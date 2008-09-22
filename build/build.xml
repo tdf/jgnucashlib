@@ -1,0 +1,420 @@
+<?xml version="1.0"?>
+<project name="gnucashReader" default="dist" basedir="">
+
+
+	<!-- public code -->
+	<property name="lib.dir" value="../lib" />
+	<property name="lib.dir.rw" value="../lib.rw" />
+	<!-- not publicly released code -->
+	<property name="lib.dir.private" value="../lib.private" />
+
+	<!-- public code -->
+	<property name="dist_dir" value="../dist" />
+
+	<!-- public code -->
+	<property name="src.dir.ro" value="../src.gnucashlib.readonly" />
+	<property name="src.dir.rw" value="../src.gnucashlib.readwrite" />
+	<!-- commercial version only -->
+	<property name="src.dir.tag" value="../src.gnucashlib.taglib" />
+	<!-- not publicly released code -->
+	<property name="src.dir.private" value="../src.gnucashlib.private" />
+	<property name="src.dir.tests" value="../test" />
+
+	<!-- public code -->
+	<property name="classes.dir.ro" value="../classes.ro" />
+	<property name="classes.dir.rw" value="../classes.rw" />
+	<!-- not publicly released code -->
+	<property name="classes.dir.private" value="../classes.private" />
+	<!-- commercial version only -->
+	<property name="classes.dir.tag" value="../classes.taglib" />
+	<!-- public code -->
+	<property name="classes.dir.tests" value="../classes.tests" />
+
+	<!-- public code -->
+	<property name="doc.testreports.dir" value="../doc/testReports" />
+
+
+	<available file="${src.dir.rw}" property="exits.rw" value="true" />
+	<available file="${src.dir.private}" property="exits.private" value="true" />
+
+	<!-- ================================================================== -->
+	<!-- Build properties -->
+	<!-- ================================================================== -->
+
+
+
+	<path id="class.path">
+		<pathelement location="${lib.dir}/jwsdp/1.5/jaxb/lib/jaxb-api.jar" />
+		<pathelement location="${lib.dir}/jwsdp/1.5/jaxb/lib/jaxb-impl.jar" />
+		<pathelement location="${lib.dir}/jwsdp/1.5/jaxb/lib/jaxb-libs.jar" />
+		<pathelement location="${lib.dir}/jwsdp/1.5/jwsdp-shared/lib/namespace.jar" />
+		<pathelement location="${lib.dir}/jwsdp/1.5/jwsdp-shared/lib/relaxngDatatype.jar" />
+		<pathelement location="${lib.dir}/jwsdp/1.5/jwsdp-shared/lib/xsdlib.jar" />
+		<pathelement location="${lib.dir}/jwsdp/1.5/jwsdp-shared/lib/jax-qname.jar" />
+		<pathelement location="${lib.dir}/commons-logging.jar" />
+		<pathelement path="${lib.dir}/xerces.jar" />
+	</path>
+
+	<path id="class.path.rw">
+		<!-- commercial version only -->
+		<path refid="class.path" />
+		<path location="${classes.dir.ro}" />
+		<path location="${lib.dir.rw}/javamail1.3.2/activation.jar" />
+		<!-- needed for CollmexFormPreparerCronJob -->
+		<path location="${lib.dir.rw}/javamail1.3.2/mail.jar" />
+<!--    <path location="${lib.dir.rw}/jxls-0.7/jxls.jar"/>
+    <path location="${lib.dir.rw}/poi/poi-2.5.1-final-20040804.jar"/>-->
+		<path location="${lib.dir.rw}/commons-beanutils.jar" />
+	</path>
+
+	<path id="class.path.private">
+		<!-- not publicly released code -->
+		<path refid="class.path" />
+		<path location="${classes.dir.ro}" />
+		<path location="${classes.dir.rw}" />
+		<path location="${lib.dir.private}/hbci4java.jar" />
+	</path>
+
+	<path id="class.path.taglib">
+		<path refid="class.path" />
+		<path location="${classes.dir.ro}" />
+		<pathelement location="${lib.dir.rw}/javax.servlet.jar" />
+		<pathelement location="${lib.dir.rw}/struts-1.2.7/lib/struts.jar" />
+	</path>
+
+	<path id="class.path.tests">
+		<path refid="class.path.rw" />
+		<pathelement path="${classes.dir.ro}" />
+		<pathelement path="${classes.dir.rw}" />
+		<pathelement path="${classes.dir.tag}" />
+		<pathelement location="${lib.dir}/junit/3.8.1/junit.jar" />
+	</path>
+
+
+	<!-- ================================================================== -->
+	<!-- Prepare for build -->
+	<!-- ================================================================== -->
+	<target name="generate_jwsdp">
+
+		<!--
+        generate jwsdp(jaxb) code for parse the format
+        specified in src.dir.ro/gnucash.xsd
+        in package biz.wolschon.fileformats.gnucash.jwsdpimpl.generated
+        in src.dir.ro
+    -->
+
+		<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+			<!--  reverseloader="true" -->
+			<classpath>
+				<pathelement path="." />
+				<pathelement path="${src.dir.ro}" />
+				<fileset dir="${lib.dir}/jwsdp/1.5">
+					<include name="jaxb/lib/*.jar" />
+					<include name="jwsdp-shared/lib/*.jar" />
+					<include name="jaxp/lib/*.jar" />
+				</fileset>
+			</classpath>
+		</taskdef>
+		<xjc schema="${src.dir.ro}/gnucash.xsd" target="${src.dir.ro}" package="biz.wolschon.fileformats.gnucash.jwsdpimpl.generated" removeOldOutput="yes" />
+		<!-- sun just does a terrible exception-handling, let's make it a bit better -->
+
+		<replace dir="${src.dir.ro}/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated">
+			<include name="**/*.java" />
+			<replacetoken>
+				<![CDATA[throw new MarshalException(e);]]>
+			</replacetoken>
+			<replacevalue>
+				<![CDATA[{e.printStackTrace();
+        MarshalException x = new MarshalException(e);
+        x.initCause(e);
+        throw x;}]]>
+			</replacevalue>
+		</replace>
+
+		<replace dir="${src.dir.ro}/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated">
+			<include name="**/*.java" />
+			<replacetoken>
+				<![CDATA[throw new AbortSerializationException((Exception)ve.getLinkedException());]]>
+			</replacetoken>
+			<replacevalue>
+				<![CDATA[{((Exception)ve.getLinkedException()).printStackTrace();
+        System.err.println("message: " + ve.getMessage());
+        AbortSerializationException x = new AbortSerializationException((Exception)ve.getLinkedException());
+        x.initCause((Exception)ve.getLinkedException());
+        throw x;}]]>
+			</replacevalue>
+		</replace>
+
+		<replace dir="${src.dir.ro}/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated">
+			<include name="**/*.java" />
+			<replacetoken>
+				<![CDATA[throw new AbortSerializationException(e);]]>
+			</replacetoken>
+			<replacevalue>
+				<![CDATA[{e.printStackTrace();
+        AbortSerializationException x = new AbortSerializationException(e);
+        x.initCause(e);
+        throw x;}]]>
+			</replacevalue>
+		</replace>
+
+
+		<replace dir="${src.dir.ro}/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated/impl">
+			<include name="GncV2TypeImpl.java" />
+			<replacetoken>
+				<![CDATA[super.enterElement(___uri, ___local, ___qname, __atts);]]>
+			</replacetoken>
+			<replacevalue>
+				<![CDATA[System.err.println("DEBUG: GncV2TypeImpl state=" + state + " ___local='" + ___local + "' ___uri='" + ___uri + "'" );super.enterElement(___uri, ___local, ___qname, __atts);]]>
+			</replacevalue>
+		</replace>
+
+
+		<replace dir="${src.dir.ro}/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated/impl/runtime">
+			<include name="SAXUnmarshallerHandlerImpl.java" />
+			<replacetoken>
+				<![CDATA[if( !canRecover || !recover )]]>
+			</replacetoken>
+			<replacevalue>
+				<![CDATA[if( !canRecover || !recover ) {/*]]>
+			</replacevalue>
+		</replace>
+
+		<replace dir="${src.dir.ro}/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated/impl/runtime">
+			<include name="SAXUnmarshallerHandlerImpl.java" />
+			<replacetoken>
+				<![CDATA[event.getLinkedException() ) );]]>
+			</replacetoken>
+			<replacevalue>
+				<![CDATA[*/
+          if (event.getLinkedException() != null) {
+             event.getLinkedException().printStackTrace();
+          }
+          UnmarshalException x = new UnmarshalException(
+             event.getMessage(),
+             event.getLinkedException() );
+          if (event.getLinkedException() != null) {
+             x.initCause(event.getLinkedException());
+          }
+          throw new SAXException(x);
+        }]]>
+			</replacevalue>
+		</replace>
+
+
+
+
+	</target>
+
+	<fileset dir="${lib.dir}/jwsdp/1.5" id="jwsdp.lib">
+		<include name="jaxb/lib/jaxb-api.jar" />
+		<include name="jaxb/lib/jaxb-impl.jar" />
+		<include name="jaxb/lib/jaxb-libs.jar" />
+		<include name="jwsdp-shared/lib/jax-qname.jar" />
+		<include name="jwsdp-shared/lib/namespace.jar" />
+		<include name="jwsdp-shared/lib/jta-spec1_0_1.jar" />
+		<include name="jwsdp-shared/lib/relaxngDatatype.jar" />
+		<include name="jwsdp-shared/lib/xsdlib.jar" />
+	</fileset>
+
+	<target name="clean">
+		<delete dir="${classes.dir.ro}" />
+		<delete dir="${classes.dir.rw}" />
+		<delete dir="${classes.dir.private}" />
+		<delete dir="${classes.dir.tag}" />
+		<delete dir="${classes.dir.tests}" />
+		<delete dir="${dist_dir}" />
+	</target>
+
+
+	<!-- *****************************************- -->
+	<!--             make the javadocs    -->
+	<!-- *****************************************- -->
+
+
+	<target name="javadoc" depends="javadoc.rw">
+
+		<mkdir dir="../doc" />
+		<mkdir dir="../doc/javadoc.ro" />
+		<mkdir dir="../doc/javadoc.taglib" />
+
+		<javadoc packagenames="biz.wolschon.*" sourcepath="${src.dir.ro}" classpathref="class.path" excludepackagenames="biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.*" defaultexcludes="yes" destdir="../doc/javadoc.ro" author="true" version="true" use="true" source="1.5" windowtitle="gnucashReader" encoding="ISO8859-15">
+			<doctitle>
+				&lt;h1&gt;gnucashReader&lt;/h1&gt;></doctitle>
+			<bottom>
+			&lt;i&gt;Copyright &#169; 2005 Wolschon Softwaredesign und Beratung. read-only library is licensed unter the terms.of the GPL.&lt;/i&gt;</bottom>
+		</javadoc>
+		<tag name="todo" scope="all" description="To do:" />
+	</target>
+
+	<target name="javadoc.rw" if="exits.rw">
+
+		<mkdir dir="../doc" />
+		<mkdir dir="../doc/javadoc.rw" />
+
+		<javadoc packagenames="biz.wolschon.*" sourcepath="${src.dir.rw}" defaultexcludes="yes" classpathref="class.path.rw" destdir="../doc/javadoc.rw" author="true" version="true" use="true" source="1.5" windowtitle="gnucashReader">
+			<doctitle>
+				&lt;h1&gt;gnucashReader&lt;/h1&gt;</doctitle>
+			<bottom>
+			&lt;i&gt;Copyright &#169; 2005 Wolschon Softwaredesign und Beratung. All Rights Reserved.&lt;/i&gt;</bottom>
+			<tag name="todo" scope="all" description="To do:" />
+		</javadoc>
+		<javadoc packagenames="biz.wolschon.*" sourcepath="${src.dir.tag}" classpathref="class.path.taglib" defaultexcludes="yes" destdir="../doc/javadoc.taglib" author="true" version="true" use="true" source="1.5" windowtitle="gnucashReader">
+			<doctitle>
+		&lt;h1&gt;gnucashReader&lt;/h1&gt;></doctitle>
+			<bottom>
+	&lt;i&gt;Copyright &#169; 2005 Wolschon Softwaredesign und Beratung. All Rights Reserved.&lt;/i&gt;</bottom>
+			<tag name="todo" scope="all" description="To do:" />
+		</javadoc>
+	</target>
+
+	<!-- *****************************************- -->
+	<!--             compile everything    -->
+	<!-- *****************************************- -->
+
+
+	<target name="compile" depends="compile.ro, compile.rw, compile.private">
+		<mkdir dir="${classes.dir.ro}" />
+		<mkdir dir="${classes.dir.rw}" />
+		<mkdir dir="${classes.dir.private}" />
+		<mkdir dir="${classes.dir.tag}" />
+		<mkdir dir="${classes.dir.tests}" />
+
+
+		<!-- compile readonly gnucashlib-->
+		<javac srcdir="${src.dir.ro}" destdir="${classes.dir.ro}" target="1.5" source="1.5" classpathref="class.path" encoding="ISO8859-15" debug="true" />
+		<copy todir="${classes.dir.ro}">
+			<fileset dir="${src.dir.ro}" excludes="**/*.java" />
+		</copy>
+
+	</target>
+
+	<target name="compile.ro" depends="generate_jwsdp" description="compile the free ReadOnly-Library">
+		<mkdir dir="${classes.dir.ro}" />
+		<mkdir dir="${classes.dir.rw}" />
+		<mkdir dir="${classes.dir.private}" />
+		<mkdir dir="${classes.dir.tag}" />
+		<mkdir dir="${classes.dir.tests}" />
+
+
+		<!-- compile readonly gnucashlib-->
+		<javac srcdir="${src.dir.ro}" destdir="${classes.dir.ro}" target="1.5" source="1.5" classpathref="class.path" encoding="ISO8859-15" debug="true" />
+		<copy todir="${classes.dir.ro}">
+			<fileset dir="${src.dir.ro}" excludes="**/*.java" />
+		</copy>
+
+		<!-- include the jwsdp-code and xerces in the jar -->
+		<unjar dest="${classes.dir.ro}">
+			<fileset refid="jwsdp.lib" />
+		</unjar>
+		<unjar dest="${classes.dir.ro}" src="${lib.dir}/xerces.jar" />
+		<unjar dest="${classes.dir.ro}" src="${lib.dir}/commons-logging.jar" />
+
+	</target>
+
+	<target name="compile.rw" if="exits.rw" depends="compile.ro" description="compile the commercial ReadWrite-Library and Taglib">
+		<!-- compile commercial readwrite gnucashlib-->
+		<javac srcdir="${src.dir.rw}" destdir="${classes.dir.rw}" target="1.5" source="1.5" classpathref="class.path.rw" encoding="ISO8859-15" debug="true" />
+		<copy todir="${classes.dir.rw}">
+			<fileset dir="${src.dir.rw}" excludes="**/*.java" />
+		</copy>
+		<!-- compile tests -->
+		<javac srcdir="${src.dir.tests}" destdir="${classes.dir.tests}" target="1.5" source="1.5" classpathref="class.path.tests" encoding="ISO8859-15" debug="true" />
+		<copy todir="${classes.dir.rw}">
+			<fileset dir="${src.dir.rw}" excludes="**/*.java" />
+		</copy>
+
+
+		<!-- compile commercial gnucashlib- jsp taglib -->
+		<javac srcdir="${src.dir.tag}" destdir="${classes.dir.tag}" target="1.5" source="1.5" classpathref="class.path.taglib" encoding="ISO8859-15" debug="true" />
+		<copy todir="${classes.dir.tag}">
+			<fileset dir="${src.dir.tag}" excludes="**/*.java" />
+		</copy>
+
+
+
+
+		<!--    <unjar dest="${classes.dir.rw}" src="${lib.dir}/jxls-0.7/jxls.jar"/>
+    <unjar dest="${classes.dir.rw}" src="${lib.dir}/poi/poi-2.5.1-final-20040804.jar"/>-->
+
+
+	</target>
+
+	<target name="compile.private" if="exits.private" depends="compile.rw" description="compile the unreleased code">
+		<!-- compile unreleased part of gnucashlib-->
+		<javac srcdir="${src.dir.private}" destdir="${classes.dir.private}" target="1.5" source="1.5" classpathref="class.path.private" encoding="ISO8859-15" debug="true" />
+		<copy todir="${classes.dir.private}">
+			<fileset dir="${src.dir.private}" excludes="**/*.java" />
+		</copy>
+	</target>
+
+
+	<!-- *****************************************- -->
+	<!--             run the automatic tests     -->
+	<!-- *****************************************- -->
+
+
+
+	<target name="tests" if="exits.private" depends="compile.private, compile.rw" description="Run the automatic unit-tests">
+		<!--Run the automatic unit-tests-->
+ 		<copy tofile="/tmp/pricat2" file="${src.dir.private}/data" />
+
+		<mkdir dir="${doc.testreports.dir}" />
+
+		<junit haltonfailure="true">
+			<formatter type="plain" />
+
+			<classpath>
+				<path refid="class.path.tests" />
+				<pathelement path="${classes.dir.tests}" />
+			</classpath>
+
+			<batchtest fork="yes" todir="${doc.testreports.dir}">
+				<fileset dir="${src.dir.tests}">
+					<include name="**/*Test*.java" />
+					<exclude name="**/elster/**" />
+					<exclude name="**/billing/**" />
+				</fileset>
+			</batchtest>
+		</junit> 
+	</target>
+
+
+	<!-- *****************************************- -->
+	<!--             make the jar-files     -->
+	<!-- *****************************************- -->
+
+	<target name="makejar.gnucashlib.reading" depends="tests">
+		<mkdir dir="${dist_dir}" />
+		<jar destfile="${dist_dir}/gnucashlib_readonly.jar" basedir="${classes.dir.ro}">
+			<manifest>
+                          <attribute name="Built-By" value="${user.name}"/>
+                          <attribute name="Main-Class" value="biz.wolschon.finance.jgnucash.JGnucashViewer"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="makejar.gnucashlib.writing" if="exits.rw" depends="makejar.gnucashlib.reading">
+		<jar destfile="${dist_dir}/gnucashlib_writingaddon.jar" basedir="${classes.dir.rw}">
+		</jar>
+	</target>
+
+	<target name="makejar.gnucashlib.private" if="exits.private" depends="makejar.gnucashlib.writing">
+		<jar destfile="${dist_dir}/gnucashlib_privateaddon.jar" basedir="${classes.dir.private}">
+		</jar>
+	</target>
+
+	<target name="makejar.gnucashlib.taglib" if="exits.rw" depends="makejar.gnucashlib.reading">
+		<jar destfile="${dist_dir}/gnucashlib_taglib.jar" basedir="${classes.dir.tag}">
+		</jar>
+		<copy todir="${dist_dir}">
+			<fileset dir="${src.dir.tag}" includes="*.tld" />
+		</copy>
+	</target>
+
+
+	<target name="dist" depends="makejar.gnucashlib.writing, makejar.gnucashlib.reading, makejar.gnucashlib.taglib, makejar.gnucashlib.private" description="make all the distribution's jar-files">
+	</target>
+
+
+</project>
