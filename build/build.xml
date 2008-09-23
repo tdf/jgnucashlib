@@ -18,7 +18,7 @@
 	<property name="src.dir.tag" value="../src.gnucashlib.taglib" />
 	<!-- not publicly released code -->
 	<property name="src.dir.private" value="../src.gnucashlib.private" />
-	<property name="src.dir.tests" value="../test" />
+	<property name="src.dir.tests"   value="../src.gnucashlib.tests" />
 
 	<!-- public code -->
 	<property name="classes.dir.ro" value="../classes.ro" />
