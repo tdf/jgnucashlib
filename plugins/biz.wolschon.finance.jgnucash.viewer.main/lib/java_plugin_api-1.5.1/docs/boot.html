@@ -1,0 +1,96 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - JPF Boot Library</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		JPF Boot Library<br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+	<h1>JPF Boot Library</h1>
+	<h3>Introduction</h3>
+	<p>Running JPF based application is often routine and it might be quite tricky, especially for Java beginners. What application developer usually need to do to start (and stop) JPF based application?</p>
+		<ul>
+			<li>load application configuration</li>
+			<li>collect available plug-ins</li>
+			<li>instantiate and initialize JPF runtime</li>
+			<li>publish (load) collected plug-ins</li>
+			<li>activate and "run" main plug-in</li>
+			<li>on application exit, properly shutdow Framework</li>
+		</ul>
+	<p>As you can see, this is quite general and common procedure. All steps are usual and good formalized. So it is possible to write some library once and use it again and again for one particular purpose - load, configure and start application. That is the <a href="api/org/java/plugin/boot/package-summary.html">JPF Boot Library</a> (and slightly more as usual :).</p>
+	<p><img src="resources/images/jpf-boot-diagram.png" width="485" height="516" border="0" alt="JPF Boot Library flow chart" title="JPF Boot Library flow chart" /></p>
+	<h3>Usage</h3>
+	<p>The library packaged in separate JAR file <code>jpf-boot.jar</code> There are special entries placed in manifest of this file that tells JVM what other libraries required for this JAR (<code>jpf.jar</code> so far) and what class to start when running JAR - <code>org.java.plugin.boot.Boot</code> This simplifies library usage and allows to start application simply typing in command shell:</p>
+	<pre>java -jar lib/jpf-boot.jar</pre>
+	<p>Here is typical folders structure:</p>
+	<pre>[APPLICATION_HOME_FOLDER]/
+ +- lib/
+ |   +- commons-logging.jar
+ |   +- jpf.jar
+ |   +- jpf-boot.jar
+ |   +- log4j.jar
+ +- plugins/
+ +- boot.properties
+ +- log4j.properties
+ +- run.bat
+ +- run.sh</pre>
+	<p>Put your plug-ins in <code>plugins</code> folder and execute <code>run</code> script. All start up magic will be done by library.</p>
+	<p>You may remove <code>log4j.jar</code> and <code>log4j.properties</code> files if you don't need logging facilities. See <a href="api/org/java/plugin/boot/package-summary.html">JPF Boot Library javadoc</a> for configuration options.</p>
+    <p>Look at <a href="http://sourceforge.net/project/showfiles.php?group_id=110394">JPF-Demo application</a> to get working example of JPF Boot library usage.</p>
+	<br /><br />
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:58
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

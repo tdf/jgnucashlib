@@ -1,0 +1,234 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Tutorial</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		Tutorial<br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+	<h1>JPF Usage Tutorial (Demo application explained)</h1>
+	<h3>Introduction</h3>
+	<p>This tutorial is a detailed description of JPF Demo Application (JPF-Demo, <a href="http://sourceforge.net/project/showfiles.php?group_id=110394&package_id=121489">available for download</a>). It is aimed for developers to get them quick start with JPF. <em>Please note:</em> this is not a Java Swing application developers tutorial; this tutorial also demonstrates the only one approach in JPF usage and not cover all possible usage scenarios.</p>
+	<p>It is recommended to download JPF-Demo source code also and install it as project into your favorite Java IDE. Look at <a href="ide.html">detailed instructions</a> on how to configure JPF based project in various Java IDE.</p>
+	<p>JPF-Demo is a GUI application that is designed with "Toolbox" metaphor in mind. The main application window is kind of container for "tools" - a small (ore huge :) utility applications of any kind that are developed as JPF plug-ins (or set of plug-ins).</p>
+	<p><img src="resources/images/jpf-demo-codecolorer-tool.png" width="617" height="428" border="0" alt="JPF-Demo - Code Colorer Tool" /></p>
+	<p>On the screen shot you can see a "Code Colorer Tool" - an utility which gets java source text on it's input and transforms it to HTML text with syntax highlighting. This particular function is implemented using open-source Java2Html library (GPL, <a href="http://www.java2html.de" target="_new">Java2Html Homepage</a>).</p>
+	<h3>Application structure</h3>
+	<p>File system structure of the application looks like this:</p>
+	<pre>[APPLICATION_HOME_FOLDER]/
+ +- data/
+ +- lib/
+ |   +- commons-logging.jar
+ |   +- jpf.jar
+ |   +- jpf-boot.jar
+ |   +- jpf-tools.jar
+ |   +- jxp.jar
+ |   +- log4j.jar
+ +- logs/
+ +- plugins/
+ +- boot.properties
+ +- log4j.properties
+ +- run.bat
+ +- run.sh
+</pre>
+	<p>Here are the explanation:</p>
+	<dl>
+		<dt>data</dt>
+		<dd>Folder, where plug-ins can store their configurations and other data files.</dd>
+		<dt>lib</dt>
+		<dd>Libraries that are required for application start, here are JPF libraries and libraries for logging support (they are used also by JPF itself).</dd>
+		<dt>logs</dt>
+		<dd>Log files come here</dd>
+		<dt>plugins</dt>
+		<dd>This is repository folder for JPF plug-ins.</dd>
+		<dt>boot.properties</dt>
+		<dd>Application start up configuration file.</dd>
+		<dt>run.*</dt>
+		<dd>Application start up scripts.</dd>
+	</dl>
+	<p>Component structure of the application can be represented by the following diagram.</p>
+	<p><img src="resources/images/jpf-demo-diagram.png" width="394" height="320" border="0" alt="JPF-Demo Application Diagram" title="JPF-Demo Application Diagram" /></p>
+	<h3>Application boot</h3>
+	<p>To perfrm application start, the <code>run</code> script makes call of entry point of JPF Boot library - <code>org.java.plugin.boot.Boot.main(String[])</code> method. This method reads configuration from <code>boot.properties</code> file, initializes JPF runtime and loads all our plug-ins from <code>plugins</code> folder. Finally it calls our <code>org.jpf.demo.toolbox.core</code> plug-in because we specify that in configuration.</p>
+	<p>From this point the application control logic moves entirely into plug-in <code>org.jpf.demo.toolbox.core</code>, which we can name as, like in Eclipse, "application plug-in". The plug-in class for plug-in <code>org.jpf.demo.toolbox.core</code> extends special abstract class <code>org.java.plugin.boot.ApplicationPlugin</code> from the JPF Boot library. Thus we allow JPF boot code to call our specific boot logic.</p>
+	<h3>Core plug-in</h3>
+	<p>As almost any JPF plug-in, <code>org.jpf.demo.toolbox.core</code> consists of two parts: the manifest file and the plug-in specific Java code. We'll look through them separately.</p>
+	<h5>Plug-in manifest</h5>
+	<p>Plug-in manifest is an XML syntax file created according to <a href="dtd.html">plug-in DTD</a>. The root tag of XML is:</p>
+	<pre>&lt;plugin id="org.jpf.demo.toolbox.core" version="0.0.4"
+	class="org.jpf.demo.toolbox.core.CorePlugin"&gt;</pre>
+	<p>Here we state that the plug-in ID is "org.jpf.demo.toolbox.core" and the version identifier is "0.0.2". We also declare that our plug-in have a "plug-in class" <code>org.jpf.demo.toolbox.core.CorePlugin</code> so that JPF runtime can initialize our plug-in properly. The "plug-in class" is an optional element of plug-in declaration and can be omitted if your plug-in doesn't need any code to be executed during plug-in activation. But this is not our case because this particular plug-in is an application entry point and have to show application GUI when it is activated.</p>
+	<p>The next manifest element is libraries declaration:</p>
+	<pre>&lt;runtime&gt;
+	&lt;library id="core" path="classes/" type="code"&gt;
+		&lt;export prefix="*"/&gt;
+	&lt;/library&gt;
+	&lt;library type="resources" path="icons/" id="icons"&gt;
+		&lt;export prefix="*"/&gt;
+	&lt;/library&gt;
+&lt;/runtime&gt;</pre>
+	<p>Here we define that all Java code from this plug-in is placed into "classes/" folder within plug-in context (home) folder. We also declare that all classes and packages (*) from this plug-in are visible to other plug-ins so that they can use our code freely. We also declare a resources folder "icons/" and also made it visible to other plug-ins.</p>
+	<p>The last part of manifest is most interesting and this is most powerful feature of JPF (as for Eclipse) that makes our application extremely extendible. This is extension point declaration:</p>
+	<pre>&lt;extension-point id="Tool"&gt;
+	&lt;parameter-def id="class"/&gt;
+	&lt;parameter-def id="name"/&gt;
+	&lt;parameter-def id="description" multiplicity="none-or-one"/&gt;
+	&lt;parameter-def id="icon" multiplicity="none-or-one"/&gt;
+&lt;/extension-point&gt;</pre>
+	<p>With this we declare that our plug-in expose a point where it can be extended by any other plug-in. We call this point as "Tool" and explain that extension to this point will be represented as a "tab" in application GUI. Any plug-in that contribute to this extension point should provide several parameters that will be used to present plug-in in application and communicate with it. We define four parameters for this extension point:</p>
+	<dl>
+		<dt>class</dt>
+		<dd>This is required parameter of type String that should contain full Java class name. The contract for that class will be described bellow.</dd>
+		<dt>name</dt>
+		<dd>The name of tool to be shown as "tab name" on GUI.</dd>
+		<dt>description</dt>
+		<dd>The tool description to be shown as "tab hint" on GUI. This is optional parameter.</dd>
+		<dt>icon</dt>
+		<dd>Path to resource with tool icon. This is optional parameter.</dd>
+	</dl>
+	<p>Now we are ready to implement logic for our core plug-in.</p>
+	<h5>Plug-in code</h5>
+	<p>As you remember, we've declared in plug-in manifest, that we'll provide plug-in class <code>org.jpf.demo.toolbox.core.CorePlugin</code>. So we did. Usually, we have to extend JPF's abstract class <code>org.java.plugin.Plugin</code> and implement two methods, the framework runtime will call during plug-in life cycle: <code>protected void doStart() throws Exception;</code> and <code>protected void doStop() throws Exception;</code>. But in our case, we have to extend <code>org.java.plugin.boot.ApplicationPlugin</code> class, because we are developing "application plug-in". Our implementation of those two methods from <code>org.java.plugin.Plugin</code> will be empty. The real purpose of this plug-in class is to provide "entry point" method from <code>org.java.plugin.boot.ApplicationPlugin</code> that is called from JPF Boot library and do all the magic.</p>
+	<p>The main duty of our plug-in class is to create and show application GUI. We also want to implement support logic for extension point, defined in manifest. The main trick here is to organize GUI logic efficiently. The main principle is to activate other plug-ins as late as possible and take maximal information from extension declarations. That's why we define so many parameters in extension point declaration. We are building GUI as "set of tabs with lazy initialization of components". Look at JPF-Demo source code for details. The most interesting place is communication with plug-in framework to get all extensions that are "connected" to our extension point:</p>
+	<pre>ExtensionPoint toolExtPoint =
+	getManager().getRegistry().getExtensionPoint(
+		getDescriptor().getId(), "Tool");
+for (Iterator it = toolExtPoint.getConnectedExtensions()
+		.iterator(); it.hasNext();) {
+	Extension ext = (Extension) it.next();
+	JPanel panel = new JPanel();
+	panel.putClientProperty("extension", ext);
+	Parameter descrParam = ext.getParameter("description");
+	Parameter iconParam = ext.getParameter("icon");
+	URL iconUrl = null;
+	if (iconParam != null) {
+		iconUrl = getManager().getPluginClassLoader(
+			ext.getDeclaringPluginDescriptor())
+				.getResource(iconParam.valueAsString());
+	}
+	tabbedPane.addTab(
+		ext.getParameter("name").valueAsString(),
+		(iconUrl != null) ? new ImageIcon(iconUrl) : null,
+		panel, (descrParam != null) ?
+			descrParam.valueAsString() : "");
+}</pre>
+	<p>The next interesting place here is the contract that we are defining for extension class. Here we state that "class" parameter, specified in extension declaration should refer to a Java class that implements interface <code>org.jpf.demo.toolbox.core.Tool</code>, defined in our plug-in. We also explain that objects of this class will be instantiated using default empty constructor. We also promise that method <code>init</code> will be called once during extension life cycle. Here the code that implements described concept:</p>
+	<pre>// Activate plug-in that declares extension.
+getManager().activatePlugin(
+		ext.getDeclaringPluginDescriptor().getId());
+// Get plug-in class loader.
+ClassLoader classLoader = getManager().getPluginClassLoader(
+		ext.getDeclaringPluginDescriptor());
+// Load Tool class.
+Class toolCls = classLoader.loadClass(
+		ext.getParameter("class").valueAsString());
+// Create Tool instance.
+tool = (Tool) toolCls.newInstance();
+// Initialize class instance according to interface contract.
+tool.init(toolComponent);</pre>
+	<p>From this point we can distribute our application and wait when someone write plug-ins for it :) But we don't have time, let's do this job by ourselves and create several plug-ins that add tools to our box.</p>
+	<h3>Code colorer plug-in</h3>
+	<p>In this section I'll explain in details how to create a plug-in that add a tool to our box. As you already know, to achieve this, we have to implement an extension to extension point "Tool", defined in plug-in "org.jpf.demo.toolbox.core". As before we split explanation into two parts: plug-in manifest description and plug-in code comments.</p>
+	<h5>Plug-in manifest</h5>
+	<p>The root tag of manifest XML file should already be familiar to you:</p>
+	<pre>&lt;plugin id="org.jpf.demo.toolbox.codecolorer" version="0.0.5"&gt;</pre>
+	<p>You see that plug-in ID is "org.jpf.demo.toolbox.codecolorer" and plug-in class is absent because we don't need any code to be executed during plug-in start/stop.</p>
+	<p>The next section of manifest is new for us:</p>
+	<pre>&lt;requires&gt;
+	&lt;import plugin-id="org.jpf.demo.toolbox.core"/&gt;
+&lt;/requires&gt;</pre>
+	<p>Here we define that our plug-in depends on plug-in "org.jpf.demo.toolbox.core" and may use it's exported code and resources and may also contribute to extension points defined there.</p>
+	<p>The libraries declarations are more expensive here as we are planning to use third party library among our own code.</p>
+	<pre>&lt;runtime&gt;
+	&lt;library id="codecolorer" path="classes/" type="code"/&gt;
+	&lt;library id="java2html" path="lib/java2html.jar"
+		type="code"&gt;
+		&lt;doc caption="Java2html Library by Markus Gebhard"&gt;
+			&lt;doc-ref path="docs/java2html"
+				caption="java2html library"/&gt;
+		&lt;/doc&gt;
+	&lt;/library&gt;
+	&lt;library type="resources" path="icons/" id="icons"/&gt;
+&lt;/runtime&gt;
+	</pre>
+	<p>You see that we defined code library "java2html" that points to a JAR file "lib/java2html.jar" and also provide reference to documentation for this library (this is just for example, but would be good rule to provide documentation for every plug-in manifest element). Note also that we are not exported any code or resources as we suppose to use them within this plug-in only.</p>
+	<p>The last manifest element defines an extension. This is the main purpose of this plug-in.</p>
+	<pre>&lt;extension plugin-id="org.jpf.demo.toolbox.core"
+	point-id="Tool" id="codeColorerTool"&gt;
+	&lt;parameter id="class"
+		value="org.jpf.demo.toolbox.codecolorer.CCTool"/&gt;
+	&lt;parameter id="name" value="Code Colorer Tool"/&gt;
+	&lt;parameter id="description"
+		value="Tool to colorize source code text"/&gt;
+	&lt;parameter id="icon" value="codecolorer.png"/&gt;
+&lt;/extension&gt;</pre>
+	<p>As you can see, we give the ID to our extension as "codeColorerTool" and specified extension class as "org.jpf.demo.toolbox.codecolorer.CCTool". Bellow you'll see that this class fully conforms to contract, defined for "Tool" extension point. Now the JPF can automatically perform integrity check for our two plug-ins and warn if we miss something in declarations.</p>
+	<h5>Plug-in code</h5>
+	<p>Code part of "org.jpf.demo.toolbox.codecolorer" plug-in consists of two classes. The class <code>org.jpf.demo.toolbox.codecolorer.CCTool</code> implements interface <code>org.jpf.demo.toolbox.core.Tool</code> and thus conforms to a contract for "Tool" extension point. The method <code>init</code> from this interface in our case simply creates tool GUI and adds it to given Swing container as it's child. Class <code>org.jpf.demo.toolbox.codecolorer.CodeColorer</code> is the internal plug-in class that do all the job. The code for that class is taken from Java2Html's class <code>de.java2html.Java2HtmlApplication</code> with small non-significant modifications. I'll not comment this code here. Refer to JPF-Demo source code and <a href="http://www.java2html.de" target="_new">Java2Html Homepage</a> for details.</p>
+	<p>Notice as easy it was to add a tool as plug-in to our Toolbox! The most part of plug-in is a tool logic itself and not "plug-in support" logic. The JPF and core plug-in do the job for us!</p>
+	<h3>Other plug-ins</h3>
+	<p>There are two other plug-ins bundled with JPF-Demo application. First is <strong>Plug-in Browser Tool</strong>.</p>
+	<p><img src="resources/images/jpf-demo-pluginbrowser-tool.png" width="617" height="428" border="0" alt="JPF-Demo - Plug-in Browser Tool" /></p>
+	<p>This plug-in allows you to load any number of plug-ins and investigate their structure and dependencies. Note that plug-ins are loaded with separate instance of plug-in registry and not activated by demo application, they are even not visible for it. The main purpose of this plug-in is to demonstrate how to "instrument plug-ins with JPF" and provide rudimentary tool to look at plug-ins structure.</p>
+	<p>Another plug-in is <strong>Database Browser Tool</strong>.</p>
+	<p><img src="resources/images/jpf-demo-dbbrowser-tool.png" width="617" height="428" border="0" alt="JPF-Demo - Database Browser Tool" /></p>
+	<p>The purpose of this plug-in is not to demonstrate how to work with JDBC in Java but how it is possible to provide more extensibility to you Java application. Actually "DB Browser" is not just a plug-in but a set of plug-ins. First, "org.jpf.demo.toolbox.dbbrowser", implements "Tool" providing extension for "Tool" extension point and maintains DB browser GUI. Next, this plug-in defines it's own extension point "Database" giving possibility for other plug-ins to plug into this "DB Browser". Actually, the "org.jpf.demo.toolbox.dbbrowser" plug-in don't know anything about any particular database. All DB specifics are abstracted as extension point (and several interfaces) and actually implemented in other plug-ins. Look at plug-in source code for details.</p>
+	<h3>What's next?</h3>
+	<p>Hope this article gives you a basic understanding of main principles that forms JPF and applications using it. Now you can try to apply those to your tasks or form your own approach in development with JPF.</p>
+	<p>Feel free to ask your questions in <a href="http://sourceforge.net/forum/?group_id=110394">public JPF forum</a>. You are also welcome to share your ideas and use cases with others. This will definitely help to improve JPF and make it popular framework for building extremely flexible applications.</p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:59
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

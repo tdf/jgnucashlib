@@ -1,0 +1,75 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="de">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - JPF Boot Library</title>
+        <link rel="StyleSheet" type="text/css" href="../resources/css/base.css" />
+        <link rel="icon" href="../resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="../resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		JPF Boot Bibliothek<br />
+		<a href="./tutorial.html">JPF Tutorial</a><br />
+	</p>
+	<p lang="en"><a href="../index.html">English (en)</a></p>
+	
+</div>
+
+<div class="content">
+	<h1>JPF Boot Bibliothek</h1>
+	<h3>Einf&#252;hrung</h3>
+	<p>Eine JPF basierte Anwendung laufen zu lassen ist oftmals Routine, es kann aber etwas trickreich sein, besonders f&#252;r Java Neulinge. Was m&#252;ssen Java Entwickler gew&#246;hnlich machen um eine JPF basierte Anwendung zu starten (stoppen)?</p>
+		<ul>
+			<li>laden der Anwendungskonfiguration aus der boot.properties</li>
+			<li>alle verf&#252;gbaren Plug-ins einsammeln</li>
+			<li>instanziieren und initialisieren des JPF Framework</li>
+			<li>darstellen (laden) der verf&#252;gbaren Plug-ins</li>
+			<li>aktivieren und starten des Hauptplug-ins (gew&#246;hnlich Core)</li>
+			<li>beim Verlassen der Anwendung das Framework anst&#228;ndig herunterfahren</li>
+		</ul>
+	<p>Wie man sehen kann ist das eine recht generelle T&#228;tigkeit, deren Schritte alle sehr gut formalisiert sind. So ist es m&#246;glich einmal eine Bibliothek zu schreiben und sie immer und immer wieder f&#252;r den immer gleichen Zweck zu verwenden - laden, konfigurieren und starten der Anwendung. Diese Bibliothek ist die <a href="../api/org/java/plugin/boot/package-summary.html">JPF Boot Library</a>.</p>
+	<p><img src="../resources/images/jpf-boot-diagram.png" width="485" height="516" border="0" alt="JPF Boot Library flow chart" title="JPF Boot Library flow chart" /></p>
+	<h3>Benutzung</h3>
+	<p>Die Bibliothek ist in eine eigene JAR-Datei verpackt, der <code>jpf-boot.jar</code>. Es gibt einige spezielle Eintr&#228;ge in der Manifest Datei dieser Datei, die der JVM sagen welche anderen Bibliotheken f&#252;r diese JAR gebraucht werden (im Augenblick nur <code>jpf.jar</code>) und welche Klasse zu starten ist wenn man diese JAR ausf&#252;hrt - <code>org.java.plugin.boot.Boot</code>. Das macht die Benutzung dieser Bibliothek sehr einfach und erm&#246;glicht das Starten der Anwendung durch einfaches Eintippen von </p>
+	<pre>java -jar lib/jpf-boot.jar</pre> in der Konsole:
+	<p><br></p>
+	<p>Hier eine typische Ordnerstruktur:</p>
+	<pre>[APPLICATION_HOME_FOLDER]/
+ +- lib/
+ |   +- commons-logging.jar
+ |   +- jpf.jar
+ |   +- jpf-boot.jar
+ |   +- log4j.jar
+ +- plugins/
+ +- boot.properties
+ +- log4j.properties
+ +- run.bat
+ +- run.sh</pre>
+	<p>Bringen Sie Ihre Plug-ins im <code>plugins</code> Ordner unter und f&#252;hren Sie das <code>run</code>-Skript aus. Der gesamte Startvorgang wird nun von der Bibliothek &#252;bernommen.</p>
+	<p>Wenn Sie kein Logging ben&#246;tigen, k&#246;nnen Sie <code>log4j.jar</code> und <code>log4j.properties</code> auch entfernen. Werfen Sie einen Blick auf <a href="../api/org/java/plugin/boot/package-summary.html">JPF Boot Library javadoc</a> um weitere Konfigurationsm&#246;glichkeiten kennen zu lernen.</p>
+    <p>Schauen Sie sich die <a href="http://sourceforge.net/project/showfiles.php?group_id=110394">JPF-Demo application</a> an, um ein funktionierendes Beispiel f&#252;r die Benutzung der JPF Boot-Library zu sehen.</p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="../resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:58
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

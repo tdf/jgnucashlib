@@ -1,0 +1,79 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Concepts</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		Concepts<br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+    <h1>Core JPF Concepts</h1>
+	<h3>Our Purpose</h3>
+	<p>The goal of the JPF project is to help Java developers build <strong>modular</strong> and <strong>extensible</strong> applications. At JPF, we think it is important to clearly distinguish between the two.</p>
+	<h3>Modules and Application Modularity</h3>
+	<p>Simply speaking, modularization is splitting an application into several smaller parts. The JPF framework allows this by using the concept of plug-ins. This means you can think of plug-ins as a collection of classes and resources managed by special ClassLoader that makes them available to all dependent plug-ins transparently.</p>
+	<p>Lets say a plug-in <em>PluginA</em> introduces a class <code>ClassA</code> (this class is included in a plug-in directory hierarchy described by a JPF plug-in manifest). Now you are developing another plug-in, <em>PluginB</em>, and add another class, <code>ClassB</code>, to this plug-in. You want to reference <code>ClassA</code> in your <code>ClassB</code> code so you need to declare a plug-in dependency. You can do this by making an entry in the JPF manifest of the plug-in <em>PluginB</em> that says "<em>PluginB</em> depends on <em>PluginA</em>". This is done in the prerequisites/imports section of the JPF manifest. JPF handles finding and loading <em>ClassA</em> when it is first called. The magic lies in the ClassLoaders created by JPF. The extend the classpath of <em>PluginB</em> so that it includes the classpath of <em>PluginA</em>. So the developer doesn't have to worry about finding classes and can use the basic code that follows in <code>ClassB</code>:</p>
+	<pre>
+	ClassA clsA = new ClassA();
+	</pre>
+	<p>No further work is necessary to make <code>ClassA</code> visible for <code>ClassB</code> code, only simple <strong>JPF manifest declarations</strong>.</p>
+	<h3>Extensions and Application Extensibility</h3>
+	<p>Simply speaking, application extensibility is adding on to already existing functionality. JPF supports this with special manifest declarations. In JPF extensibility is based on the concept of <em>extension points</em> and <em>extensions</em>. An extenstion point is an opening that may be added to by later code. An extension is code that adds onto an existing extension point. Typically <em>extension points</em> are declared in a plug-in manifest and supported with Java code  There is no special dedicated API for such code in JPF as it can be anything! For examples of <em>extension points</em> see the JPF demo application.</p>
+	<p>When designing applications based on JPF it is better to think in terms of <em>extension points</em> and <em>extensions</em> rather than <em>plug-ins</em>. In general, it doesn't matter where (in what <em>plug-in</em>) the actual code and/or resources are placed. It is much more important to define where an application can be extended, and design and develop <em>extension points</em> to support this extensibility.</p>
+	<h3>Summary</h3>
+	<p><em>Plug-ins</em> - are what makes an application <strong>modular</strong>. <em>Extension points</em>&nbsp;/&nbsp;<em>extensions</em> - are what makes application <strong>extensible</strong>.</p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:58
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

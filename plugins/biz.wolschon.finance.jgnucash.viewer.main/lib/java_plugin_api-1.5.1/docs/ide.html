@@ -1,0 +1,82 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Java IDE Configuration</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		JPF &amp; Java IDE<br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+	<h1>Java IDE configuration for JPF Based Project</h1>
+	<h3>General Notes</h3>
+	<p>There are several common principles may be formulated to describe differences of JPF based application from usual "monolithic" one. These differences affect on how JPF based java project should be configured in a Java IDE.</p>
+	<dl>
+		<dt>Plug-in classes</dt>
+		<dd>JPF based application consists of some "host" part (that runs first when application starts up) and plug-ins (that activated "on demand"). From the developer point of view, plug-ins may contain source code that should be compiled to the very specific place, each unique for the every plug-in. This place is described in plug-in manifest file and usually plug-in classes are compiled into "classes" folder within plug-in folder. So, the Java project in IDE should be configured so that it puts plug-in classes into the right places during compilation phase.</dd>
+		<dt>Application classpath</dt>
+		<dd>To run JPF based application correctly, only "host" part related libraries should be available in the classpath. All other libraries and resources that belong to different plug-ins are managed by JPF itself and shouldn't be included into startup classpath. This runtime behavior of JPF based application should be taken into account when configuring "run/debug" settings in a Java IDE.</dd>
+	</dl>
+	<p>Described principles are quite general and based on the JPF nature - manage plug-ins in runtime. Understanding of the JPF runtime behavior allow you to use your favorite Java IDE building JPF based project without any problem.</p>
+	<h3>Concrete Instructions</h3>
+	<p>Currently detailed instructions available for the following Java IDE:</p>
+	<ul>
+		<li><a href="ide-eclipse.html">Eclipse IDE</a> (<a href="http://www.eclipse.org" target="_new">www.eclipse.org</a>)</li>
+		<li><a href="ide-netbeans.html">Netbeans IDE</a> (<a href="http://www.netbeans.org" target="_new">www.netbeans.org</a>)</li>
+	</ul>
+	<p>Contributions with instructions for other Java IDE are greatly appreciated.</p>
+	<br /><br />
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:59
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

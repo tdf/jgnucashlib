@@ -1,37 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src.gnucashlib.readonly"/>
-	<classpathentry kind="src" path="src.gnucashlib.private"/>
-	<classpathentry kind="src" path="src.gnucashlib.taglib"/>
-	<classpathentry kind="src" path="src.gnucashlib.readwrite"/>
-	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/source"/>
+	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.editor.main/source"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/xerces.jar"/>
 	<classpathentry kind="var" path="JUNIT_HOME/junit.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jwsdp/1.5/jaxb/lib/jaxb-api.jar" sourcepath="lib/jwsdp/1.5/jaxb/lib/jaxb-api.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jaxb/lib/jaxb-impl.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jaxb/lib/jaxb-libs.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jaxb/lib/jaxb-xjc.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/activation.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/commons-beanutils.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/commons-collections.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/commons-digester.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/commons-logging.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/jaas.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/jax-qname.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/jta-spec1_0_1.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/mail.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/namespace.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/PackageFormat.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/relaxngDatatype.jar"/>
-	<classpathentry kind="lib" path="lib/jwsdp/1.5/jwsdp-shared/lib/xsdlib.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
-	<classpathentry kind="lib" path="lib/commons-beanutils.jar"/>
-	<classpathentry kind="lib" path="lib.rw/javamail1.3.2/activation.jar"/>
-	<classpathentry kind="lib" path="lib.rw/httpclient2.1.1/httpclient.jar"/>
-	<classpathentry kind="lib" path="lib.rw/javamail1.3.2/mail.jar"/>
-	<classpathentry kind="lib" path="lib.rw/javax.servlet.jar"/>
-	<classpathentry kind="lib" path="lib.rw/struts-1.2.7/lib/struts.jar"/>
-	<classpathentry kind="lib" path="lib.private/hbci4java.jar" sourcepath="lib.private/hbci4java-2.5.8-src/src"/>
+	<classpathentry kind="lib" path="build/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="build/lib/jpf-boot.jar"/>
+	<classpathentry kind="lib" path="build/lib/jpf-tools.jar"/>
+	<classpathentry kind="lib" path="build/lib/jpf.jar"/>
+	<classpathentry kind="lib" path="build/lib/jxp.jar"/>
+	<classpathentry kind="lib" path="build/lib/log4j.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/junit_3.8.1/junit.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxb/lib/jaxb-api.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxb/lib/jaxb-impl.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxb/lib/jaxb-libs.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxb/lib/jaxb-xjc.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxp/lib/endorsed/dom.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxp/lib/endorsed/sax.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxp/lib/endorsed/xalan.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxp/lib/endorsed/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jaxp/lib/jaxp-api.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/activation.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/commons-collections.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/commons-digester.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/jaas.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/jax-qname.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/jta-spec1_0_1.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/mail.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/namespace.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/PackageFormat.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/relaxngDatatype.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/jwsdp_1.5/jwsdp-shared/lib/xsdlib.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/lib/xerces.jar"/>
 	<classpathentry kind="output" path="classes.eclipse"/>
 </classpath>

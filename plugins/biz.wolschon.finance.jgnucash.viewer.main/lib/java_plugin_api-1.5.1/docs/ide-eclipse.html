@@ -1,0 +1,96 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Java IDE Configuration - Eclipse IDE</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		JPF &amp; Java IDE<br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+	<h1>JPF-Demo as Project in Eclipse IDE</h1>
+	<p><em>Note:</em> for simplicity and concreteness, instructions prepared for JPF-Demo project but applicable to any JPF based application.</p>
+	<h3>Preface</h3>
+	<p><a href="http://sourceforge.net/project/showfiles.php?group_id=110394&package_id=121489">Download</a> ZIP archive with JPF-Demo source code and unpack it into some location. This location will be the project "root" folder. Following instructions are created for <a href="http://www.eclipse.org" target="_new">Eclipse IDE</a> version 3.1 but similar steps applicable to earlier versions also (tested with 3.0).</p>
+	<p><em>Note:</em> JPF-Demo source distribution package already contains project files for Eclipse IDE - <code>.project</code> and <code>.classpath</code> files. You have to remove these files if you whant to go through steps in this tutorial. But for quick start with JPF-Demo source code simply import provided project into Eclipse IDE workplace.</p>
+	<h3>Creating Project</h3>
+	<p>Open Eclipse <strong>New Project</strong> dialogue and select <strong>Java Project</strong> wizard. In the <strong>Contents</strong> section enter location of the unzipped JPF-Demo source folder.</p>
+	<p><img src="resources/images/ide-eclipse-01.png" width="500" height="570" border="0" alt="Eclipse IDE" /></p>
+	<p>On the next step wizard scans all project folders to detect Java source files and libraries there. The result is shown on the screen. What you have to do here is to tell Eclipse to put compiled classes for each plug-in into separate folders named <code>classes</code> and located in corresponding plug-in folders. You have to create folder with such name in every plug-in directory that contains source code and point Eclipse to put output to those folders.</p>
+	<p><img src="resources/images/ide-eclipse-02.png" width="500" height="569" border="0" alt="Eclipse IDE" /></p>
+	<p><img src="resources/images/ide-eclipse-03.png" width="437" height="181" border="0" alt="Eclipse IDE" /></p>
+	<p>When <strong>all</strong> source/output folders configured, press <strong>Finish</strong> button. Now you should get configured JPF-Demo project. In the <strong>Package Explorer</strong> it looks like this.</p>
+	<p><img src="resources/images/ide-eclipse-04.png" width="374" height="712" border="0" alt="Eclipse IDE" /></p>
+	<h3>Run/Debug Configuration</h3>
+	<p>Open <strong>Run...</strong> dialogue and select <strong>Java Application</strong> on the left pane. Press <strong>New</strong> button to create new Run/Debug configuration. On the <strong>Main</strong> tab enter configuration name and <strong>Main class</strong>, for JPF-Demo project this should be <code>org.java.plugin.boot.Boot</code> because JPF-Demo uses <a href="boot.html">JPF Boot Library</a> for application starting.</p>
+	<p><img src="resources/images/ide-eclipse-05.png" width="738" height="572" border="0" alt="Eclipse IDE" /></p>
+	<p>Now switch to <strong>Classpath</strong> tab. Here Eclipse by default included all classes and libraries from the project that is good for usual "monolithic" applications but is wrong for JPF based application. In JPF application only "boot" level libraries and classes are required for application startup, all classes that come from plug-ins shouldn't be included into application classpath because JPF itself manages lookups and loading such libraries and resources. Thus you have to <strong>Remove</strong> the whole <em>default classpath</em> section from the configuration classpath...</p>
+	<p><img src="resources/images/ide-eclipse-06.png" width="738" height="572" border="0" alt="Eclipse IDE" /></p>
+	<p>... and include only jpf-boot.jar library.</p>
+	<p><img src="resources/images/ide-eclipse-07.png" width="738" height="572" border="0" alt="Eclipse IDE" /></p>
+	<p>Here the result.</p>
+	<p><img src="resources/images/ide-eclipse-08.png" width="738" height="572" border="0" alt="Eclipse IDE" /></p>
+	<p>The last thing that remains to do is to configure sources for plug-in classes for comfortable debugging. Switch to <strong>Source</strong> tab and press <strong>Add...</strong> button.</p>
+	<p><img src="resources/images/ide-eclipse-09.png" width="738" height="572" border="0" alt="Eclipse IDE" /></p>
+	<p>In the opened window select <strong>Java Project</strong> source type...</p>
+	<p><img src="resources/images/ide-eclipse-10.png" width="471" height="289" border="0" alt="Eclipse IDE" /></p>
+	<p>... and mark checkbox near the JPF-Demo project. Press <strong>OK</strong> button.</p>
+	<p><img src="resources/images/ide-eclipse-11.png" width="346" height="470" border="0" alt="Eclipse IDE" /></p>
+	<p>Now source configuration should look like on this screen shot.</p>
+	<p><img src="resources/images/ide-eclipse-12.png" width="738" height="572" border="0" alt="Eclipse IDE" /></p>
+	<p>Finally you may run JPF-Demo application and debug it.</p>
+	<p><img src="resources/images/ide-eclipse-13.png" width="1152" height="840" border="0" alt="Eclipse IDE" /></p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:59
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

@@ -1,0 +1,97 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Java IDE Configuration - Netbeans IDE</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		JPF &amp; Java IDE<br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+	<h1>JPF-Demo as Project in Netbeans IDE</h1>
+	<p><em>Note:</em> for simplicity and concreteness, instructions prepared for JPF-Demo project but applicable to any JPF based application.</p>
+	<h3>Preface</h3>
+	<p><a href="http://sourceforge.net/project/showfiles.php?group_id=110394&package_id=121489">Download</a> ZIP archive with JPF-Demo source code and unpack it into some location. This location will be the project "root" folder. Following instructions are created for <a href="http://www.netbeans.org" target="_new">Netbeans IDE</a> version 5.0 but similar steps applicable to earlier versions also.</p>
+	<p><em>Note:</em> JPF-Demo source distribution package already contains project files for Netbeans IDE - <code>nbproject</code> folder. You have to remove this folder if you want to go through steps in this tutorial. But for quick start with JPF-Demo source code simply open provided project in Netbeans IDE.</p>
+	<h3>Creating Project</h3>
+	<p>Before creating project in Netbeans IDE you should already get somewhere the Ant build script for your project. For the beginning, this might be quite rudimentary script file without any useful targets defined, but it is needed as starting point for Netbeans <strong>free-form</strong> project. Later you will be able to improve it adding more targets. JPF-Demo project already contains such build script so you don't need to worry about it.</p>
+	<p>Open Netbeans <strong>New Project</strong> dialogue and select <strong>General</strong> category and <strong>Java Project with Existing Ant Script</strong> project type in the wizard.</p>
+	<p><img src="resources/images/ide-netbeans-01.png" width="729" height="494" border="0" alt="Netbeans IDE" /></p>
+	<p>On the next step you have to select project location. This should be folder that contains project <strong>build script</strong> - <code>build.xml</code> file.</p>
+	<p><img src="resources/images/ide-netbeans-02.png" width="729" height="494" border="0" alt="Netbeans IDE" /></p>
+	<p>On the next step you have to map targets from <code>build.xml</code> file to IDE actions. For JPF-Demo project no changes required, Netbeans maps most found targets to standard IDE actions automatically.</p>
+	<p><img src="resources/images/ide-netbeans-03.png" width="729" height="494" border="0" alt="Netbeans IDE" /></p>
+	<p>Next step in wizard is quite important - you have to tell Netbeans about all source folders in your project. For JPF based application usually every plug-in has it's own separate source folder. You should provide them all here.</p>
+	<p><img src="resources/images/ide-netbeans-04.png" width="728" height="493" border="0" alt="Netbeans IDE" /></p>
+	<p>Now press <strong>Finish</strong> button.</p>
+	<p><img src="resources/images/ide-netbeans-05.png" width="729" height="494" border="0" alt="Netbeans IDE" /></p>
+	<p>The first phase of project configuring is done. You'll see newly created project in the IDE. Before continue, you need to build project. This makes all necessary class folders that we later will use when informing IDE about our project classpath.</p>
+	<p><img src="resources/images/ide-netbeans-06.png" width="387" height="477" border="0" alt="Netbeans IDE" /></p>
+	<p>Now open project <strong>properties</strong> dialog window. On the first category <strong>Java Sources</strong> it is recommended to provide meaningful labels for plug-in sources. Plug-in ID is good candidate for such label.</p>
+	<p><img src="resources/images/ide-netbeans-07.png" width="758" height="526" border="0" alt="Netbeans IDE" /></p>
+	<p>On the <strong>Java Sources Classpath</strong> category you have to provide classpath entries for every source folder. Note that these classpath entires will be used by IDE code completion and refactoring tools but not for classes compiling and running.</p>
+	<p><img src="resources/images/ide-netbeans-08.png" width="758" height="526" border="0" alt="Netbeans IDE" /></p>
+	<p>On the <strong>Output</strong> category you have to provide outputs for for every source folder. This info will be used by debugger and by IDE for inter-project dependencies.</p>
+	<p><img src="resources/images/ide-netbeans-09.png" width="758" height="526" border="0" alt="Netbeans IDE" /></p>
+	<p>The last <strong>Build and Run</strong> category allow you to configure mappings between Ant build script targets and IDE actions. Here you may provide additional actions configuration.</p>
+	<p><img src="resources/images/ide-netbeans-10.png" width="758" height="526" border="0" alt="Netbeans IDE" /></p>
+	<p>Now you are ready to work with project in Netbeans IDE.</p>
+	<h3>Run/Debug Configuration</h3>
+	<p>Running configured project in Netbeans IDE is very simple. All magic done in project Ant build script. Simply press <strong>Run</strong> button that will call mapped Ant target.</p>
+	<p>Debugging is also very easy task. Press <strong>Debug</strong> button. In the first time IDE suggest you create corresponding Ant target and map it to the <strong>debug</strong> action. Answer <strong>yes</strong> to all questions. Netbeans IDE will generate target automatically basing on the <strong>run</strong> target. No manual modifications usually required.</p>
+	<p>Here the result.</p>
+	<p><img src="resources/images/ide-netbeans-11.png" width="1036" height="752" border="0" alt="Netbeans IDE" /></p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:59
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

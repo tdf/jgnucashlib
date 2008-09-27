@@ -1,0 +1,93 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Home</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		System Overview<br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+    <h1>JPF System Overview</h1>
+    <h3>Introduction</h3>
+    <p>The JPF framework is based around the concept of "plug-ins". A plug-in is a structured component that contributes code and resources to the system and describes them in a structured way. These plug-ins can further define <b>extension points</b>, well-defined method hooks that can be extended by other plug-ins. When one plug-in provides an implementation of an extension point defined by another plug-in, we say that it adds an <b>extension</b> to the system. This approach allows developers using JPF to build highly modular and easily extendible applications.</p>
+	<h3>Framework Structure</h3>
+    <p>All required information about a plug-in is defined in the plug-in manifest. Depending on the <a href="api/org/java/plugin//PluginRegistry.html">PluginRegistry</a>, this may be any structured data that exists at some URL. JPF provides a default XML-based manifest implementation. The format of this XML document is defined by the JPF <a href="dtd.html">plug-in DTD</a>. It is very important to include as much information about a plug-in in its manifest as possible. This is because the JPF framework uses this information to check plug-in consistency, whether plug-in dependencies (relationships between plug-ins) are satisfied (including version compatibility check) and that all declared resources are available. JPF also checks that all provided extensions have been declared with the required parameters.</p>
+    <p>The high-level structure of framework can be represented by this diagram:</p>
+	<p><img src="resources/images/jpf-diagram.png" width="500" height="292" border="0" alt="JPF High-level Structure Diagram" title="JPF High-level Structure Diagram" /></p>
+	<p>The diagram shows the three major parts of JPF:</p>
+	<ul>
+		<li><a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> - the storage repository for meta-information about all discovered plug-ins</li>
+		<li><a href="api/org/java/plugin/PathResolver.html">PathResolver</a> - the component responsible for finding the physical lcation of all discovered resources</li>
+		<li><a href="api/org/java/plugin/PluginManager.html">PluginManager</a> - the framework runtime that loads and activates the plug-ins</li>
+	</ul>
+	<p><a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> is a set of interfaces that abstract meta-information about plug-ins and plug-in fragments. The framework provides <strong>default implementations</strong> of these interfaces based on XML plug-in manifests mentioned earlier (<a href="dtd.html">plug-in DTD</a>). The general rule here is that a manifest should be registered with the <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> for every plug-in and plug-in fragment.</p>
+	<p>The framework also provides a <a href="api/org/java/plugin/standard/StandardPathResolver.html">default implementation</a> of <a href="api/org/java/plugin/PathResolver.html">PathResolver</a>, which simply maps manifest locations to the context ("home") folder of their corresponding plug-ins. A <a href="api/org/java/plugin/standard/ShadingPathResolver.html">special implementation</a> of <a href="api/org/java/plugin/PathResolver.html">PathResolver</a> is also available that makes "shadow copies" of plug-in resources before resolving paths to them. This helps avoid locking of local resources and running native code from remote locations.</p>
+	<p>Bringing these interfaces together is <a href="api/org/java/plugin/PluginManager.html">PluginManager</a>. You can access an instance of the "standard", or default, <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> by just one <a href="api/org/java/plugin/ObjectFactory.html#createManager()">method call</a>. This makes using JPF very simple in most situations.</p>
+    <h3>Plug-in manifest</h3>
+	<p>If you are using <a href="api/org/java/plugin/registry/xml/package-summary.html">the default XML based implementation</a> of <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> provided by JPF, you'll need to learn the plug-in manifest syntax. It is simple and shouldn't be too difficult for any familiar with HTML or XML.</p>
+    <p>The plug-in manifest is an XML file which contains all the information needed by the JPF framework about each plug-in. The XML syntax should conform to the <a href="dtd.html">plug-in manifest DTD</a>. Look at this file carefully, all elements are documented.</p>
+    <h3>PluginRegistry</h3>
+    <p><a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> manages all meta-information about discovered plug-ins. In general, you may provide your own registry implementation, but the standard one should be enough in most cases.</p>
+	<p>To make plug-in meta-data available for the application, you (as the application developer, but not plug-in developer) should <a href="api/org/java/plugin/registry/PluginRegistry.html#register(java.net.URL[])">register</a> their manifests with PluginRegistry. The counterpart method - <a href="api/org/java/plugin/registry/PluginRegistry.html#unregister(java.lang.String[])">unregister()</a> is used to "remove" plug-in meta-data from the registry. To make plug-ins available for activation, use <a href="api/org/java/plugin/PluginManager.html#publishPlugins(org.java.plugin.PluginManager.PluginLocation[])">publishPlugins()</a> method (about <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> class see bellow). Note that all mentioned methods may be called not only during the application start up phase but in also at runtime. This allows application developers to implement "hot" plug-in deployment functionality.</p>
+    <h3>PluginManager</h3>
+    <p><a href="api/org/java/plugin/PluginManager.html">PluginManager</a> is the <b>runtime system</b> of the Framework. The main responsibility of the manager is to activate (load plug-in code and call the plug-in initializer class) plug-ins upon client code requests and manage inter plug-in dependencies. Usually, programmers shouldn't care about plug-in activation, this is done automatically when the plug-in code is first called. It is also possible to "deactivate" plug-ins during the life of the application. This feature may help to reduce application resources requirements. For complex usage scenarios it is possible to disable/enable plug-ins. A plug-in that is marked as disabled can't be activated with <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> (but it's meta-data remains available from the PluginRegistry).</p>
+    <h3>Object factory</h3>
+    <p>The <a href="api/org/java/plugin/ObjectFactory.html">ObjectFactory</a> class allows application developers to easily create base JPF objects: <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a>, <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> and <a href="api/org/java/plugin/PathResolver.html">PathResolver</a>. It uses a simple and efficient discovery algorithm to find the available implementations of the main framework classes. It is possible to provide your own "vision" of all aspects of the Framework: you may write your own registry and manager and that will be used by JPF.</p>
+    <h3>Usage scenario</h3>
+    <p>A typical JPF-based application may consist of a small <b>boot launcher</b>, which initializes the registry, instanciates <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> and activates <b>the main plug-in</b> by calling some of it's methods (Or you can use <a href="boot.html">the JPF Boot Library</a> provided by JPF to greatly simplify this task). From this point on the flow of control remains within the registered plug-in code. This allows the development of applications of any kind, not only GUI applications, but also J2EE applications, command line utilities and more.</p>
+    <p>See the <a href="http://sourceforge.net/project/showfiles.php?group_id=110394">demo application</a> source code for an example on how to build an application with JPF. You can also go through the <a href="tutorial.html">tutorial</a>, that explains the internals of JPF-Demo application.</p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:58
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - JPF Configuration Reference</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		Configuration Reference<br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+	<h1>JPF Configuration Reference</h1>
+	<p>This page collects in single place all available configuration options for various parts of JPF. Parameters are grouped by corresponding classes that introduce and support them.</p>
+	<p>Note that configuration parameters will be loaded using <a href="api/org/java/plugin/util/ExtendedProperties.html">specially extended</a> version of Properties class, which supports parameters substitution.</p>
+	<h2>Core JPF Library</h2>
+	<h3><a href="api/org/java/plugin/ObjectFactory.html">org.java.plugin.ObjectFactory</a></h3>
+	<dl>
+		<dt>org.java.plugin.ObjectFactory</dt>
+		<dd>Object factory implementation to use.</dd>
+	</dl>
+	<h3><a href="api/org/java/plugin/standard/StandardObjectFactory.html">org.java.plugin.standard.StandardObjectFactory</a></h3>
+	<dl>
+		<dt>org.java.plugin.registry.PluginRegistry</dt>
+		<dd>Plug-in registry implementation to use.</dd>
+		<dt>org.java.plugin.PathResolver</dt>
+		<dd>Path resolver implementation to use.</dd>
+		<dt>org.java.plugin.standard.PluginLifecycleHandler</dt>
+		<dd>Plug-in lifecycle handler implementation to use.</dd>
+	</dl>
+	<p>All implementation classes specific configuration parameter names should be prefixed with corresponding classes name and separating dot (.) character.</p>
+	<h3><a href="api/org/java/plugin/registry/xml/PluginRegistryImpl.html">org.java.plugin.registry.xml.PluginRegistryImpl</a></h3>
+	<dl>
+		<dt>isValidating</dt>
+		<dd>Regulates is registry should use validating parser when loading plug-in manifests. The default parameter value is <code>true</code>.</dd>
+		<dt>stopOnError</dt>
+		<dd>Regulates is registry should stop and throw RuntimeException if an error occurred while <a href="api/org/java/plugin/registry/PluginRegistry.html#register(java.net.URL[])">registering</a> or <a href="api/org/java/plugin/registry/PluginRegistry.html#unregister(java.lang.String[])">un-registering</a> plug-ins. If this is <code>false</code>, the registration errors will be stored in the internal report that is available with <a href="api/org/java/plugin/registry/PluginRegistry.html#checkIntegrity(org.java.plugin.PathResolver,%20boolean)">PluginRegistry.checkIntegrity(PathResolver)</a> method. The default parameter value is <code>false</code>.</dd>
+	</dl>
+	<h3><a href="api/org/java/plugin/standard/ShadingPathResolver.html">org.java.plugin.standard.ShadingPathResolver</a></h3>
+	<dl>
+		<dt>shadowFolder</dt>
+		<dd>Path to the folder where to copy resources to prevent their locking. By default this will be <code>System.getProperty("java.io.tmpdir") + "/.jpf-shadow"</code>. Please note that this folder will be maintained automatically by the Framework and might be cleared without any confirmation or notification. So it is strongly not recommended to use plug-ins folder (or other sensitive application directory) as shadow folder, this may lead to losing your data.</dd>
+		<dt>unpackMode</dt>
+		<dd>If <code>always</code>, "JAR'ed" or "ZIP'ed" plug-ins will be un-compressed to the shadow folder, if <code>never</code>, they will be just copied, if <code>smart</code>, the processing depends on plug-in content - if plug-in contains JAR libraries, it will be un-packed, otherwise just copied to shadow folder. It is also possible to add boolean "unpack" attribute to plug-in manifest, in this case, it's value will be taken into account. The default parameter value is <code>smart</code>.</dd>
+		<dt>excludes</dt>
+		<dd>Pipe <code>'|'</code> separated list of regular expression patterns to be used to exclude files to be shadowed. By default no files excluded.</dd>
+		<dt>includes</dt>
+		<dd>Pipe <code>'|'</code> separated list of regular expression patterns to be used to include files to be shadowed. By default all files included.</dd>
+	</dl>
+	<h3><a href="api/org/java/plugin/standard/StandardPluginLifecycleHandler.html">org.java.plugin.standard.StandardPluginLifecycleHandler</a></h3>
+	<dl>
+		<dt>probeParentLoaderLast</dt>
+		<dd>If <code>true</code>, plug-in classloader will try loading classes from system (boot) classpath <b>after</b> trying to load them from plug-in classpath. Otherwise system classpath will be used <b>first</b>. Default value is <code>false</code> that corresponds to standard delegation model for classloaders hierarchy.</dd>
+		<dt>stickySynchronizing</dt>
+		<dd>Allows advanced configuring of classloaders synchronization in multy-threaded environment. If <code>true</code> then class loading will be synchronized with initial plug-in classloader instance. Otherwise <code>this</code> instance will be used as synchronizing monitor. Default value is <code>false</code>.</dd>
+		<dt>localClassLoadingOptimization</dt>
+		<dd>If <code>true</code> then plug-in classloader will collect local packages statistics to predict class location. This allow to optimize class look-up procedure for classes that belong to the requested plug-in. Default value is <code>true</code>.</dd>
+		<dt>foreignClassLoadingOptimization</dt>
+		<dd>If <code>true</code> then plug-in classloader will collect statistics for "foreign" classes - those which belong to depending plug-ins. This allow to optimize class look-up procedure when enumerating depending plug-ins. Default value is <code>true</code>.</dd>
+	</dl>
+	<h2>JPF Boot Library</h2>
+	<p>Note that JPF Boot library loads all System properties as default values that together with ability of <a href="api/org/java/plugin/util/ExtendedProperties.html">extended properties</a> class to expand parameters substitution allows you to create extremely flexible configurations.</p>
+	<h3><a href="api/org/java/plugin/boot/Boot.html">org.java.plugin.boot.Boot</a></h3>
+	<dl>
+		<dt>jpf.boot.mode</dt>
+		<dd>Application boot mode. Always available as System property also. Default value is <code>shell</code>.</dd>
+		<dt>org.java.plugin.boot.appInitializer</dt>
+		<dd>Application initializer class, for details see <a href="api/org/java/plugin/boot/ApplicationInitializer.html">org.java.plugin.boot.ApplicationInitializer</a>. Default is <a href="api/org/java/plugin/boot/DefaultApplicationInitializer.html">org.java.plugin.boot.DefaultApplicationInitializer</a>.</dd>
+		<dt>org.java.plugin.boot.errorHandler</dt>
+		<dd>Error handler class, for details see <a href="api/org/java/plugin/boot/BootErrorHandler.html">org.java.plugin.boot.BootErrorHandler</a>. Default is <a href="api/org/java/plugin/boot/BootErrorHandlerConsole.html">org.java.plugin.boot.BootErrorHandlerConsole</a> for "service" style applications and <a href="api/org/java/plugin/boot/BootErrorHandlerGui.html">org.java.plugin.boot.BootErrorHandlerGui</a> for "interactive" applications.</dd>
+		<dt>org.java.plugin.boot.controlHost</dt>
+		<dd>Host to be used by background control service, no default values.</dd>
+		<dt>org.java.plugin.boot.controlPort</dt>
+		<dd>Port number to be used by background control service, no default values.</dd>
+		<dt>org.java.plugin.boot.splashHandler</dt>
+		<dd>Splash screen handler class, for details see <a href="api/org/java/plugin/boot/SplashHandler.html">org.java.plugin.boot.SplashHandler</a>. Default is simple splash handler that can only display an image.</dd>
+		<dt>org.java.plugin.boot.splashImage</dt>
+		<dd>Path to an image file to be shown as splash screen. If no file and no handler given, the splash screen will not be shown.</dd>
+		<dt>org.java.plugin.boot.splashLeaveVisible</dt>
+		<dd>If set to <code>true</code>, the <a href="api/org/java/plugin/boot/Boot.html">org.java.plugin.boot.Boot</a> class will not hide splash screen at the end of boot procedure but delegate this function to application code. Default value is <code>false</code>.</dd>
+		<dt>org.java.plugin.boot.splashDisposeOnHide</dt>
+		<dd>If set to <code>false</code>, the <a href="api/org/java/plugin/boot/Boot.html">org.java.plugin.boot.Boot</a> class will not dispose <a href="api/org/java/plugin/boot/SplashHandler.html">splash screen handler</a> when hiding it. This allows you to reuse handler and show splash screen back after it was hidden. Default value is <code>true</code>.</dd>
+	</dl>
+	<p>All parameters with prefix <code>org.java.plugin.boot.splash.</code> will be passed to <a href="api/org/java/plugin/boot/SplashHandler.html#configure(org.java.plugin.util.ExtendedProperties)">splash screen handler</a> as configuration data (prefix will be removed from parameter names).</p>
+	<h3><a href="api/org/java/plugin/boot/DefaultApplicationInitializer.html">org.java.plugin.boot.DefaultApplicationInitializer</a></h3>
+	<dl>
+		<dt>org.java.plugin.boot.applicationPlugin</dt>
+		<dd>ID of plug-in to start. There is no default value for this parameter. In common scenario, this is the only parameter that you must provide.</dd>
+		<dt>org.java.plugin.boot.integrityCheckMode</dt>
+		<dd>Regulates how to check plug-ins integrity when running JPF. Possible values: <code>full</code>, <code>light</code>, <code>off</code>. The default value is <code>full</code>.</dd>
+		<dt>org.java.plugin.boot.pluginsCollector</dt>
+		<dd>Plug-ins location collector class, for details see <a href="api/org/java/plugin/boot/PluginsCollector.html">org.java.plugin.boot.PluginsCollector</a>. Default is <a href="api/org/java/plugin/boot/DefaultPluginsCollector.html">org.java.plugin.boot.DefaultPluginsCollector</a>.</dd>
+		<dt>org.java.plugin.boot.pluginsWhiteList</dt>
+		<dd>Location of the file with plug-in identifiers that should be only accepted by this application initializer. This is optional parameter.</dd>
+		<dt>org.java.plugin.boot.pluginsBlackList</dt>
+		<dd>Location of the file with plug-in identifiers that should not be accepted by this application initializer. This is optional parameter.</dd>
+	</dl>
+	<h3><a href="api/org/java/plugin/boot/DefaultPluginsCollector.html">org.java.plugin.boot.DefaultPluginsCollector</a></h3>
+	<dl>
+		<dt>org.java.plugin.boot.pluginsRepositories</dt>
+		<dd>Comma separated list of local plug-in repositories, given folders will be scanned for plug-ins. Default value is <code>./plugins</code>.</dd>
+		<dt>org.java.plugin.boot.pluginsLocationsDescriptors</dt>
+		<dd>Comma separated list of URLs for XML syntax files that describe available plug-in locations (for details see file <a href="api/org/java/plugin/boot/DefaultPluginsCollector.html">class javadoc</a>). No default value provided.</dd>
+	</dl>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:58
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+
