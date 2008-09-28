@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>jgnucashLib-V1</name>
+	<name>jGnucashLib-GPL</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -13,16 +13,6 @@
 		<buildCommand>
 			<name>com.atlassw.tools.eclipse.checkstyle.CheckstyleBuilder</name>
 			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
-			<triggers>full,incremental,</triggers>
-			<arguments>
-				<dictionary>
-					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/org.eclipse.wst.validation.validationbuilder.launch</value>
-				</dictionary>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
