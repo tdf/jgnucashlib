@@ -45,6 +45,7 @@ test  - runs some tests
 		<mkdir dir="${build.home}/plugins" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.viewer.main" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.editor.main" target="${target}" />
+		<ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
 	</target>
 
 	<target name="build" depends="-init" description="Builds entire project">

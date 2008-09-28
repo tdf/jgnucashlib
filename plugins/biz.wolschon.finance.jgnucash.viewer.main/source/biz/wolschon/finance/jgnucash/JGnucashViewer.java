@@ -31,6 +31,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.xml.bind.JAXBException;
 
+import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl;
 import biz.wolschon.finance.jgnucash.panels.TaxReportPanel;
@@ -66,7 +67,8 @@ import biz.wolschon.finance.jgnucash.panels.DebugLogPanel;
 */
 public class JGnucashViewer extends JFrame implements Application {
 
-    /**
+
+	/**
      * Our logger for debug- and error-ourput.
      */
     private static final Log LOGGER = LogFactory.getLog(JGnucashViewer.class);
@@ -80,7 +82,10 @@ public class JGnucashViewer extends JFrame implements Application {
 
     private javax.swing.JFileChooser jFileChooser = null; //  @jve:visual-info  decl-index=0 visual-constraint="582,36"
 
-
+    /**
+     * The currently selected account.
+     */
+    private GnucashAccount selectedAccount = null;
 
     private static final String title = "JGnucash";
 
@@ -130,7 +135,6 @@ public class JGnucashViewer extends JFrame implements Application {
         rootLogger.setLevel(Level.WARNING);
         Logger.getLogger("biz.wolschon").setLevel(Level.ALL);
 
-        initialize();
         initializeErrorLogHandler();
     }
 
@@ -154,13 +158,21 @@ public class JGnucashViewer extends JFrame implements Application {
             @Override
             public void publish(final LogRecord aRecord) {
 
+            
+            	String message = aRecord.getLevel() + " "
+                       + "in " + aRecord.getSourceClassName() + ":" + aRecord.getSourceMethodName() + "(...) "
+                       + aRecord.getMessage();
+            	if (aRecord.getLevel().intValue() < Level.WARNING.intValue()) {
+                	System.out.println(message);
+                } else {
+                	System.err.println(message);
+                }
+
                 if (aRecord.getLevel().intValue() < Level.SEVERE.intValue()) {
                     return;
                 }
 
-                JOptionPane.showMessageDialog(JGnucashViewer.this, aRecord.getLevel() + " "
-                        + "in " + aRecord.getSourceClassName() + ":" + aRecord.getSourceMethodName() + "(...) "
-                        + aRecord.getMessage(),
+                JOptionPane.showMessageDialog(JGnucashViewer.this, message,
                         "ERROR",
                         JOptionPane.ERROR_MESSAGE);
             }
@@ -200,15 +212,11 @@ public class JGnucashViewer extends JFrame implements Application {
 
                     TreePath path = e.getPath();
                     if (path == null) {
-                        getTransactionsPanel().setAccount(null);
+                    	setSelectedAccount(null);
                     } else {
                      GnucashAccountsTreeModel.GnucashAccountTreeEntry entry
                      = (GnucashAccountsTreeModel.GnucashAccountTreeEntry)
                        path.getLastPathComponent();
-                     getTransactionsPanel().setAccount(entry.getAccount());
-                     LOGGER.debug("accoun " + entry.getAccount().getId()
-                             + " = " + entry.getAccount().getQualifiedName()
-                             + " selected");
 
                     }
 
@@ -255,6 +263,29 @@ public class JGnucashViewer extends JFrame implements Application {
         }
         return taxReportPanel;
     }
+
+    /**
+     * The currently selected account.
+	 * @return the selectedAccount
+	 */
+	public GnucashAccount getSelectedAccount() {
+		return selectedAccount;
+	}
+
+	/**
+	 * The currently selected account.
+	 * @param selectedAccount the selectedAccount to set (may be null)
+	 */
+	public void setSelectedAccount(final GnucashAccount aSelectedAccount) {
+		this.selectedAccount = aSelectedAccount;
+
+    	getTransactionsPanel().setAccount(selectedAccount);
+        if (selectedAccount != null) {
+        	LOGGER.debug("accoun " + selectedAccount.getId()
+        			+ " = " + selectedAccount.getQualifiedName()
+        			+ " selected");
+        }
+	}
 
     /**
      * This method initializes jJMenuBar.
@@ -365,6 +396,7 @@ public class JGnucashViewer extends JFrame implements Application {
      */
     public static void main(final String[] args) {
         JGnucashViewer ste = new JGnucashViewer();
+        ste.initializeGUI();
         ste.setVisible(true);
         if (args.length > 0) {
             ste.loadFile(new File(args[0]));
@@ -391,7 +423,7 @@ public class JGnucashViewer extends JFrame implements Application {
     /**
      * This method initializes this gui.
      */
-    private void initialize() {
+    protected void initializeGUI() {
         final int defaultWidth  = 750;
         final int defaultHeight = 600;
 
@@ -488,7 +520,7 @@ public class JGnucashViewer extends JFrame implements Application {
             getAccountsTree().setModel(
                     new GnucashAccountsTreeModel(getModel()));
             getTaxReportPanel().setBooks(getModel());
-            getTransactionsPanel().setAccount(null);
+            setSelectedAccount(null);
             setTitle(title);
             jSplitPane.setDividerLocation(0.5);
             return true;
@@ -509,7 +541,7 @@ public class JGnucashViewer extends JFrame implements Application {
     protected GnucashFile getModel() {
         return myModel;
     }
-    protected void setModel(final GnucashFile model) {
+    public void setModel(final GnucashFile model) {
         if (model == null)
             throw new IllegalArgumentException(
                     "null not allowed for field this.model");

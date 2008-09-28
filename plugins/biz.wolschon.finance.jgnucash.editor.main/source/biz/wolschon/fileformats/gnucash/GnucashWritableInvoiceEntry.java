@@ -6,7 +6,6 @@ package biz.wolschon.fileformats.gnucash;
 
 import javax.xml.bind.JAXBException;
 
-import biz.wolschon.fileformats.gnucash.GnucashTaxTable.TaxTableEntry;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashObject;
 import biz.wolschon.numbers.FixedPointNumber;
 

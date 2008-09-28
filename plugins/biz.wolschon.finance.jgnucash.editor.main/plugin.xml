@@ -13,10 +13,11 @@
 			<export prefix="*" />
 		</library>
 	</runtime>
-<!--	<extension-point id="Tool">
-		<parameter-def id="class" />
+	<extension-point id="Importer">
+		<parameter-def id="class" /> <!-- class must implement biz.wolschon.finance.jgnucash.plugin.ImporterPlugin -->
 		<parameter-def id="name" />
+		<parameter-def id="hasFixedAccount" /> <!-- false=use currently selected account -->
 		<parameter-def id="description" multiplicity="none-or-one" />
 		<parameter-def id="icon" multiplicity="none-or-one" />
-	</extension-point> -->
+	</extension-point>
 </plugin>

@@ -35,7 +35,7 @@ public class JPFEditorMain extends ApplicationPlugin {
 	protected Application initApplication(final ExtendedProperties arg0, final String[] args)
 			throws Exception {
 		org.apache.log4j.BasicConfigurator.configure();
-		JGnucashViewer ste = new JGnucash();
+		JGnucash ste = new JGnucash(getManager(), getDescriptor());
         ste.setVisible(true);
         if (args.length > 0) {
             ste.loadFile(new File(args[0]));

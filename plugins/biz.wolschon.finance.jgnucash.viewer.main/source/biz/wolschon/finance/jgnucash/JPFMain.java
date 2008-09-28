@@ -35,6 +35,7 @@ public class JPFMain extends ApplicationPlugin {
 	protected Application initApplication(final ExtendedProperties arg0, final String[] args)
 			throws Exception {
 		JGnucashViewer ste = new JGnucashViewer();
+		ste.initializeGUI();
         ste.setVisible(true);
         if (args.length > 0) {
             ste.loadFile(new File(args[0]));

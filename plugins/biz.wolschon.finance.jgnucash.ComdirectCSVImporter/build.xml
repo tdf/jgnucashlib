@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="biz.wolschon.finance.jgnucash.editor.main plug-in build file"
+<project name="biz.wolschon.finance.jgnucash.ComdirectCSVImporter plug-in build file"
          default="help"
          basedir=".">
 	<jpf-info manifest="${basedir}/plugin.xml"
@@ -10,6 +10,7 @@
 
 	<path id="plugin.classpath">
 		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
+		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
 		<fileset dir="${basedir}/../../lib" includes="*.jar" />
 		<fileset dir="${basedir}/lib" includes="**/*.jar" />
 	</path>
@@ -62,14 +63,10 @@ Use top-level project build file to build application.
 
 	<target name="docs">
 		<echo>Generating javadoc for plug-in ${plugin.id} to folder ${plugin.home}/docs/api</echo>
-		<!--<javadoc destdir="${plugin.home}/docs/api"
-		         classpathref="plugin.classpath"
-		         sourcepath="${basedir}/source"
-		         packagenames="${plugin.id}.*"> -->
 		<javadoc destdir="${plugin.home}/docs/api"
 		         classpathref="plugin.classpath"
 		         sourcepath="${basedir}/source"
-		         packagenames="biz.*"> 
+		         packagenames="${plugin.id}.*">
 		</javadoc>
 	</target>
 </project>
