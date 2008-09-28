@@ -305,7 +305,9 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      */
     @SuppressWarnings("unchecked")
     protected void addSplit(final GnucashTransactionSplitImpl impl) throws JAXBException {
-        jwsdpPeer.getTrnSplits().getTrnSplit().add(impl.getJwsdpPeer());
+        if (!jwsdpPeer.getTrnSplits().getTrnSplit().contains(impl.getJwsdpPeer())) {
+        	jwsdpPeer.getTrnSplits().getTrnSplit().add(impl.getJwsdpPeer());
+        }
 
         Collection<GnucashTransactionSplit> splits = getSplits();
         if (!splits.contains(impl)) {
@@ -367,16 +369,16 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      */
     @SuppressWarnings("unchecked")
     public List<GnucashTransactionSplit> getSplits() throws JAXBException {
-        if (mySplits == null) {
-            List<GncTransactionType.TrnSplitsType.TrnSplitType > jwsdpSplits = jwsdpPeer.getTrnSplits().getTrnSplit();
+    	if (mySplits == null) {
+    		List<GncTransactionType.TrnSplitsType.TrnSplitType > jwsdpSplits = jwsdpPeer.getTrnSplits().getTrnSplit();
 
-           mySplits = new ArrayList<GnucashTransactionSplit>(jwsdpSplits.size());
-           for (GncTransactionType.TrnSplitsType.TrnSplitType element :jwsdpSplits) {
-            
-            mySplits.add(createSplit(element));
-        }
-        }
-        return mySplits;
+    		mySplits = new ArrayList<GnucashTransactionSplit>(jwsdpSplits.size());
+    		for (GncTransactionType.TrnSplitsType.TrnSplitType element :jwsdpSplits) {
+
+    			mySplits.add(createSplit(element));
+    		}
+    	}
+    	return mySplits;
     }
 
 

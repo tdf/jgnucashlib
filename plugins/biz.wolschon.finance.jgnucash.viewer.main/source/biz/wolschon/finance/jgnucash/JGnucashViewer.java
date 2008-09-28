@@ -217,7 +217,7 @@ public class JGnucashViewer extends JFrame implements Application {
                      GnucashAccountsTreeModel.GnucashAccountTreeEntry entry
                      = (GnucashAccountsTreeModel.GnucashAccountTreeEntry)
                        path.getLastPathComponent();
-
+                     setSelectedAccount(entry.getAccount());
                     }
 
                 }
@@ -384,6 +384,7 @@ public class JGnucashViewer extends JFrame implements Application {
                     JFrame f = new JFrame("debug-log");
                     f.getContentPane().add(new DebugLogPanel());
                     f.pack();
+                    f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                     f.setVisible(true);
                 }
             });

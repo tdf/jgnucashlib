@@ -55,6 +55,13 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import org.apache.log4j.Appender;
+import org.apache.log4j.Layout;
+import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.spi.ErrorHandler;
+import org.apache.log4j.spi.Filter;
+import org.apache.log4j.spi.LoggingEvent;
+
 
 /**
  * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
@@ -88,7 +95,131 @@ public class DebugLogPanel extends JPanel {
         this.myLogArea.setPreferredSize(new Dimension(1000, 400));
         this.add(new JScrollPane(this.myLogArea), BorderLayout.CENTER);
 
-        Logger.getLogger("").addHandler(new Handler() {
+        initializeLog4JLogging();
+
+        // Display log-messages of Java-Logging
+        initializeForJavaLogging();
+    }
+
+	/**
+	 * 
+	 */
+	private void initializeLog4JLogging() {
+		org.apache.log4j.Logger.getRootLogger().addAppender(new Appender() {
+
+        	private Layout layout = null;
+        	private ErrorHandler errorHandler = null;
+        	private String name = "DebugLogPanel";
+        	private Filter filter = null;
+
+			@Override
+			public void addFilter(Filter arg0) {
+				this.filter = arg0;
+			}
+
+			@Override
+			public void clearFilters() {
+				this.filter = null;
+			}
+
+			@Override
+			public void close() {
+				
+			}
+
+			@Override
+			public void doAppend(final LoggingEvent aRecord) {
+				
+				//getLayout().format(aRecord);
+				try {
+                    // decide color or message
+                    SimpleAttributeSet attrs = new SimpleAttributeSet();
+                    if (aRecord.getLevel() == org.apache.log4j.Level.ALL)
+                        StyleConstants.setForeground(attrs, Color.LIGHT_GRAY);
+                    if (aRecord.getLevel() == org.apache.log4j.Level.DEBUG)
+                        StyleConstants.setForeground(attrs, Color.LIGHT_GRAY);
+                    if (aRecord.getLevel() == org.apache.log4j.Level.INFO)
+                        StyleConstants.setForeground(attrs, Color.GRAY);
+                    if (aRecord.getLevel() == org.apache.log4j.Level.TRACE)
+                        StyleConstants.setForeground(attrs, Color.GRAY);
+                    if (aRecord.getLevel() == org.apache.log4j.Level.WARN)
+                        StyleConstants.setForeground(attrs, Color.ORANGE);
+                    if (aRecord.getLevel() == org.apache.log4j.Level.ERROR)
+                        StyleConstants.setForeground(attrs, Color.RED);
+                    if (aRecord.getLevel() == org.apache.log4j.Level.FATAL)
+                          StyleConstants.setForeground(attrs, Color.RED);
+
+                    // print message
+                    myLogArea.getDocument().insertString(
+                            myLogArea.getDocument().getLength(),
+                            "\n" + aRecord.getLevel().toString() + " "
+                            + "in " + aRecord.getLocationInformation().getClassName() + ":" + aRecord.getLocationInformation().getMethodName() + "(...) :" + aRecord.getLocationInformation().getLineNumber()
+                            + aRecord.getMessage(), attrs);
+
+                    // print stack-trace
+                    if (aRecord.getThrowableInformation() != null) {
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        aRecord.getThrowableInformation().getThrowable().printStackTrace(pw);
+                        myLogArea.getDocument().insertString(
+                                myLogArea.getDocument().getLength(),
+                                "\n" + sw.getBuffer(), attrs);
+                    }
+                } catch (BadLocationException e) {
+                    LOG.log(Level.SEVERE, "[BadLocationException] Problem in "
+                               + getClass().getName(),
+                                 e);
+                }
+			}
+
+			@Override
+			public ErrorHandler getErrorHandler() {
+				return errorHandler;
+			}
+
+			@Override
+			public Filter getFilter() {
+				return filter;
+			}
+
+			@Override
+			public Layout getLayout() {
+				return layout;
+			}
+
+			@Override
+			public String getName() {
+				return name;
+			}
+
+			@Override
+			public boolean requiresLayout() {
+				return false;
+			}
+
+			@Override
+			public void setErrorHandler(ErrorHandler arg0) {
+				this.errorHandler = arg0;
+			}
+
+			@Override
+			public void setLayout(final Layout arg0) {
+				this.layout = arg0;
+			}
+
+			@Override
+			public void setName(String arg0) {
+				this.name = arg0;
+			}
+        	
+        });
+	}
+
+	/**
+	 * 
+	 */
+	private void initializeForJavaLogging() {
+		Logger.getLogger("").addHandler(new Handler() {
 
             @Override
             public void close() {
@@ -144,7 +275,7 @@ public class DebugLogPanel extends JPanel {
                 }
             }
             });
-    }
+	}
 
     //------------------------ support for propertyChangeListeners ------------------
 

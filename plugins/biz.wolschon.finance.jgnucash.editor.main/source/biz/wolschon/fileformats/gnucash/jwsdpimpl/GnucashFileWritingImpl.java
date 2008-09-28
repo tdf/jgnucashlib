@@ -131,7 +131,15 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
 //         propertyChange.firePropertyChange("modified", old, pModified);
     }
 
-
+    /**
+     * @return the jaxb object-factory used to create new peer-objects to extend
+     *         this
+     * @throws JAXBException
+     *             o jaxb-errors
+     */
+    protected ObjectFactory getObjectFactory() throws JAXBException {
+        return super.getObjectFactory();
+    }
 
     /**
      * Keep the count-data up to date.

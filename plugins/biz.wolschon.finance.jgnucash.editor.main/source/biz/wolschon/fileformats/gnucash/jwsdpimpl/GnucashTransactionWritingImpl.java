@@ -108,6 +108,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
      */
     public GnucashWritableTransactionSplit createWritingSplit(final GnucashAccount account) throws JAXBException {
         GnucashTransactionSplitWritingImpl gnucashTransactionSplitWritingImpl = new GnucashTransactionSplitWritingImpl(this, account);
+        addSplit(gnucashTransactionSplitWritingImpl);
         if (getPropertyChangeSupport() != null) {
         	getPropertyChangeSupport().firePropertyChange("splits", null, getWritingSplits());
         }
@@ -260,6 +261,13 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
         return super.getSplits();
     }
 
+    /**
+     * @param impl the split to add to mySplits
+     * @throws JAXBException if we have issues with the XML-backend
+     */
+    protected void addSplit(final GnucashTransactionSplitWritingImpl impl) throws JAXBException {
+    	super.addSplit(impl);
+    }
 
     /**
      *

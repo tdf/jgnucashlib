@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jGnucashLib-Viewer" default="help" basedir=".">
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.0" />
+	<property name="app.version" value="2.0.1" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -46,6 +46,7 @@ test  - runs some tests
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.viewer.main" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.editor.main" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
+		<ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporter" target="${target}" />
 	</target>
 
 	<target name="build" depends="-init" description="Builds entire project">
