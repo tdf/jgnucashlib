@@ -17,7 +17,6 @@
  */
 package biz.wolschon.finance.jgnucash.HBCIImporter;
 
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,7 +29,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
-import java.util.jar.JarOutputStream;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -43,16 +41,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.structures.Saldo;
-
-import com.sun.codemodel.JOp;
-
-import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
-import biz.wolschon.finance.jgnucash.panels.DebugLogPanel;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -394,7 +387,7 @@ public class HBCIImporter {
 				                                        input.get(GregorianCalendar.MONTH),
 				                                        input.get(GregorianCalendar.DAY_OF_MONTH));
 		long from = day.getTimeInMillis();
-		input.add(GregorianCalendar.DAY_OF_MONTH, 1);
+		day.add(GregorianCalendar.DAY_OF_MONTH, 1);
 		long to   = day.getTimeInMillis();
 
 		FixedPointNumber zero = new FixedPointNumber();
