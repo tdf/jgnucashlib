@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jGnucashLib-Viewer" default="help" basedir=".">
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.1" />
+	<property name="app.version" value="2.0.3" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -99,7 +99,7 @@ test  - runs some tests
 		<mkdir dir="${dist.home}" />
 
                 <!-- build standalong jGnucashViewer.jar -->
-                <jar destfile="${dist.home}/jGnucashViewer.jar" basedir="${build.home}/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes">
+                <jar destfile="${dist.home}/jGnucashViewer-${app.version}.jar" basedir="${build.home}/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes">
                     <manifest>
                         <attribute name="Built-By" value="${user.name}"/>
                         <attribute name="Main-Class" value="biz.wolschon.finance.jgnucash.JGnucashViewer"/>
@@ -113,7 +113,7 @@ test  - runs some tests
                         <include name="org/**/*.*" />
                 </jar>
                 <!-- build jgnucash-library usable in third party applications -->
-                <jar destfile="${dist.home}/jGnucashLib.jar">
+                <jar destfile="${dist.home}/jGnucashLib-${app.version}.jar">
                     <manifest>
                         <attribute name="Built-By" value="${user.name}"/>
                     </manifest>
