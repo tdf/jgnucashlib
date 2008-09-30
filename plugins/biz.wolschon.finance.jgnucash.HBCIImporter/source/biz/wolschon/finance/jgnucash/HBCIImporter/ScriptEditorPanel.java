@@ -33,6 +33,7 @@ package biz.wolschon.finance.jgnucash.HBCIImporter;
 //other imports
 
 //automatically created logger for debug and error -output
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -44,6 +45,8 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Window;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
@@ -53,11 +56,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -66,6 +70,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultStyledDocument;
 
+import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
+import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
+import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
+import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
+import biz.wolschon.finance.jgnucash.HBCIImporter.ScriptEditor.DummyGnucashFile;
+import biz.wolschon.finance.jgnucash.panels.WritableTransactionsPanel;
 import biz.wolschon.numbers.FixedPointNumber;
 
 
@@ -87,25 +97,53 @@ public class ScriptEditorPanel extends JPanel {
     private static final Logger LOG = Logger.getLogger(
     		ScriptEditorPanel.class.getName());
 
+    /**
+     * Every script in the HBCIImporter has a number to identify it.<br/>
+     * When we edit a new script that has not yet been saved, it has already
+     * been given a number.
+     */
     private int myScriptNumber;
+
+    /**
+     * The description of the transaction.<br/>
+     * May be null when editing existing scripts while
+     * they are not running.
+     */
     private String myInputText;
+
+    /**
+     * The date+time of the transaction.<br/>
+     * May be null when editing existing scripts while
+     * they are not running.
+     */
     private Date myInputDate;
+
+    /**
+     * The value of the transaction.<br/>
+     * May be null when editing existing scripts while
+     * they are not running.
+     */
     private FixedPointNumber myInputValue;
     
+    //------------------ GUI-components
+
     /**
      * The area with the script-text.
      */
-    private JTextPane myEditorArea = new JTextPane();
+    private JTextPane myEditorArea;
 
     /**
-     * The area with the regexp-text.
+     * The area with the regexp-text.<br/>
+     * (The regular expression that a transaction's description
+     * must match for the script to be invoked at all.)
      */
-    private JTextField myRegExpArea = new JTextField();
+    private JTextField myRegExpArea;
 
     /**
      * Panel with the SAVE-button.
      */
     private JPanel myButtonsPanel;
+
     /**
      *  CANCEL-button.
      */
@@ -122,27 +160,31 @@ public class ScriptEditorPanel extends JPanel {
      */
     private JButton mySaveButton;
 
+    /**
+     * The button to test-run the script on a 
+     * dummy-database..
+     */
+    private JButton myTestrunButton;
+
+    /**
+     * The settings of the HBCIImporter.<br/>
+     * They contain all installed scripts and
+     * can be written to ~/.jgnucash/.hbci.properties .
+     */
 	private Properties mySettings;
 
     /**
-	 * @param myScriptNumber
-	 * @param myInputText
-	 * @param myInputDate
-	 * @param myInputValue
-     * @param properties 
+	 * @param myScriptNumber the number of the new script to edit
+	 * @param myInputText The description of the transaction. (May be null)
+	 * @param myInputDate The date of the transaction. (May be null)
+	 * @param myInputValue The value of the transaction. (May be null)
+     * @param properties The complete and current settings of the HBCIImporter.
 	 */
 	public ScriptEditorPanel(final int myScriptNumber,
 			                 final String myInputText,
 			                 final Date myInputDate,
 			                 final FixedPointNumber myInputValue,
 			                 final Properties properties) {
-		this.myScriptNumber = myScriptNumber;
-		this.myInputText = myInputText;
-		this.myInputDate = myInputDate;
-		this.myInputValue = myInputValue;
-		this.mySettings = properties;
-
-		this.setLayout(new BorderLayout());
 		BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("biz/wolschon/finance/jgnucash/HBCIImporter/defaultscript.js")));
 		String line = null;
 		StringBuilder defaultScript = new StringBuilder();
@@ -155,56 +197,135 @@ public class ScriptEditorPanel extends JPanel {
 			           + getClass().getName(),
 			             e);
 		}
-        this.myEditorArea.setStyledDocument(new DefaultStyledDocument());
-        this.myEditorArea.setText(defaultScript.toString());
-        this.myEditorArea.setPreferredSize(new Dimension(1000, 400));
-        this.add(new JScrollPane(this.myEditorArea), BorderLayout.CENTER);
+		init(myScriptNumber,
+				          defaultScript.toString(),
+				          myInputText,
+				          myInputDate,
+				          myInputValue,
+				          properties);
+	}
+    /**
+	 * @param myScriptNumber the number of the new script to edit
+	 * @param myScriptSourcecode the sourcecode of the script to edit
+	 * @param myInputText The description of the transaction. (May be null)
+	 * @param myInputDate The date of the transaction. (May be null)
+	 * @param myInputValue The value of the transaction. (May be null)
+     * @param properties The complete and current settings of the HBCIImporter.
+	 */
+	public ScriptEditorPanel(final int myScriptNumber,
+                             final String myScriptSourcecode,
+			                 final String myInputText,
+			                 final Date myInputDate,
+			                 final FixedPointNumber myInputValue,
+			                 final Properties properties) {
+		init(myScriptNumber,
+				  myScriptSourcecode,
+		          myInputText,
+		          myInputDate,
+		          myInputValue,
+		          properties);
+	}
 
-        this.myRegExpArea.setText("(?s).*" + myInputText + ".*");
-        this.add(new JScrollPane(this.myRegExpArea), BorderLayout.NORTH);
+    /**
+	 * @param myScriptNumber the number of the new script to edit
+	 * @param myScriptSourcecode the sourcecode of the script to edit
+	 * @param myInputText The description of the transaction. (May be null)
+	 * @param myInputDate The date of the transaction. (May be null)
+	 * @param myInputValue The value of the transaction. (May be null)
+     * @param properties The complete and current settings of the HBCIImporter.
+	 */
+	private void init(final int myScriptNumber,
+                             final String myScriptSourcecode,
+			                 final String myInputText,
+			                 final Date myInputDate,
+			                 final FixedPointNumber myInputValue,
+			                 final Properties properties) {
+
+		this.myScriptNumber = myScriptNumber;
+		this.myInputText = myInputText;
+		this.myInputDate = myInputDate;
+		this.myInputValue = myInputValue;
+		this.mySettings = properties;
+
+		this.setLayout(new BorderLayout());
+
+        this.add(new JScrollPane(getEditorArea(myScriptSourcecode)), BorderLayout.CENTER);
+        this.add(new JScrollPane(getRegExpArea()), BorderLayout.NORTH);
         this.add(getButtonsPanel(), BorderLayout.SOUTH);
-
-        // color the textfield red, yellow or green
-        if (myInputText != null && myInputText.trim().length() > 0) {
-        	this.myRegExpArea.getDocument().addDocumentListener(new DocumentListener() {
-
-				public void changed() {
-
-					try {
-						if (myInputText.matches(myRegExpArea.getText())) {
-							myRegExpArea.setForeground(Color.green);
-							myRegExpArea.setToolTipText("OK");
-						} else {
-							myRegExpArea.setForeground(Color.yellow);
-
-							myRegExpArea.setToolTipText("does not mach:\n" + myInputText);
-						}
-
-					} catch (Exception e1) {
-						myRegExpArea.setForeground(Color.red);
-						myRegExpArea.setToolTipText(e1.getMessage());
-					}
-				}
-
-				@Override
-				public void changedUpdate(DocumentEvent e) {
-					changed();	
-				}
-
-				@Override
-				public void insertUpdate(DocumentEvent e) {
-					changed();
-				}
-
-				@Override
-				public void removeUpdate(DocumentEvent e) {
-					changed();
-				}
-        		
-        	});
-        }
-
     }
+
+	/**
+	 * The area with the script-text.
+	 * @param aScriptSourcecode 
+	 * @return Returns the editorArea.
+	 * @see #myEditorArea
+	 */
+	private JTextPane getEditorArea(final String aScriptSourcecode) {
+		if (this.myEditorArea == null) {
+			this.myEditorArea  = new JTextPane();
+			this.myEditorArea.setStyledDocument(new DefaultStyledDocument());
+	        this.myEditorArea.setText(aScriptSourcecode);
+	        this.myEditorArea.setPreferredSize(new Dimension(1000, 400));
+			
+		}
+
+		return this.myEditorArea;
+	}
+	/**
+	 * The area with the regexp-text.<br/>
+     * (The regular expression that a transaction's description
+     * must match for the script to be invoked at all.)
+	 * @return Returns the myRegExpArea.
+	 * @see #myRegExpArea
+	 */
+	private JTextField getRegExpArea() {
+		if (this.myRegExpArea == null) {
+			this.myRegExpArea = new JTextField();
+			this.myRegExpArea.setText("(?s).*" + myInputText + ".*");
+
+	        // color the textfield red, yellow or green
+	        if (myInputText != null && myInputText.trim().length() > 0) {
+	        	this.myRegExpArea.getDocument().addDocumentListener(new DocumentListener() {
+
+					public void changed() {
+
+						try {
+							if (myInputText.matches(myRegExpArea.getText())) {
+								myRegExpArea.setForeground(Color.green);
+								myRegExpArea.setToolTipText("OK");
+							} else {
+								myRegExpArea.setForeground(Color.yellow);
+
+								myRegExpArea.setToolTipText("does not mach:\n" + myInputText);
+							}
+
+						} catch (Exception e1) {
+							myRegExpArea.setForeground(Color.red);
+							myRegExpArea.setToolTipText(e1.getMessage());
+						}
+					}
+
+					@Override
+					public void changedUpdate(DocumentEvent e) {
+						changed();	
+					}
+
+					@Override
+					public void insertUpdate(DocumentEvent e) {
+						changed();
+					}
+
+					@Override
+					public void removeUpdate(DocumentEvent e) {
+						changed();
+					}
+	        		
+	        	});
+	        }
+		}
+
+		return this.myRegExpArea;
+	}
 
 	/**
 	 * @return Returns the wasCanceled.
@@ -264,6 +385,8 @@ public class ScriptEditorPanel extends JPanel {
 		}
 		this.myInputText = myInputText;
 		// <<insert code to react further to this change here
+		 getTestrunButton(); // undate the enabled-state of the button
+
 		PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
 		if (propertyChangeFirer != null) {
 			propertyChangeFirer.firePropertyChange("myInputText", old, myInputText);
@@ -293,6 +416,8 @@ public class ScriptEditorPanel extends JPanel {
 		}
 		this.myInputDate = myInputDate;
 		// <<insert code to react further to this change here
+		 getTestrunButton(); // undate the enabled-state of the button
+
 		PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
 		if (propertyChangeFirer != null) {
 			propertyChangeFirer.firePropertyChange("myInputDate", old, myInputDate);
@@ -322,6 +447,8 @@ public class ScriptEditorPanel extends JPanel {
 		}
 		this.myInputValue = myInputValue;
 		// <<insert code to react further to this change here
+		 getTestrunButton(); // undate the enabled-state of the button
+
 		PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
 		if (propertyChangeFirer != null) {
 			propertyChangeFirer.firePropertyChange("myInputValue", old,
@@ -337,18 +464,20 @@ public class ScriptEditorPanel extends JPanel {
 	private JPanel getButtonsPanel() {
 		if (this.myButtonsPanel == null) {
 			this.myButtonsPanel = new JPanel();
-			this.myButtonsPanel.setLayout(new GridLayout(1, 2));
-			this.myButtonsPanel.add(getMyCancelButton());
-			this.myButtonsPanel.add(getMySaveButton());
+			this.myButtonsPanel.setLayout(new GridLayout(1, 3));
+			this.myButtonsPanel.add(getTestrunButton());
+			this.myButtonsPanel.add(getCancelButton());
+			this.myButtonsPanel.add(getSaveButton());
 		}
 		return myButtonsPanel;
 	}
 
     /**
+     * CANCEL-button.
 	 * @return Returns the myCancelButton.
 	 * @see #myCancelButton
 	 */
-	private JButton getMyCancelButton() {
+	private JButton getCancelButton() {
 		if (this.myCancelButton == null) {
 			this.myCancelButton = new JButton("Cancel");
 			this.myCancelButton.addActionListener(new ActionListener() {
@@ -356,22 +485,7 @@ public class ScriptEditorPanel extends JPanel {
 				@Override
 				public void actionPerformed(final ActionEvent e) {
 					ScriptEditorPanel.this.wasCanceled = true;
-					Container parent = ScriptEditorPanel.this.getParent();
-					while (parent != null) {
-						if (parent instanceof JFrame) {
-							JFrame frame = (JFrame) parent;
-							frame.setVisible(false);
-							frame.dispose();
-							return;
-						}
-						if (parent instanceof JDialog) {
-							JDialog frame = (JDialog) parent;
-							frame.setVisible(false);
-							frame.dispose();
-							return;
-						}
-						parent = parent.getParent();
-					}
+					getFrame().dispose();
 					
 				}
 				
@@ -382,10 +496,11 @@ public class ScriptEditorPanel extends JPanel {
 	}
 
 	/**
+	 * SAVE-button.
 	 * @return Returns the mySaveButton.
 	 * @see #mySaveButton
 	 */
-	private JButton getMySaveButton() {
+	private JButton getSaveButton() {
 		if (this.mySaveButton == null) {
 			this.mySaveButton = new JButton("Save");
 			this.mySaveButton.addActionListener(new ActionListener() {
@@ -414,28 +529,115 @@ public class ScriptEditorPanel extends JPanel {
 						return;
 					}
 					
-					Container parent = ScriptEditorPanel.this.getParent();
-					while (parent != null) {
-						if (parent instanceof JFrame) {
-							JFrame frame = (JFrame) parent;
-							frame.setVisible(false);
-							frame.dispose();
-							return;
-						}
-						if (parent instanceof JDialog) {
-							JDialog frame = (JDialog) parent;
-							frame.setVisible(false);
-							frame.dispose();
-							return;
-						}
-						parent = parent.getParent();
-					}
+					getFrame().dispose();
 				}
 				
 			});
 		}
 
 		return this.mySaveButton;
+	}
+
+	private Window getFrame() {
+		Container parent = ScriptEditorPanel.this.getParent();
+		while (parent != null) {
+			if (parent instanceof Window) {
+				return (Window) parent;
+			}
+			parent = parent.getParent();
+		}
+		return null;
+	}
+
+	/**
+	 * This number is incremented with every testrun made.
+	 */
+	private int testRunNumber = 0;
+
+	/**
+     * The button to test-run the script on a 
+     * dummy-database..
+	 * @return Returns the myCancelButton.
+	 * @see #myCancelButton
+	 */
+	private JButton getTestrunButton() {
+		if (this.myTestrunButton == null) {
+			this.myTestrunButton = new JButton("Testrun");
+			this.myTestrunButton.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					//TODO: test this
+			
+					try {
+						GnucashWritableFile dummyFile = new DummyGnucashFile(this.getClass().getClassLoader());
+
+						GnucashWritableAccount bankAccount = dummyFile.createWritableAccount();
+						bankAccount.setName("Dummy Bank-Account");
+						bankAccount.setCurrencyNameSpace("ISO4217");
+						bankAccount.setCurrencyID("EUR");
+
+						// prepare dummy-transaction
+						GnucashWritableTransaction transaction = dummyFile.createWritableTransaction();
+						transaction.setDescription(getMyInputText().replace('\n', ' '));
+						transaction.setDatePosted(getMyInputDate());
+						transaction.setCurrencyNameSpace(bankAccount.getCurrencyNameSpace());
+						transaction.setCurrencyID(bankAccount.getCurrencyID());
+
+						// we always need the split on out account's side
+						GnucashWritableTransactionSplit myAccountSplit = transaction.createWritingSplit(bankAccount);
+						myAccountSplit.setValue(getMyInputValue());
+						myAccountSplit.setQuantity(getMyInputValue());
+						myAccountSplit.setUserDefinedAttribute("HBCI.orig_description", getMyInputText());
+						myAccountSplit.setDescription(getMyInputText().replace('\n', ' '));
+
+						testRunNumber++;
+						HBCIImporter.runImportScript(getMyInputValue(),
+								                     getMyInputText(),
+								                     myAccountSplit,
+								                     getMyScriptNumber(),
+								                     "JavaScript",
+								                     "(editor)",
+								                     new StringReader(ScriptEditorPanel.this.myEditorArea.getText()));
+						// show the result in a new window
+
+						final JDialog resultFrame = new JDialog(getFrame(), ModalityType.APPLICATION_MODAL);
+						resultFrame.setTitle("Result of testrun # " + testRunNumber + " on " + DateFormat.getDateTimeInstance().format(new Date()));
+						resultFrame.getContentPane().setLayout(new BorderLayout());
+							
+						resultFrame.add(new WritableTransactionsPanel(bankAccount), BorderLayout.CENTER);
+						JButton closeButton = new JButton("Close");
+						closeButton.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(final ActionEvent aE) {
+								resultFrame.setVisible(false);
+								resultFrame.dispose();
+							}
+						});
+						resultFrame.add(closeButton, BorderLayout.SOUTH);
+						
+						resultFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+						resultFrame.pack();
+						resultFrame.setVisible(true);
+					} catch (Exception e1) {
+						LOG.log(Level.SEVERE,"[Exception] Problem in "
+						           + getClass().getName(),
+						             e1);
+						JOptionPane.showMessageDialog(null, "Error",
+								"Testrun failed.\n"
+								+ "[" + e1.getClass().getName() + "]: " + e1.getMessage(),
+								JOptionPane.ERROR_MESSAGE);
+					}
+					
+				}
+				
+			});
+		}
+
+		this.myTestrunButton.setEnabled(getMyInputText() != null
+				                    && getMyInputDate() != null
+				                    && getMyInputValue() != null);
+		return this.myTestrunButton;
 	}
 
     //------------------------ support for propertyChangeListeners ------------------

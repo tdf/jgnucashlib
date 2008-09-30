@@ -17,6 +17,7 @@
  */
 package biz.wolschon.finance.jgnucash.HBCIImporter;
 
+import java.awt.Dialog.ModalityType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -456,7 +457,6 @@ public class HBCIImporter {
 						if (getMyProperties().containsKey(SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum)) {
 							importViaScript(value,
 									        text,
-									        transaction,
 									        myAccountSplit,
 									        scriptnum);
 						} else {
@@ -495,7 +495,6 @@ public class HBCIImporter {
 				if (newScriptnum != null) {
 					importViaScript(value,
 							text,
-							transaction,
 							myAccountSplit,
 							newScriptnum.intValue());
 				}
@@ -552,8 +551,7 @@ public class HBCIImporter {
 		}
 
 
-		JDialog f = new JDialog((JFrame) null, true);
-		f.setTitle("new Script");
+		JDialog f = new JDialog(null, "new Script (HBCI-import waiting to resume)", ModalityType.APPLICATION_MODAL);
         ScriptEditorPanel editor = new ScriptEditorPanel(maxScriptnum, text, date, value, getMyProperties());
 		f.getContentPane().add(editor);
         f.pack();
@@ -568,29 +566,17 @@ public class HBCIImporter {
 	}
 
 	/**
-	 * @param value
-	 * @param text
-	 * @param transaction
-	 * @param myAccountSplit
-	 * @param scriptnum
+	 * @param text the description-text ("usage"-field on a paper-form) of the transaction. 
+	 * @param value Wert in der Währung des Kontos
+	 * @param myAccountSplit a split for the transaction-part involving the bank's account.
+	 * @param scriptnum the number of the script to run
 	 */
 	private void importViaScript(final FixedPointNumber value,
-			final String text, GnucashWritableTransaction transaction,
-			GnucashWritableTransactionSplit myAccountSplit, int scriptnum) {
+			                     final String text,
+			                     final GnucashWritableTransactionSplit myAccountSplit,
+			                     final int scriptnum) {
 		String language = getMyProperties().getProperty(SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + scriptnum, "JavaScript");
 		String scriptPath = getMyProperties().getProperty(SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum);
-
-		ScriptEngineManager mgr = new ScriptEngineManager();
-		ScriptEngine jsEngine = mgr.getEngineByName(language);
-		jsEngine.put("text", text);
-		jsEngine.put("value", value);
-		jsEngine.put("transaction", transaction);
-		jsEngine.put("myAccountSplit", myAccountSplit);
-		jsEngine.put("file",        getMyAccount().getWritableFile());
-		FixedPointNumber ustValue = ((FixedPointNumber) value.clone()).divideBy(new FixedPointNumber("-1,19")).multiply(new FixedPointNumber("0,19")); //TODO: get tax-% from tax-config
-		FixedPointNumber nettoValue = ((FixedPointNumber) value.clone()).negate().subtract(ustValue);
-		jsEngine.put("USt",         ustValue);
-		jsEngine.put("Netto",       nettoValue);
 		InputStream is = null;
 		try {
 			if (new File(scriptPath).exists()) {
@@ -608,24 +594,58 @@ public class HBCIImporter {
 					scriptPath,
 					JOptionPane.ERROR_MESSAGE);
 		}
+
 		if (is != null) {
-			try {
-				LOGGER.info("importing transaction using script: " + scriptPath);
-				Reader reader = new InputStreamReader(is);
-				jsEngine.eval(reader);
-			} catch (Exception ex) {
-				LOGGER.error("Error executing script number " + scriptnum + " from " + scriptPath, ex);
-				JOptionPane.showMessageDialog(null, "Error executing user HBCI-Import-Script #" + scriptnum
-						+ " '" + scriptPath + "':\n "
-						+ ex.getMessage()
-						+ "\ntransaction (value is " + value + ") \n" + text,
-						scriptPath,
-						JOptionPane.ERROR_MESSAGE);
-			}
+			Reader reader = new InputStreamReader(is);
+			runImportScript(value, text, myAccountSplit,
+					scriptnum, language, scriptPath, reader);
 		} else {
 			LOGGER.error("Error  script number " + scriptnum + " at " + scriptPath + " not found");
 			JOptionPane.showMessageDialog(null, "Error, user- HBCI-Import-Script #" + scriptnum
 					+ " at '" + scriptPath + "' not found"
+					+ "\ntransaction (value is " + value + ") \n" + text,
+					scriptPath,
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	/**
+	 * @param text the description-text ("usage"-field on a paper-form) of the transaction. 
+	 * @param value Wert in der Währung des Kontos
+	 * @param myAccountSplit a split for the transaction-part involving the bank's account.
+	 * @param scriptnum number of the script (only used for debug+error -output)
+	 * @param language the language of the script (e.g. "JavaScript")
+	 * @param scriptPath path to the script (only used for debug+error -output)
+	 * @param reader where to get the source-code of the script to run from
+	 */
+	protected static void runImportScript(final FixedPointNumber value,
+			                     final String text,
+			                     final GnucashWritableTransactionSplit myAccountSplit,
+			                     final int scriptnum,
+			                     final String language,
+			                     final String scriptPath,
+			                     final Reader reader) {
+		ScriptEngineManager mgr = new ScriptEngineManager();
+		ScriptEngine jsEngine = mgr.getEngineByName(language);
+
+		jsEngine.put("text",           text);
+		jsEngine.put("value",          value);
+		jsEngine.put("transaction",    myAccountSplit.getTransaction());
+		jsEngine.put("myAccountSplit", myAccountSplit);
+		jsEngine.put("file",           myAccountSplit.getWritableFile());
+		FixedPointNumber ustValue   = ((FixedPointNumber) value.clone()).divideBy(new FixedPointNumber("-1,19")).multiply(new FixedPointNumber("0,19")); //TODO: get tax-% from tax-config
+		FixedPointNumber nettoValue = ((FixedPointNumber) value.clone()).negate().subtract(ustValue);
+		jsEngine.put("USt",           ustValue);
+		jsEngine.put("Netto",         nettoValue);
+
+		try {
+			LOGGER.info("importing transaction using script: " + scriptPath);
+			jsEngine.eval(reader);
+		} catch (Exception ex) {
+			LOGGER.error("Error executing script number " + scriptnum + " from " + scriptPath, ex);
+			JOptionPane.showMessageDialog(null, "Error executing user HBCI-Import-Script #" + scriptnum
+					+ " '" + scriptPath + "':\n "
+					+ ex.getMessage()
 					+ "\ntransaction (value is " + value + ") \n" + text,
 					scriptPath,
 					JOptionPane.ERROR_MESSAGE);
