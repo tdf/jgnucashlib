@@ -40,7 +40,7 @@
                   </xs:simpleContent>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="book_slots" type="slots_type"/>
+              <xs:element name="book_slots" type="slots_type" minOccurs="0" maxOccurs="1"/>
               <xs:element ref="gnc_count-data" minOccurs="0" maxOccurs="unbounded"/>
               
 <!-- ===================== support for currencies and funds that have price-quotes ===================== -->
