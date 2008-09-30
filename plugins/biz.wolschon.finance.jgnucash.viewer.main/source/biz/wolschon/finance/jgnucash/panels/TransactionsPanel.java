@@ -148,6 +148,9 @@ public class TransactionsPanel extends JPanel {
         getTransactionTable().getColumn("-").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-1000000)));
         getTransactionTable().getColumn("balance").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-1000000)));
 
+        getTransactionTable().getColumn("transaction").setCellRenderer(new DesriptionCellRenderer());
+        getTransactionTable().getColumn("description").setCellRenderer(new DesriptionCellRenderer());
+
         updateSelectionSummaryAccountList();
         updateSelectionSummary();
         getSingleTransactionPanel().setTransaction(null);
