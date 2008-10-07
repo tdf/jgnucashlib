@@ -643,7 +643,7 @@ public class ScriptEditorPanel extends JPanel {
     //------------------------ support for propertyChangeListeners ------------------
 
 	/**
-     * support for firing PropertyChangeEvents.
+     * support for firing PropertyChangeEvents..
      * (gets initialized only if we really have listeners)
      */
     private volatile PropertyChangeSupport myPropertyChange = null;

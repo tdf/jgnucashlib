@@ -35,6 +35,8 @@ package biz.wolschon.finance.jgnucash.panels;
 //automatically created logger for debug and error -output
 import java.util.logging.Logger;
 
+import biz.wolschon.fileformats.gnucash.GnucashAccount;
+
 //automatically created propertyChangeListener-Support
 //import java.beans.PropertyChangeListener;
 //import java.beans.PropertyChangeSupport;
@@ -57,6 +59,15 @@ public class WritableTransactionsPanel extends TransactionsPanel {
     public WritableTransactionsPanel() {
         super();
     }
+    
+    /**
+     * @param account if null, an empty table will be shown.
+	 */
+	 public WritableTransactionsPanel(final GnucashAccount account) {
+		 super();
+		 setAccount(account);
+	 }
+
 
     //TODO: override tableModel to allow editing by the user of transaction-descriptions+dates and split-values for transactions with exactly 2 splits.
     /**

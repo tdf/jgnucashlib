@@ -38,7 +38,6 @@ import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EventObject;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,33 +46,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //automatically created propertyChangeListener-Support
-import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListDataListener;
+import javax.swing.JToolTip;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.TableCellEditor;
 import javax.xml.bind.JAXBException;
 
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
-import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
-import biz.wolschon.finance.jgnucash.panels.ShowTransactionPanel.SingleTransactionTableModel;
 import biz.wolschon.numbers.FixedPointNumber;
 
 
@@ -84,7 +74,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  * created: 21.09.2008 07:27:37 <br/>
  *<br/><br/>
  * <b>This is a variant of {@link ShowTransactionPanel} that also allows
- * to edit the transaction.</a>
+ * to edit the transaction.</b>
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public class ShowWritableTransactionPanel extends ShowTransactionPanel {
@@ -187,7 +177,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      * @see #myTransaction
      */
     public void setTransaction(final GnucashTransaction aTransaction) {
-        
+
         Object old = getTransaction();
         if (old == aTransaction) {
             return; // nothing has changed
@@ -204,7 +194,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
             model = new SingleWritableTransactionTableModel(aTransaction);
             setPreferredSize(new Dimension(200, 200));
             invalidate();
-        }   
+        }
         setModel(model);
     }
 
@@ -231,7 +221,21 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
         // if editing is possible, install a jcomboBox as an editor for the accounts
         if (aModel != null && aModel instanceof SingleWritableTransactionTableModel) {
             GnucashTransaction transaction = aModel.getTransaction();
-            JComboBox accountsCombo = new JComboBox();
+            JComboBox accountsCombo = new JComboBox() {
+
+                /**
+                 * ${@inheritDoc}.
+                 */
+                @Override
+                public String getToolTipText() {
+                    Object selectedItem = getSelectedItem();
+                    if (selectedItem != null) {
+                        return selectedItem.toString();
+                    }
+                    return super.getToolTipText();
+                }
+            };
+            accountsCombo.setToolTipText("Account-name"); //make sure a tooltip-manager exists
             if (transaction != null) {
                 Collection<GnucashAccount> accounts = transaction.getFile().getAccounts();
                 for (GnucashAccount gnucashAccount : accounts) {
@@ -275,7 +279,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
          * ${@inheritDoc}.
          */
         @Override
-        public Object getValueAt(int aRowIndex, int aColumnIndex) {
+        public Object getValueAt(final int aRowIndex, final int aColumnIndex) {
             if (aRowIndex == getRowCount() - 1) {
              // add one row for adding a new split
                 return "";
@@ -334,7 +338,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
          * @param aRowIndex the split to return (starts with 0).
          * @return the selected split of the transaction.
          */
-        public GnucashWritableTransactionSplit getWritableTransactionSplit(int aRowIndex) {
+        public GnucashWritableTransactionSplit getWritableTransactionSplit(final int aRowIndex) {
             return getWritableTransactionSplits().get(aRowIndex);
         }
 
@@ -369,36 +373,23 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
                if (rowIndex == 0) {
                    // show data of transaction
                    switch(columnIndex) {
-                   case 0: { //DATE
-                       try {
-                           getWritableTransaction().setDatePosted(dateFormat.parse(aValue.toString()));
-                           for (TableModelListener listener : this.myTableModelListeners) {
-                               listener.tableChanged(new TableModelEvent(this));
-                           }
-                       } catch (ParseException e) {
-                           // ignore wrong dates
-                       }
-                       return;
-                   }
-                   case 1: { //action == transaction-Number
-                       getWritableTransaction().setTransactionNumber(aValue.toString());
-                       return;
-                   }
-                   case 2: { //description
-                       getWritableTransaction().setDescription(aValue.toString());
-                       return;
-                   }
-                   case 3: { // account
-                       return;
-                   }
-                   case 4: { // +
-                       return;
-                   }
-                   case 5: { // -
-                       return;
-                   }
-
-                   default:
+                   case 0: try {
+						       getWritableTransaction().setDatePosted(dateFormat.parse(aValue.toString()));
+						       for (TableModelListener listener : this.myTableModelListeners) {
+						           listener.tableChanged(new TableModelEvent(this));
+						       }
+						   } catch (ParseException e) {
+						       // ignore wrong dates
+						   }
+						return;
+					case 1: getWritableTransaction().setTransactionNumber(aValue.toString());
+						return;
+					case 2: getWritableTransaction().setDescription(aValue.toString());
+						return;
+					case 3: return;
+					case 4: return;
+					case 5: return;
+					default:
                        throw new IllegalArgumentException("illegal columnIndex "+columnIndex);
                    }
                }
@@ -423,114 +414,100 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
                }
 
                switch(columnIndex) {
-               case 0: { //DATE
-                   return;
-               }
-               case 1: { //action
-                   split.setSplitAction(aValue.toString());
-                   if (informListeners) {
-                       for (TableModelListener listener : this.myTableModelListeners) {
-                           listener.tableChanged(new TableModelEvent(this));
-                       }
-                   }
-                   return;
-               }
-               case 2: { //description
-                   split.setDescription(aValue.toString());
-                   if (informListeners) {
-                       for (TableModelListener listener : this.myTableModelListeners) {
-                           listener.tableChanged(new TableModelEvent(this));
-                       }
-                   }
-                   return;
-               }
-               case 3: { // account
-                   if (aValue.toString().trim().length() == 0
-                       && split.getQuantity().equals(new FixedPointNumber())
-                       && split.getValue().equals(new FixedPointNumber())
-                       && split.getDescription().trim().length() == 0
-                       && split.getSplitAction().trim().length() == 0) {
-                       //remove split
-                       split.remove();
-                       for (TableModelListener listener : this.myTableModelListeners) {
-                           listener.tableChanged(new TableModelEvent(this));
-                       }
-                       return;
-                   }
-                   try {
-                       GnucashAccount account = getTransaction().getFile().getAccountByIDorNameEx(aValue.toString(), aValue.toString());
-                       if (account != null) {
-                           split.setAccount(account);
-                       }
-                   } catch (Exception e) {
-                       LOG.log(Level.SEVERE,"[Exception] Problem in "
-                               + getClass().getName(),
-                               e);
-                   }
-                   if (informListeners) {
-                       for (TableModelListener listener : this.myTableModelListeners) {
-                           listener.tableChanged(new TableModelEvent(this));
-                       }
-                   }
-                   return;
-               }
-               case 4: { // +
-
-                   // retain the value in the "-" -field to sum both
-                   try {
-                       //TODO: Parse the format "<value> (<quantity>)" too
-                       if(!split.getQuantity().isPositive()) {
-                           FixedPointNumber add = split.getQuantity();
-                           split.setQuantity(aValue.toString());
-                           split.setQuantity(add.add(split.getQuantity()));
-                       } else {
-                           split.setQuantity(aValue.toString());
-                       }
-                       if (!split.getTransaction().isBalanced()) {
-                           balanceTransaction();
-                       }
-                   } catch (Exception e) {
-                       LOG.log(Level.SEVERE,"[Exception] Problem in "
-                               + getClass().getName(),
-                               e);
-                   }
-                   if (informListeners) {
-                       for (TableModelListener listener : this.myTableModelListeners) {
-                           listener.tableChanged(new TableModelEvent(this));
-                       }
-                   }
-                   return;
-               }
-               case 5: { // -
-
-                   // retain the value in the "-" -field to sum both
-                   try {
-                       //TODO: Parse the format "<value> (<quantity>)" too
-                       if(split.getQuantity().isPositive()) {
-                           FixedPointNumber add = split.getQuantity();
-                           split.setQuantity(aValue.toString());
-                           split.setQuantity(split.getQuantity().negate());
-                           split.setQuantity(add.add(split.getQuantity()));
-                       } else {
-                           split.setQuantity(aValue.toString());
-                           split.setQuantity(split.getQuantity().negate());
-                       }
-                       if (!split.getTransaction().isBalanced()) {
-                           balanceTransaction();
-                       }
-                   } catch (Exception e) {
-                       LOG.log(Level.SEVERE,"[Exception] Problem in "
-                               + getClass().getName(),
-                               e);
-                   }
-                   if (informListeners) {
-                       for (TableModelListener listener : this.myTableModelListeners) {
-                           listener.tableChanged(new TableModelEvent(this));
-                       }
-                   }
-                   return;
-               }
-               default:
+               case 0: return;
+				case 1: split.setSplitAction(aValue.toString());
+					if (informListeners) {
+					       for (TableModelListener listener : this.myTableModelListeners) {
+					           listener.tableChanged(new TableModelEvent(this));
+					       }
+					   }
+					return;
+				case 2: split.setDescription(aValue.toString());
+					if (informListeners) {
+					       for (TableModelListener listener : this.myTableModelListeners) {
+					           listener.tableChanged(new TableModelEvent(this));
+					       }
+					   }
+					return;
+				case 3: if (aValue.toString().trim().length() == 0
+					       && split.getQuantity().equals(new FixedPointNumber())
+					       && split.getValue().equals(new FixedPointNumber())
+					       && split.getDescription().trim().length() == 0
+					       && split.getSplitAction().trim().length() == 0) {
+					       //remove split
+					       split.remove();
+					       for (TableModelListener listener : this.myTableModelListeners) {
+					           listener.tableChanged(new TableModelEvent(this));
+					       }
+					       return;
+					   }
+					try {
+					       GnucashAccount account = getTransaction().getFile().getAccountByIDorNameEx(aValue.toString(), aValue.toString());
+					       if (account != null) {
+					           split.setAccount(account);
+					       }
+					   } catch (Exception e) {
+					       LOG.log(Level.SEVERE,"[Exception] Problem in "
+					               + getClass().getName(),
+					               e);
+					   }
+					if (informListeners) {
+					       for (TableModelListener listener : this.myTableModelListeners) {
+					           listener.tableChanged(new TableModelEvent(this));
+					       }
+					   }
+					return;
+				case 4: // retain the value in the "-" -field to sum both
+					   try {
+					       //TODO: Parse the format "<value> (<quantity>)" too
+					       if(!split.getQuantity().isPositive()) {
+					           FixedPointNumber add = split.getQuantity();
+					           split.setQuantity(aValue.toString());
+					           split.setQuantity(add.add(split.getQuantity()));
+					       } else {
+					           split.setQuantity(aValue.toString());
+					       }
+					       if (!split.getTransaction().isBalanced()) {
+					           balanceTransaction();
+					       }
+					   } catch (Exception e) {
+					       LOG.log(Level.SEVERE,"[Exception] Problem in "
+					               + getClass().getName(),
+					               e);
+					   }
+					if (informListeners) {
+					       for (TableModelListener listener : this.myTableModelListeners) {
+					           listener.tableChanged(new TableModelEvent(this));
+					       }
+					   }
+					return;
+				case 5: // retain the value in the "-" -field to sum both
+					   try {
+					       //TODO: Parse the format "<value> (<quantity>)" too
+					       if(split.getQuantity().isPositive()) {
+					           FixedPointNumber add = split.getQuantity();
+					           split.setQuantity(aValue.toString());
+					           split.setQuantity(split.getQuantity().negate());
+					           split.setQuantity(add.add(split.getQuantity()));
+					       } else {
+					           split.setQuantity(aValue.toString());
+					           split.setQuantity(split.getQuantity().negate());
+					       }
+					       if (!split.getTransaction().isBalanced()) {
+					           balanceTransaction();
+					       }
+					   } catch (Exception e) {
+					       LOG.log(Level.SEVERE,"[Exception] Problem in "
+					               + getClass().getName(),
+					               e);
+					   }
+					if (informListeners) {
+					       for (TableModelListener listener : this.myTableModelListeners) {
+					           listener.tableChanged(new TableModelEvent(this));
+					       }
+					   }
+					return;
+				default:
                    throw new IllegalArgumentException("illegal columnIndex "+columnIndex);
                }
 
@@ -591,7 +568,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
         * @return
         */
        private GnucashAccount getBalancingAccount(
-                                                  GnucashWritableTransaction transaction) {
+                                                  final GnucashWritableTransaction transaction) {
            return transaction.getFile().getAccountByIDorName("c3e524eccc4e66cde2dc8eb3666ff469", "Ausgleichskonto-EUR");
        }
 
@@ -620,26 +597,13 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
            if (aRowIndex == 0) {
                // show data of transaction
                switch(aColumnIndex) {
-               case 0: { //DATE
-                   return true;
-               }
-               case 1: { //action == transaction-Number
-                   return true;
-               }
-               case 2: { //description
-                   return true;
-               }
-               case 3: { // account
-                   return false;
-               }
-               case 4: { // +
-                   return false;
-               }
-               case 5: { // -
-                   return false;
-               }
-
-               default:
+               case 0: return true;
+				case 1: return true;
+				case 2: return true;
+				case 3: return false;
+				case 4: return false;
+				case 5: return false;
+				default:
                    throw new IllegalArgumentException("illegal columnIndex " + aColumnIndex);
                }
            }
