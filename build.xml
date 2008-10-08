@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jGnucashLib-Viewer" default="help" basedir=".">
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.3" />
+	<property name="app.version" value="2.0.4" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -118,15 +118,15 @@ test  - runs some tests
                         <attribute name="Built-By" value="${user.name}"/>
                     </manifest>
                     <fileset dir="${build.home}/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes">
-                        <exclude name="biz/wolschon/finance/**/*.*" /> <!-- exclude the graphical applications -->
+                    	<exclude name="biz/wolschon/finance/jgnucash/**/*" /> <!-- exclude the graphical applications -->
                     </fileset>
                     <fileset dir="${build.home}/plugins/biz.wolschon.finance.jgnucash.editor.main/classes">
-                        <include name="biz/wolschon/**/*.*" />
-                        <exclude name="biz/wolschon/finance/**/*.*" /> <!-- exclude the graphical applications -->
-                        <include name="com/**/*.*" />
-                        <include name="javax/**/*.*" />
-                        <include name="jp/**/*.*" />
-                        <include name="org/**/*.*" />
+                        <include name="biz/wolschon/**/*" />
+                    	<exclude name="biz/wolschon/finance/jgnucash/**/*" /> <!-- exclude the graphical applications -->
+                        <include name="com/**/*" />
+                        <include name="javax/**/*" />
+                        <include name="jp/**/*" />
+                        <include name="org/**/*" />
                     </fileset>
                 </jar>
 
