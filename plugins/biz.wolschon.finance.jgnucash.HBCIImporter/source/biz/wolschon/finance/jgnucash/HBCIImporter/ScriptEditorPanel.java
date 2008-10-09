@@ -33,13 +33,6 @@ package biz.wolschon.finance.jgnucash.HBCIImporter;
 //other imports
 
 //automatically created logger for debug and error -output
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-//automatically created propertyChangeListener-Support
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -57,6 +50,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -65,10 +63,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.DefaultStyledDocument;
+
+import org.syntax.jedit.JEditTextArea;
+import org.syntax.jedit.tokenmarker.JavaScriptTokenMarker;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
@@ -91,11 +90,10 @@ import biz.wolschon.numbers.FixedPointNumber;
 public class ScriptEditorPanel extends JPanel {
 
 
-	/**
+    /**
      * Automatically created logger for debug and error-output.
      */
-    private static final Logger LOG = Logger.getLogger(
-    		ScriptEditorPanel.class.getName());
+    private static final Logger LOG = Logger.getLogger(ScriptEditorPanel.class.getName());
 
     /**
      * Every script in the HBCIImporter has a number to identify it.<br/>
@@ -124,13 +122,13 @@ public class ScriptEditorPanel extends JPanel {
      * they are not running.
      */
     private FixedPointNumber myInputValue;
-    
+
     //------------------ GUI-components
 
     /**
      * The area with the script-text.
      */
-    private JTextPane myEditorArea;
+    private JEditTextArea myEditorArea;
 
     /**
      * The area with the regexp-text.<br/>
@@ -155,13 +153,13 @@ public class ScriptEditorPanel extends JPanel {
     private boolean wasCanceled = false;
 
 
-	/**
+    /**
      *  SAVE-button.
      */
     private JButton mySaveButton;
 
     /**
-     * The button to test-run the script on a 
+     * The button to test-run the script on a
      * dummy-database..
      */
     private JButton myTestrunButton;
@@ -171,7 +169,7 @@ public class ScriptEditorPanel extends JPanel {
      * They contain all installed scripts and
      * can be written to ~/.jgnucash/.hbci.properties .
      */
-	private Properties mySettings;
+    private Properties mySettings;
 
     /**
 	 * @param myScriptNumber the number of the new script to edit
@@ -245,7 +243,7 @@ public class ScriptEditorPanel extends JPanel {
 		this.myInputText = myInputText;
 		this.myInputDate = myInputDate;
 		this.myInputValue = myInputValue;
-		this.mySettings = properties;
+		mySettings = properties;
 
 		this.setLayout(new BorderLayout());
 
@@ -256,20 +254,23 @@ public class ScriptEditorPanel extends JPanel {
 
 	/**
 	 * The area with the script-text.
-	 * @param aScriptSourcecode 
+	 * @param aScriptSourcecode
 	 * @return Returns the editorArea.
 	 * @see #myEditorArea
 	 */
-	private JTextPane getEditorArea(final String aScriptSourcecode) {
-		if (this.myEditorArea == null) {
-			this.myEditorArea  = new JTextPane();
-			this.myEditorArea.setStyledDocument(new DefaultStyledDocument());
-	        this.myEditorArea.setText(aScriptSourcecode);
-	        this.myEditorArea.setPreferredSize(new Dimension(1000, 400));
-			
+	private JEditTextArea getEditorArea(final String aScriptSourcecode) {
+		if (myEditorArea == null) {
+			myEditorArea  = new JEditTextArea();
+			//myEditorArea.setStyledDocument(new DefaultStyledDocument());
+	        myEditorArea.setText(aScriptSourcecode);
+	        myEditorArea.setPreferredSize(new Dimension(1000, 400));
+
+	        //if (scriptLanguage.equals("JavaScript")) {
+	        myEditorArea.setTokenMarker(new JavaScriptTokenMarker());
+	       //     }
 		}
 
-		return this.myEditorArea;
+		return myEditorArea;
 	}
 	/**
 	 * The area with the regexp-text.<br/>
@@ -279,13 +280,13 @@ public class ScriptEditorPanel extends JPanel {
 	 * @see #myRegExpArea
 	 */
 	private JTextField getRegExpArea() {
-		if (this.myRegExpArea == null) {
-			this.myRegExpArea = new JTextField();
-			this.myRegExpArea.setText("(?s).*" + myInputText + ".*");
+		if (myRegExpArea == null) {
+			myRegExpArea = new JTextField();
+			myRegExpArea.setText("(?s).*" + myInputText + ".*");
 
 	        // color the textfield red, yellow or green
 	        if (myInputText != null && myInputText.trim().length() > 0) {
-	        	this.myRegExpArea.getDocument().addDocumentListener(new DocumentListener() {
+	        	myRegExpArea.getDocument().addDocumentListener(new DocumentListener() {
 
 					public void changed() {
 
@@ -307,7 +308,7 @@ public class ScriptEditorPanel extends JPanel {
 
 					@Override
 					public void changedUpdate(DocumentEvent e) {
-						changed();	
+						changed();
 					}
 
 					@Override
@@ -319,12 +320,12 @@ public class ScriptEditorPanel extends JPanel {
 					public void removeUpdate(DocumentEvent e) {
 						changed();
 					}
-	        		
+
 	        	});
 	        }
 		}
 
-		return this.myRegExpArea;
+		return myRegExpArea;
 	}
 
 	/**
@@ -348,7 +349,7 @@ public class ScriptEditorPanel extends JPanel {
 	 * @see #myScriptNumber
 	 */
 	public void setMyScriptNumber(final int myScriptNumber) {
-	
+
 		int old = this.myScriptNumber;
 		if (old == myScriptNumber) {
 			return; // nothing has changed
@@ -378,7 +379,7 @@ public class ScriptEditorPanel extends JPanel {
 		if (myInputText == null) {
 			throw new IllegalArgumentException("null 'myInputText' given!");
 		}
-	
+
 		Object old = this.myInputText;
 		if (old == myInputText) {
 			return; // nothing has changed
@@ -409,7 +410,7 @@ public class ScriptEditorPanel extends JPanel {
 		if (myInputDate == null) {
 			throw new IllegalArgumentException("null 'myInputDate' given!");
 		}
-	
+
 		Object old = this.myInputDate;
 		if (old == myInputDate) {
 			return; // nothing has changed
@@ -440,7 +441,7 @@ public class ScriptEditorPanel extends JPanel {
 		if (myInputValue == null) {
 			throw new IllegalArgumentException("null 'myInputValue' given!");
 		}
-	
+
 		Object old = this.myInputValue;
 		if (old == myInputValue) {
 			return; // nothing has changed
@@ -462,12 +463,12 @@ public class ScriptEditorPanel extends JPanel {
 	 * @see #myButtonsPanel
 	 */
 	private JPanel getButtonsPanel() {
-		if (this.myButtonsPanel == null) {
-			this.myButtonsPanel = new JPanel();
-			this.myButtonsPanel.setLayout(new GridLayout(1, 3));
-			this.myButtonsPanel.add(getTestrunButton());
-			this.myButtonsPanel.add(getCancelButton());
-			this.myButtonsPanel.add(getSaveButton());
+		if (myButtonsPanel == null) {
+			myButtonsPanel = new JPanel();
+			myButtonsPanel.setLayout(new GridLayout(1, 3));
+			myButtonsPanel.add(getTestrunButton());
+			myButtonsPanel.add(getCancelButton());
+			myButtonsPanel.add(getSaveButton());
 		}
 		return myButtonsPanel;
 	}
@@ -478,21 +479,21 @@ public class ScriptEditorPanel extends JPanel {
 	 * @see #myCancelButton
 	 */
 	private JButton getCancelButton() {
-		if (this.myCancelButton == null) {
-			this.myCancelButton = new JButton("Cancel");
-			this.myCancelButton.addActionListener(new ActionListener() {
+		if (myCancelButton == null) {
+			myCancelButton = new JButton("Cancel");
+			myCancelButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					ScriptEditorPanel.this.wasCanceled = true;
+					wasCanceled = true;
 					getFrame().dispose();
-					
+
 				}
-				
+
 			});
 		}
 
-		return this.myCancelButton;
+		return myCancelButton;
 	}
 
 	/**
@@ -501,15 +502,15 @@ public class ScriptEditorPanel extends JPanel {
 	 * @see #mySaveButton
 	 */
 	private JButton getSaveButton() {
-		if (this.mySaveButton == null) {
-			this.mySaveButton = new JButton("Save");
-			this.mySaveButton.addActionListener(new ActionListener() {
+		if (mySaveButton == null) {
+			mySaveButton = new JButton("Save");
+			mySaveButton.addActionListener(new ActionListener() {
 
-				
+
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					ScriptEditorPanel.this.wasCanceled = false;
-					
+					wasCanceled = false;
+
 					try {
 						File dir = new File(Main.getConfigFileDirectory(), "import_scripts");
 						File filename = new File(dir, getMyScriptNumber() + ".js");
@@ -517,25 +518,25 @@ public class ScriptEditorPanel extends JPanel {
 						FileWriter fw = new FileWriter(filename);
 						fw.write(myEditorArea.getText());
 						fw.close();
-						ScriptEditorPanel.this.mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT + getMyScriptNumber(), "import_scripts" + File.separator + getMyScriptNumber() + ".js");
-						ScriptEditorPanel.this.mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + getMyScriptNumber(), myRegExpArea.getText());
-						ScriptEditorPanel.this.mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + getMyScriptNumber(), "javascript");
-						ScriptEditorPanel.this.mySettings.store(new FileWriter(Main.getConfigFile()), "saved by ScriptEditprPanel");
+						mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT + getMyScriptNumber(), "import_scripts" + File.separator + getMyScriptNumber() + ".js");
+						mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + getMyScriptNumber(), myRegExpArea.getText());
+						mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + getMyScriptNumber(), "javascript");
+						mySettings.store(new FileWriter(Main.getConfigFile()), "saved by ScriptEditprPanel");
 					} catch (IOException e1) {
-						ScriptEditorPanel.this.wasCanceled = true;
+						wasCanceled = true;
 						LOG.log(Level.SEVERE,"[IOException] Problem in "
 						           + getClass().getName(),
 						             e1);
 						return;
 					}
-					
+
 					getFrame().dispose();
 				}
-				
+
 			});
 		}
 
-		return this.mySaveButton;
+		return mySaveButton;
 	}
 
 	private Window getFrame() {
@@ -555,20 +556,20 @@ public class ScriptEditorPanel extends JPanel {
 	private int testRunNumber = 0;
 
 	/**
-     * The button to test-run the script on a 
+     * The button to test-run the script on a
      * dummy-database..
 	 * @return Returns the myCancelButton.
 	 * @see #myCancelButton
 	 */
 	private JButton getTestrunButton() {
-		if (this.myTestrunButton == null) {
-			this.myTestrunButton = new JButton("Testrun");
-			this.myTestrunButton.addActionListener(new ActionListener() {
+		if (myTestrunButton == null) {
+			myTestrunButton = new JButton("Testrun");
+			myTestrunButton.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(final ActionEvent e) {
 					//TODO: test this
-			
+
 					try {
 						GnucashWritableFile dummyFile = new DummyGnucashFile(this.getClass().getClassLoader());
 
@@ -598,13 +599,13 @@ public class ScriptEditorPanel extends JPanel {
 								                     getMyScriptNumber(),
 								                     "JavaScript",
 								                     "(editor)",
-								                     new StringReader(ScriptEditorPanel.this.myEditorArea.getText()));
+								                     new StringReader(myEditorArea.getText()));
 						// show the result in a new window
 
 						final JDialog resultFrame = new JDialog(getFrame(), ModalityType.APPLICATION_MODAL);
 						resultFrame.setTitle("Result of testrun # " + testRunNumber + " on " + DateFormat.getDateTimeInstance().format(new Date()));
 						resultFrame.getContentPane().setLayout(new BorderLayout());
-							
+
 						resultFrame.add(new WritableTransactionsPanel(bankAccount), BorderLayout.CENTER);
 						JButton closeButton = new JButton("Close");
 						closeButton.addActionListener(new ActionListener() {
@@ -615,7 +616,7 @@ public class ScriptEditorPanel extends JPanel {
 							}
 						});
 						resultFrame.add(closeButton, BorderLayout.SOUTH);
-						
+
 						resultFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 						resultFrame.pack();
 						resultFrame.setVisible(true);
@@ -628,16 +629,16 @@ public class ScriptEditorPanel extends JPanel {
 								+ "[" + e1.getClass().getName() + "]: " + e1.getMessage(),
 								JOptionPane.ERROR_MESSAGE);
 					}
-					
+
 				}
-				
+
 			});
 		}
 
-		this.myTestrunButton.setEnabled(getMyInputText() != null
+		myTestrunButton.setEnabled(getMyInputText() != null
 				                    && getMyInputDate() != null
 				                    && getMyInputValue() != null);
-		return this.myTestrunButton;
+		return myTestrunButton;
 	}
 
     //------------------------ support for propertyChangeListeners ------------------
@@ -662,6 +663,7 @@ public class ScriptEditorPanel extends JPanel {
      *
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(
             final PropertyChangeListener listener) {
         if (myPropertyChange == null) {
@@ -678,6 +680,7 @@ public class ScriptEditorPanel extends JPanel {
      * @param propertyName  The name of the property to listen on.
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(final String propertyName,
             final PropertyChangeListener listener) {
         if (myPropertyChange == null) {
@@ -692,6 +695,7 @@ public class ScriptEditorPanel extends JPanel {
      * @param propertyName  The name of the property that was listened on.
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public final void removePropertyChangeListener(final String propertyName,
             final PropertyChangeListener listener) {
         if (myPropertyChange != null) {
@@ -707,6 +711,7 @@ public class ScriptEditorPanel extends JPanel {
      *
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public synchronized void removePropertyChangeListener(
             final PropertyChangeListener listener) {
         if (myPropertyChange != null) {
@@ -721,6 +726,7 @@ public class ScriptEditorPanel extends JPanel {
      * and hashCode.
      * @return className and hashCode
      */
+    @Override
     public String toString() {
         return "DebugLogPanel@" + hashCode();
     }

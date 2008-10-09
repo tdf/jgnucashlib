@@ -1,0 +1,13 @@
+Changes from 2.2.2 RC 1 to 2.2.2
+================================
+
+- keybindings for clipboard operations (ctrl c, ctrl v, ctrl x) and "select-all" (ctrl a) (me)
+- javadoc cleanups for new package structure  (me)
+
+
+Changes from 2.2.1 to 2.2.2 RC 1
+================================
+
+- Fixed: Rudimentary package structure. Packages are org.syntax.jedit and org.syntax.jedit.tokenmarker  (me)
+- Fixed: Cursor (caret) rendering for JDK 1.4  (Anonymous)
+- Added: Oracle PL/SQL highlighting  (me)
