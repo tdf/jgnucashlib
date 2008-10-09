@@ -262,24 +262,24 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                 // look if there is a script matching,
                 int scriptnum = 0;
                 while (getMyProperties().containsKey(
-                        SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum)) {
+                        getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum)) {
 
                     String regexp = getMyProperties().getProperty(
-                            SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum);
+                            getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum);
                     if (text.matches(regexp)) {
                         scriptMatched = true;
 
                         // does a full script exist or only an alternate
                         // accountid?
                         if (getMyProperties().containsKey(
-                                SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum)) {
+                                getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum)) {
                             importViaScript(value, text, myAccountSplit,
                                     scriptnum);
                         } else {
 
                             String alternateAccountID = getMyProperties()
                                     .getProperty(
-                                            SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT
+                                            getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT
                                                     + scriptnum);
                             otherAccount = getMyAccount().getWritableFile()
                                     .getAccountByID(alternateAccountID);
@@ -374,10 +374,10 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                                  final GnucashWritableTransactionSplit myAccountSplit,
                                  final int scriptnum) {
         String language = getMyProperties()
-                .getProperty(SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + scriptnum,
+                .getProperty(getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + scriptnum,
                         "JavaScript");
         String scriptPath = getMyProperties().getProperty(
-                SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum);
+                getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum);
         InputStream is = null;
         try {
             if (new File(scriptPath).exists()) {
@@ -461,7 +461,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
 
         int maxScriptnum = 0;
         while (getMyProperties().containsKey(
-                SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + maxScriptnum)) {
+                getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + maxScriptnum)) {
             maxScriptnum++;
         }
 
@@ -479,7 +479,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         // if the script was saved, return it to be run
         if (!editor.wasCanceled()
                 && getMyProperties().containsKey(
-                        SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + maxScriptnum)) {
+                        getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + maxScriptnum)) {
             return maxScriptnum;
         }
         return null;
