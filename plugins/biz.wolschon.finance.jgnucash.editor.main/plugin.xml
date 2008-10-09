@@ -3,7 +3,7 @@
 <plugin id="biz.wolschon.finance.jgnucash.editor.main" version="2.0.3"
 	class="biz.wolschon.finance.jgnucash.JPFEditorMain">
 	<requires>
-	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main" reverse-lookup="true"/>
 	</requires>
 	<runtime>
 		<library id="core" path="classes/" type="code">

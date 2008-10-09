@@ -28,23 +28,20 @@
  *   the test-case BEFORE writing this class and to run it on every build
  *   as a regression-test.
  */
-package biz.wolschon.finance.jgnucash.HBCIImporter.ScriptEditor;
+package biz.wolschon.finance.jgnucash.AbstractScriptablePlugin.ScriptEditor;
 
 
 //automatically created logger for debug and error -output
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-//automatically created propertyChangeListener-Support
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
-import biz.wolschon.fileformats.gnucash.GnucashWritableCustomer;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileWritingImpl;
 
@@ -66,9 +63,9 @@ public class DummyGnucashFile extends GnucashFileWritingImpl implements GnucashW
 	private static final Logger LOG = Logger.getLogger(DummyGnucashFile.class
 			.getName());
 
-	/** 
+	/**
 	 * ${@inheritDoc}.
-	 * @throws JAXBException 
+	 * @throws JAXBException
 	 */
 	@Override
 	public GnucashWritableAccount getAccountByName(final String aName) {
@@ -87,9 +84,9 @@ public class DummyGnucashFile extends GnucashFileWritingImpl implements GnucashW
 	}
 
 
-	/** 
+	/**
 	 * ${@inheritDoc}.
-	 * @throws JAXBException 
+	 * @throws JAXBException
 	 */
 	@Override
 	public GnucashWritableAccount getAccountByID(final String aID) {
@@ -107,9 +104,9 @@ public class DummyGnucashFile extends GnucashFileWritingImpl implements GnucashW
 		return account;
 	}
 
-	/** 
+	/**
 	 * ${@inheritDoc}.
-	 * @throws JAXBException 
+	 * @throws JAXBException
 	 */
 	@Override
 	public GnucashWritableAccount getAccountByIDorName(final String aID, final String aName) {
@@ -126,7 +123,7 @@ public class DummyGnucashFile extends GnucashFileWritingImpl implements GnucashW
 		}
 		return account;
 	}
-	
+
 
 
 	/**
@@ -140,14 +137,14 @@ public class DummyGnucashFile extends GnucashFileWritingImpl implements GnucashW
 
 	/**
 	 * Create an empty gnucash-file as a temp-file
-	 * that will be deleted at JVM-exit. 
+	 * that will be deleted at JVM-exit.
 	 * @return
 	 * @throws IOException on problems
 	 */
 	private static File createDummyFile(final ClassLoader classLoader) throws IOException {
 		File file = File.createTempFile("dummyGnucashFile", ".xml");
 		file.deleteOnExit();
-		InputStream in = classLoader.getResourceAsStream("biz/wolschon/finance/jgnucash/HBCIImporter/ScriptEditor/dummy.xml");
+		InputStream in = classLoader.getResourceAsStream("biz/wolschon/finance/jgnucash/AbstractScriptablePlugin/ScriptEditor/dummy.xml");
 		FileOutputStream out = new FileOutputStream(file);
 		byte[] buffer = new byte[255];
 		int length = -1;
@@ -163,7 +160,8 @@ public class DummyGnucashFile extends GnucashFileWritingImpl implements GnucashW
 	 * and hashCode.
 	 * @return className and hashCode
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "DummyGnucashFile@" + hashCode();
 	}
 }

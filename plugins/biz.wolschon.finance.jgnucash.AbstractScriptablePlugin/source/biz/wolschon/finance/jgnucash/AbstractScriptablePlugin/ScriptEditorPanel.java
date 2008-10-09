@@ -28,7 +28,7 @@
  *   the test-case BEFORE writing this class and to run it on every build
  *   as a regression-test.
  */
-package biz.wolschon.finance.jgnucash.HBCIImporter;
+package biz.wolschon.finance.jgnucash.AbstractScriptablePlugin;
 
 //other imports
 
@@ -49,7 +49,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -71,9 +70,7 @@ import org.syntax.jedit.tokenmarker.JavaScriptTokenMarker;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
-import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
-import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
-import biz.wolschon.finance.jgnucash.HBCIImporter.ScriptEditor.DummyGnucashFile;
+import biz.wolschon.finance.jgnucash.AbstractScriptablePlugin.ScriptEditor.DummyGnucashFile;
 import biz.wolschon.finance.jgnucash.panels.WritableTransactionsPanel;
 import biz.wolschon.numbers.FixedPointNumber;
 
@@ -82,12 +79,12 @@ import biz.wolschon.numbers.FixedPointNumber;
  * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
  * Project: jGnucashLib<br/>
  * ScriptEditorPanel.java<br/>
- * created: 28.09.2008 15:03:18 <br/>
+ * created: 09.10.2008 06:03:18 <br/>
  *<br/><br/>
- * This panel acts as an editor for scripts to the HBCIImporter..
+ * This panel acts as an editor for scripts .
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
-public class ScriptEditorPanel extends JPanel {
+public abstract class ScriptEditorPanel extends JPanel {
 
 
     /**
@@ -170,20 +167,32 @@ public class ScriptEditorPanel extends JPanel {
      * can be written to ~/.jgnucash/.hbci.properties .
      */
     private Properties mySettings;
+    protected Properties getSettings() {
+       return mySettings;
+    }
+
+    public abstract File getScriptFileName();
+    public abstract File getConfigFile();
+    /**
+     *  @return the account with the created transactions
+     *  @param dummyFile the gnucash-file to use.
+     */
+    public abstract GnucashWritableAccount doTestRun(final GnucashWritableFile dummyFile) throws javax.xml.bind.JAXBException;
+    public abstract void addScriptToSettings(int aScriptNumber, String aRelativeFileName);
 
     /**
-	 * @param myScriptNumber the number of the new script to edit
-	 * @param myInputText The description of the transaction. (May be null)
-	 * @param myInputDate The date of the transaction. (May be null)
-	 * @param myInputValue The value of the transaction. (May be null)
+     * @param myScriptNumber the number of the new script to edit
+     * @param myInputText The description of the transaction. (May be null)
+     * @param myInputDate The date of the transaction. (May be null)
+     * @param myInputValue The value of the transaction. (May be null)
      * @param properties The complete and current settings of the HBCIImporter.
-	 */
-	public ScriptEditorPanel(final int myScriptNumber,
+     */
+    public ScriptEditorPanel(final int myScriptNumber,
 			                 final String myInputText,
 			                 final Date myInputDate,
 			                 final FixedPointNumber myInputValue,
 			                 final Properties properties) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("biz/wolschon/finance/jgnucash/HBCIImporter/defaultscript.js")));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("biz/wolschon/finance/jgnucash/AbstractScriptablePlugin/defaultscript.js")));
 		String line = null;
 		StringBuilder defaultScript = new StringBuilder();
 		try {
@@ -273,13 +282,25 @@ public class ScriptEditorPanel extends JPanel {
 		return myEditorArea;
 	}
 	/**
+     * The area with the script-text.
+     * @param aScriptSourcecode
+     * @return Returns the editorArea.
+     * @see #myEditorArea
+     */
+    protected JEditTextArea getEditorArea() {
+        if (myEditorArea == null) {
+            return getEditorArea("");
+        }
+        return myEditorArea;
+    }
+	/**
 	 * The area with the regexp-text.<br/>
      * (The regular expression that a transaction's description
      * must match for the script to be invoked at all.)
 	 * @return Returns the myRegExpArea.
 	 * @see #myRegExpArea
 	 */
-	private JTextField getRegExpArea() {
+	protected JTextField getRegExpArea() {
 		if (myRegExpArea == null) {
 			myRegExpArea = new JTextField();
 			myRegExpArea.setText("(?s).*" + myInputText + ".*");
@@ -512,16 +533,13 @@ public class ScriptEditorPanel extends JPanel {
 					wasCanceled = false;
 
 					try {
-						File dir = new File(Main.getConfigFileDirectory(), "import_scripts");
-						File filename = new File(dir, getMyScriptNumber() + ".js");
-						dir.mkdirs();
+						File filename = getScriptFileName();
 						FileWriter fw = new FileWriter(filename);
 						fw.write(myEditorArea.getText());
 						fw.close();
-						mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT + getMyScriptNumber(), "import_scripts" + File.separator + getMyScriptNumber() + ".js");
-						mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + getMyScriptNumber(), myRegExpArea.getText());
-						mySettings.setProperty(HBCIImporter.SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + getMyScriptNumber(), "javascript");
-						mySettings.store(new FileWriter(Main.getConfigFile()), "saved by ScriptEditprPanel");
+						addScriptToSettings(getMyScriptNumber(),
+						                    "import_scripts" + File.separator + getMyScriptNumber() + ".js");
+						mySettings.store(new FileWriter(getConfigFile()), "saved by ScriptEditprPanel");
 					} catch (IOException e1) {
 						wasCanceled = true;
 						LOG.log(Level.SEVERE,"[IOException] Problem in "
@@ -572,34 +590,9 @@ public class ScriptEditorPanel extends JPanel {
 
 					try {
 						GnucashWritableFile dummyFile = new DummyGnucashFile(this.getClass().getClassLoader());
-
-						GnucashWritableAccount bankAccount = dummyFile.createWritableAccount();
-						bankAccount.setName("Dummy Bank-Account");
-						bankAccount.setCurrencyNameSpace("ISO4217");
-						bankAccount.setCurrencyID("EUR");
-
-						// prepare dummy-transaction
-						GnucashWritableTransaction transaction = dummyFile.createWritableTransaction();
-						transaction.setDescription(getMyInputText().replace('\n', ' '));
-						transaction.setDatePosted(getMyInputDate());
-						transaction.setCurrencyNameSpace(bankAccount.getCurrencyNameSpace());
-						transaction.setCurrencyID(bankAccount.getCurrencyID());
-
-						// we always need the split on out account's side
-						GnucashWritableTransactionSplit myAccountSplit = transaction.createWritingSplit(bankAccount);
-						myAccountSplit.setValue(getMyInputValue());
-						myAccountSplit.setQuantity(getMyInputValue());
-						myAccountSplit.setUserDefinedAttribute("HBCI.orig_description", getMyInputText());
-						myAccountSplit.setDescription(getMyInputText().replace('\n', ' '));
-
 						testRunNumber++;
-						HBCIImporter.runImportScript(getMyInputValue(),
-								                     getMyInputText(),
-								                     myAccountSplit,
-								                     getMyScriptNumber(),
-								                     "JavaScript",
-								                     "(editor)",
-								                     new StringReader(myEditorArea.getText()));
+
+						GnucashWritableAccount bankAccount = doTestRun(dummyFile);
 						// show the result in a new window
 
 						final JDialog resultFrame = new JDialog(getFrame(), ModalityType.APPLICATION_MODAL);

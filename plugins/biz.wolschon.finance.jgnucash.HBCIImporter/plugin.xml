@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
-<plugin id="biz.wolschon.finance.jgnucash.HBCIImporter" version="2.0.3"
-	class="biz.wolschon.finance.jgnucash.HBCIImporter.Main">
+<plugin id="biz.wolschon.finance.jgnucash.HBCIImporter" version="2.0.6"
+	class="biz.wolschon.finance.jgnucash.HBCIImporter.PluginMain">
 	<requires>
-	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main" reverse-lookup="true"/>
-	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main" reverse-lookup="true"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.AbstractScriptableImporter"/>
 	</requires>
 	<runtime>
 		<library id="core" path="classes/" type="code">
@@ -23,6 +24,6 @@
 	   <parameter id="hasFixedAccount"
 	           value="false"/>
 	   <parameter id="class"
-		       value="biz.wolschon.finance.jgnucash.HBCIImporter.Main"/>
+		       value="biz.wolschon.finance.jgnucash.HBCIImporter.HBCIImporter"/>
      </extension>
 </plugin>

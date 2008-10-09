@@ -23,12 +23,19 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
      * @see {@link BigDecimal}
      */
     // private static final BigDecimal MINUSZERO = new BigDecimal("-0.0");
-
     /**
      * @see java.lang.Object#clone()
      */
     @Override
     public Object clone() {
+        FixedPointNumber fp2 = new FixedPointNumber(getBigDecimal());
+        return fp2;
+    }
+
+    /**
+     * @see java.lang.Object#clone()
+     */
+    public FixedPointNumber copy() {
         FixedPointNumber fp2 = new FixedPointNumber(getBigDecimal());
         return fp2;
     }
@@ -71,9 +78,9 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
                 this.value = MINUSZERO;
 
             */BigDecimal otherBigDecimal = (BigDecimal) o;/*
-                     if (otherBigDecimal.abs().compareTo(MINUSZERO) == 0)
-                         otherBigDecimal = MINUSZERO;
-                    //^^^^^^^^*/
+                                                         if (otherBigDecimal.abs().compareTo(MINUSZERO) == 0)
+                                                             otherBigDecimal = MINUSZERO;
+                                                        //^^^^^^^^*/
             return (otherBigDecimal).compareTo(value) == 0;
         }
 
@@ -249,9 +256,9 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
         BigDecimal n2 = n;
 
         value = value.setScale(value.scale() + n.precision()); // make sure we
-                                                               // have enough
-                                                               // digits after
-                                                               // the comma
+        // have enough
+        // digits after
+        // the comma
 
         // workaround for a bug in BigDecimal
         if (n.scale() < value.scale()) {
@@ -300,8 +307,8 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
 
     /**
      * internally converts the double to a String.
-     * @deprecated Try not to use floating-point numbers. This class is for EXACT
-     *             computation!
+     * @deprecated Try not to use floating-point numbers. This class is for
+     *             EXACT computation!
      * @param gnucashString
      * @throws NumberFormatException
      */

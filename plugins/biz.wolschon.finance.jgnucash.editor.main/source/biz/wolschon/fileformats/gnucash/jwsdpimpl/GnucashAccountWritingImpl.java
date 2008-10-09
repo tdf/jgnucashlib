@@ -23,7 +23,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,7 +34,6 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType;
@@ -64,7 +62,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
 	/**
      * Our helper to implement the GnucashWritableObject-interface.
      */
-    private GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(super.helper);
+    private final GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(super.helper);
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#setUserDefinedAttribute(java.lang.String, java.lang.String)
@@ -88,7 +86,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
     public GnucashAccountWritingImpl(final GnucashFileWritingImpl file) throws JAXBException {
         super(createAccount(file, file.createGUID()), file);
     }
-    
+
     /**
      * @see biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashAccountImpl#GnucashAccountImpl(GncAccountType, GnucashFileImpl)
      */
@@ -168,10 +166,12 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * Throws IllegalStateException if this account has splits or childres.
      */
     public void remove() {
-     if (getTransactionSplits().size() > 0)
+     if (getTransactionSplits().size() > 0) {
         throw new IllegalStateException("cannot remove account while it contains transaction-splits!");
-     if (this.getChildren().size() > 0)
-         throw new IllegalStateException("cannot remove account while it contains child-accounts!");
+    }
+     if (this.getChildren().size() > 0) {
+        throw new IllegalStateException("cannot remove account while it contains child-accounts!");
+    }
 
      getWritableFile().getRootElement().getGncBook().getGncAccount().remove(getJwsdpPeer());
      getWritableFile().removeAccount(this);
@@ -190,6 +190,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashAccount#addTransactionSplit(biz.wolschon.fileformats.gnucash.GnucashTransactionSplit)
      */
+    @Override
     public void addTransactionSplit(final GnucashTransactionSplit split) {
         super.addTransactionSplit(split);
 
@@ -223,8 +224,9 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setName(java.lang.String)
      */
     public void setName(final String name) {
-        if (name == null || name.trim().length() == 0)
+        if (name == null || name.trim().length() == 0) {
             throw new IllegalArgumentException("null or empty name given!");
+        }
 
 
         Object old = getJwsdpPeer().getActName();
@@ -246,8 +248,9 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * @see ${@link GnucashAccount#getCurrencyID()}
      */
     public void setCurrencyID(final String currencyID) {
-        if (currencyID == null)
+        if (currencyID == null) {
             throw new IllegalArgumentException("null or empty currencyID given!");
+        }
 
 
         Object old = getJwsdpPeer().getActCommodity().getCmdtyId();
@@ -267,8 +270,9 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * @see ${@link GnucashAccount#getCurrencyNameSpace()}
      */
     public void setCurrencyNameSpace(final String currencyNameSpace) {
-        if (currencyNameSpace == null)
+        if (currencyNameSpace == null) {
             throw new IllegalArgumentException("null or empty currencyNameSpace given!");
+        }
 
 
         Object old = getJwsdpPeer().getActCommodity().getCmdtySpace();
@@ -309,10 +313,12 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * We assume that time does never move backwards
      * @see #getBalance(Date)
      */
+    @Override
     public FixedPointNumber getBalance() {
 
-        if (myBalanceCached != null)
+        if (myBalanceCached != null) {
             return myBalanceCached;
+        }
 
         Collection<GnucashTransactionSplit> after = new LinkedList<GnucashTransactionSplit>();
         FixedPointNumber balance = getBalance(new Date(), after);
@@ -323,7 +329,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
             // add a listener to keep the cache up to date
             if (myBalanceCachedInvalidtor != null) {
                 myBalanceCachedInvalidtor = new PropertyChangeListener() {
-                    private Collection<GnucashTransactionSplit> splitsWeAreAddedTo = new HashSet<GnucashTransactionSplit>();
+                    private final Collection<GnucashTransactionSplit> splitsWeAreAddedTo = new HashSet<GnucashTransactionSplit>();
                     public void propertyChange(final PropertyChangeEvent evt) {
                         myBalanceCached = null;
 
@@ -349,8 +355,9 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
                                 if (!(split instanceof GnucashWritableTransactionSplit)
                                         ||
                                         splitsWeAreAddedTo.contains(split)
-                                    )
+                                    ) {
                                     continue;
+                                }
                                 GnucashWritableTransactionSplit splitw = (GnucashWritableTransactionSplit) split;
                                 splitw.addPropertyChangeListener("account", this);
                                 splitw.addPropertyChangeListener("quantity", this);
@@ -374,8 +381,9 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setDescription(java.lang.String)
      */
     public void setDescription(final String description) {
-        if (description == null)
+        if (description == null) {
             throw new IllegalArgumentException("null or empty description given!");
+        }
 
 
         Object old = getJwsdpPeer().getActDescription();
@@ -397,8 +405,9 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setType(java.lang.String)
      */
     public void setType(final String type) {
-        if (type == null)
+        if (type == null) {
             throw new IllegalArgumentException("null type given!");
+        }
 
 
         Object old = getJwsdpPeer().getActDescription();
@@ -420,8 +429,9 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
     public void setParentAccountId(final String newParent) throws JAXBException {
         if (newParent == null || newParent.trim().length() == 0) {
             setParentAccount(null);
-        } else
+        } else {
             setParentAccount(getFile().getAccountByID(newParent));
+        }
     }
 
     /**
@@ -434,12 +444,14 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
             return;
         }
 
-        if (parentAccount == this)
+        if (parentAccount == this) {
             throw new IllegalArgumentException("I cannot be my own parent!");
+        }
 
         // check if newparent is a child-account recusively
-        if (isChildAccountRecursive(parentAccount))
+        if (isChildAccountRecursive(parentAccount)) {
             throw new IllegalArgumentException("I cannot be my own (grand-)parent!");
+        }
 
 
         Object old = null;
@@ -476,13 +488,15 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
     public FixedPointNumber getBalanceChange(final Date from, final Date to) {
         FixedPointNumber retval = new FixedPointNumber();
 
-        for (Iterator iter = getTransactionSplits().iterator(); iter.hasNext();) {
-            GnucashTransactionSplit split = (GnucashTransactionSplit) iter.next();
+        for (Object element : getTransactionSplits()) {
+            GnucashTransactionSplit split = (GnucashTransactionSplit) element;
             Date whenHappened = split.getTransaction().getDatePosted();
-            if (!whenHappened.before(to))
+            if (!whenHappened.before(to)) {
                 continue;
-            if (whenHappened.before(from))
+            }
+            if (whenHappened.before(from)) {
                 continue;
+            }
             retval = retval.add(split.getQuantity());
         }
         return retval;
