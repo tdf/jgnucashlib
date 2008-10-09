@@ -1,16 +1,16 @@
 /**
- * HBCIImporter.java Created on 26.07.2008 (c) 2005 by
- * "Wolschon Softwaredesign und Beratung".
- * 
- * Permission is granted to use, modify, publish and sub-license this code as
- * specified in the contract. If nothing else is specified these rights are
- * given non-exclusively with no restrictions solely to the contractor(s). If no
- * specified otherwise I reserve the right to use, modify, publish and
- * sub-license this code to other parties myself.
- * 
- * ----------------------------------------------------------- major Changes:
+ * HBCIImporter.java
+ * Created on 26.07.2008
+ * (c) 2005 by "Wolschon Softwaredesign und Beratung".
+ *
+ * Permission is granted to use, modify,
+ * publish and sub-license this code as specified in the contract. If nothing
+ * else is specified these rights are given non-exclusively with no restrictions
+ * solely to the contractor(s). If no specified otherwise I reserve the right to
+ * use, modify, publish and sub-license this code to other parties myself.
+ * -----------------------------------------------------------
+ * major Changes:
  * 26.07.2008 - initial version ...
- * 
  */
 package biz.wolschon.finance.jgnucash.HBCIImporter;
 
@@ -28,6 +28,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.swing.JDialog;
@@ -50,9 +51,7 @@ import biz.wolschon.numbers.FixedPointNumber;
 /**
  * Use HBCI4Java to import transactions via HBCI from a bank into a given
  * account.
- * 
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
- * 
  */
 public class HBCIImporter {
 
@@ -86,7 +85,6 @@ public class HBCIImporter {
 
     /**
      * The settings like account-number, pin-code, bank.url, ....
-     * 
      * @see #SETTINGS_ACCOUNT
      * @see #SETTINGS_BANKCODE
      * @see #SETTINGS_COUNTRY
@@ -97,39 +95,36 @@ public class HBCIImporter {
 
     /**
      * The key for the setting of the pin-code.
-     * 
      * @see #myProperties
      */
     public static final String SETTINGS_PIN = "hbci.pin";
 
     /**
      * The key for the setting of the bank-number (German: BLZ) .
-     * 
      * @see #myProperties
      */
     public static final String SETTINGS_BANKCODE = "hbci.bankcode";
 
     /**
      * The key for the setting of the country (defaults to "DE") .
-     * 
      * @see #myProperties
      */
     public static final String SETTINGS_COUNTRY = "hbci.country";
+
     /**
      * The key for the setting of the account-number .
      * @see #myProperties
      */
     public static final String SETTINGS_GNUCASHACCOUNT = "hbci.gnucashaccountid";
+
     /**
      * The key for the setting of the account-number .
-     * 
      * @see #myProperties
      */
     public static final String SETTINGS_ACCOUNT = "hbci.account";
 
     /**
      * The key for the setting of the hbci-url (without leading "https://") .
-     * 
      * @see #myProperties
      */
     public static final String SETTINGS_SERVER = "hbci.server";
@@ -137,7 +132,6 @@ public class HBCIImporter {
     /**
      * The key for the setting of the id of the account that imported
      * transactions will be booked to/from by default. .
-     * 
      * @see #myProperties
      */
     public static final String SETTINGS_DEFAULTTARGETACCOUNT = "hbci.import.defaultTargetAccountID";
@@ -150,7 +144,6 @@ public class HBCIImporter {
      * SETTINGS_PREFIX_IMPORTSCRIPT + "2",<br/>
      * . The value of this property is either the file-name or a name to be
      * loaded via {@link ClassLoader#getResourceAsStream(String)}.
-     * 
      * @see #myProperties
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT
@@ -162,7 +155,6 @@ public class HBCIImporter {
      * The key-prefix for the setting of a regexp.<br/>
      * Each added script must have a regexp. If the text of the transaction
      * matches the regexp this and no other script will be executed.
-     * 
      * @see #myProperties
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT
@@ -171,7 +163,6 @@ public class HBCIImporter {
 
     /**
      * The JSR223 language-name of the script. (defaults to "Javascript".
-     * 
      * @see #myProperties
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT
@@ -181,7 +172,6 @@ public class HBCIImporter {
     /**
      * Instead of a full script, you can overside the accountid of
      * {@link #SETTINGS_DEFAULTTARGETACCOUNT}.
-     * 
      * @see #myProperties
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP
      * @see #SETTINGS_PREFIX_IMPORTSCRIPT
@@ -236,7 +226,6 @@ public class HBCIImporter {
 
     /**
      * Import all transactions that are not yet in the account.
-     * 
      * @see #myAccount
      */
     public void synchronizeAllTransactions() {
@@ -389,7 +378,6 @@ public class HBCIImporter {
     /**
      * Create a transaction that simply acts as a comment and shows the current
      * Saldo. This helps in finding missing or doubled transactions manually.
-     * 
      * @param aValuta
      *            the date
      * @param aSaldo
@@ -439,7 +427,6 @@ public class HBCIImporter {
      * Mark all transactions of the given date that are not matched by an
      * HBCI-transaction and have a split-value != 0, so they can be quickly
      * identified by the user.
-     * 
      * @param date
      */
     private void markNonExistingTransactions(final Date date) {
@@ -484,7 +471,6 @@ public class HBCIImporter {
 
     /**
      * Import the given transaction into the account.
-     * 
      * @param text
      *            the description-text ("usage"-field on a paper-form) of the
      *            transaction.
@@ -627,7 +613,6 @@ public class HBCIImporter {
      * Ask the user to create one.<br/>
      * If no, return null. If yes create the script and, add it to the config
      * and save the config.
-     * 
      * @param text
      *            the description-text ("usage"-field on a paper-form) of the
      *            transaction.
@@ -691,8 +676,7 @@ public class HBCIImporter {
      * @param scriptnum
      *            the number of the script to run
      */
-    private void importViaScript(
-                                 final FixedPointNumber value,
+    private void importViaScript(final FixedPointNumber value,
                                  final String text,
                                  final GnucashWritableTransactionSplit myAccountSplit,
                                  final int scriptnum) {
@@ -755,8 +739,7 @@ public class HBCIImporter {
      * @param reader
      *            where to get the source-code of the script to run from
      */
-    protected static void runImportScript(
-                                          final FixedPointNumber value,
+    protected static void runImportScript(final FixedPointNumber value,
                                           final String text,
                                           final GnucashWritableTransactionSplit myAccountSplit,
                                           final int scriptnum,
@@ -764,7 +747,11 @@ public class HBCIImporter {
                                           final String scriptPath,
                                           final Reader reader) {
         ScriptEngineManager mgr = new ScriptEngineManager();
+
         ScriptEngine jsEngine = mgr.getEngineByName(language);
+        // work around the PluginClassLoader at leas for Javascript
+        classloaderWorkaround(jsEngine, myAccountSplit.getClass()
+                .getClassLoader());
 
         jsEngine.put("text", text);
         jsEngine.put("value", value);
@@ -774,11 +761,14 @@ public class HBCIImporter {
         FixedPointNumber ustValue = ((FixedPointNumber) value.clone())
                 .divideBy(new FixedPointNumber("-1,19")).multiply(
                         new FixedPointNumber("0,19")); // TODO: get tax-% from
-                                                       // tax-config
+        // tax-config
         FixedPointNumber nettoValue = ((FixedPointNumber) value.clone())
                 .negate().subtract(ustValue);
         jsEngine.put("USt", ustValue);
         jsEngine.put("Netto", nettoValue);
+        jsEngine.put("Helper", new ScriptHelper());
+        jsEngine.getContext().setAttribute(ScriptEngine.FILENAME, scriptPath,
+                ScriptContext.GLOBAL_SCOPE);
 
         try {
             LOGGER.info("importing transaction using script: " + scriptPath);
@@ -795,9 +785,36 @@ public class HBCIImporter {
     }
 
     /**
+     * work around the PluginClassLoader at leas for Javascript.
+     * @param aJsEngine
+     * @param aClassLoader
+     *            the classloader to be used by the scripting-engine.
+     */
+    private static void classloaderWorkaround(final ScriptEngine aJsEngine,
+                                              final ClassLoader aClassLoader) {
+        //
+        // ScriptContext context = aJsEngine.getContext();
+        //
+        // try {
+        // Class<? extends ScriptContext> contextClass = context.getClass();
+        // Method method = contextClass.getMethod("setApplicationClassLoader",
+        // new Class[] { ClassLoader.class });
+        // if (method != null) {
+        // method.invoke(context, new Object[] { aClassLoader });
+        // }
+        // } catch (Exception e) {
+        // // e.printStackTrace();
+        // LOGGER.debug(
+        // "[SecurityException] Problem in HBCIImporter:classloaderWorkaround() "
+        // + "context is a [" + context.getClass().getName()
+        // + "]", e);
+        // }
+
+    }
+
+    /**
      * Get the default-account (something like "expenses-other").<br/>
      * If it does not exist, create one.
-     * 
      * @return the default-accout
      * @throws JAXBException
      *             if account-creation fails-
@@ -822,7 +839,6 @@ public class HBCIImporter {
     /**
      * Determine if a transaction of this value has been made on or around the
      * given date. (Not very precise.)
-     * 
      * @param date
      *            effective date of the transaction
      * @param value
