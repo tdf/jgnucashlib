@@ -26,16 +26,6 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-//import java.security.SecureRandom;
-//import java.security.Security;
-//import java.security.cert.CertificateException;
-//import java.security.cert.X509Certificate;
-//
-//import javax.net.ssl.HostnameVerifier;
-//import javax.net.ssl.HttpsURLConnection;
-//import javax.net.ssl.SSLContext;
-//import javax.net.ssl.TrustManager;
-//import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,63 +39,69 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 
-public class HttpFetcher {
+public final class HttpFetcher {
 
-	/**
-	 * Automatically created logger for debug and error-output.
-	 */
-	private static final Log LOGGER = LogFactory.getLog(HttpFetcher.class);
+    /**
+     * Automatically created logger for debug and error-output.
+     */
+    private static final Log LOGGER = LogFactory.getLog(HttpFetcher.class);
 
+    /**
+     * Utility-class with no instances.
+     */
+    private HttpFetcher() {
 
-	/**
-	 * Fetch the given URL with http-basic-auth.
-	 * @param url the URL
-	 * @param username username
-	 * @param password password
-	 * @return the page-content or null
-	 */
-	public static String fetchURL (final URL url, final String username, final String password) {
-		StringWriter sw = new StringWriter();
+    }
 
-		try {
-			PrintWriter  pw = new PrintWriter(sw);
-			InputStream content = fetchURLStream(url, username, password);
-			BufferedReader in   = 
-				new BufferedReader (new InputStreamReader (content));
-			String line;
-			while ((line = in.readLine()) != null) {
-				pw.println (line);
-			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			LOGGER.error("cannot fetch malformed URL " + url, e);
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			LOGGER.error("cannot fetch URL " + url, e);
-			return null;
-		}
-		return sw.toString();
-	}
-	
-	   /**
+    /**
      * Fetch the given URL with http-basic-auth.
      * @param url the URL
      * @param username username
      * @param password password
      * @return the page-content or null
      */
-    public static InputStream fetchURLStream (final URL url, final String username, final String password) {
+    public static String fetchURL(final URL url, final String username, final String password) {
+        StringWriter sw = new StringWriter();
+
+        try {
+            PrintWriter  pw = new PrintWriter(sw);
+            InputStream content = fetchURLStream(url, username, password);
+            BufferedReader in   =
+                new BufferedReader(new InputStreamReader(content));
+            String line;
+            while ((line = in.readLine()) != null) {
+                pw.println(line);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            LOGGER.error("cannot fetch malformed URL " + url, e);
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.error("cannot fetch URL " + url, e);
+            return null;
+        }
+        return sw.toString();
+    }
+
+    /**
+     * Fetch the given URL with http-basic-auth.
+     * @param url the URL
+     * @param username username
+     * @param password password
+     * @return the page-content or null
+     */
+    public static InputStream fetchURLStream(final URL url, final String username, final String password) {
 
         try {
             String userPassword = username + ":" + password;
 
             // Encode String
-            String encoding = new sun.misc.BASE64Encoder().encode (userPassword.getBytes());
+            String encoding = new sun.misc.BASE64Encoder().encode(userPassword.getBytes());
 
             URLConnection uc = url.openConnection();
-            uc.setRequestProperty  ("Authorization", "Basic " + encoding);
-            return (InputStream)uc.getInputStream();
+            uc.setRequestProperty("Authorization", "Basic " + encoding);
+            return uc.getInputStream();
         } catch (MalformedURLException e) {
             e.printStackTrace();
             LOGGER.error("cannot fetch malformed URL " + url, e);
