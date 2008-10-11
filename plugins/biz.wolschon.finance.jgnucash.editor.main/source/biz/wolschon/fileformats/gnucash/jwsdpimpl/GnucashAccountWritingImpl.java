@@ -48,6 +48,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  * Supported properties for the propertyChangeListeners:
  * <ul>
  *  <li>name</li>
+ *  <li>code</li>
  *  <li>currencyID</li>
  *  <li>currencyNameSpace</li>
  *  <li>description</li>
@@ -59,7 +60,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  */
 public class GnucashAccountWritingImpl extends GnucashAccountImpl implements GnucashWritableAccount {
 
-	/**
+    /**
      * Our helper to implement the GnucashWritableObject-interface.
      */
     private final GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(super.helper);
@@ -241,7 +242,29 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
             propertyChangeFirer.firePropertyChange("name", old, name);
         }
     }
+    /**
+    *
+    *
+    * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setAccountCode(java.lang.String)
+    */
+   public void setAccountCode(final String code) {
+       if (code == null || code.trim().length() == 0) {
+           throw new IllegalArgumentException("null or empty code given!");
+       }
 
+
+       Object old = getJwsdpPeer().getActCode();
+       if (old == code) {
+           return; // nothing has changed
+       }
+       this.getJwsdpPeer().setActCode(code);
+       setIsModified();
+       // <<insert code to react further to this change here
+       PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
+       if (propertyChangeFirer != null) {
+           propertyChangeFirer.firePropertyChange("code", old, code);
+       }
+   }
     /**
      * @param currencyID the new currency
      * @see #setCurrencyNameSpace(String)

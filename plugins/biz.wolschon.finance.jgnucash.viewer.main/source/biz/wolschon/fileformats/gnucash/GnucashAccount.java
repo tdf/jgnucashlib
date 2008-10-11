@@ -43,7 +43,11 @@ public interface GnucashAccount extends Comparable {
      * @return a user-defined description to acompany the name of the account. Can encompass many lines.
      */
      String getDescription();
-
+     /**
+     *
+     * @return the account-number
+     */
+    String getAccountCode();
     /**
      *
      * @return user-readable name of this account. Does not contain the name of parent-accounts
@@ -115,22 +119,22 @@ public interface GnucashAccount extends Comparable {
        * e.g. "Visa"
        */
       String ACCOUNTTYPE_CREDIT = "CREDIT";
-      
+
       /**
        * e.g. "Anfangsbestand"
        */
       String ACCOUNTTYPE_EQUITY = "EQUITY";
-      
+
       /**
        * e.g. "stock"
        */
       String ACCOUNTTYPE_CASH = "CASH";
-      
+
       /**
        * e.g. "Cash in Wallet"
        */
       String ACCOUNTTYPE_STOCK = "STOCK";
-      
+
       /**
        * e.g. "Lesezeichen"
        */
@@ -343,19 +347,19 @@ public interface GnucashAccount extends Comparable {
      * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive(Date, Currency)
      */
     FixedPointNumber getBalanceRecursive(Date date, String currencyNameSpace, String currencyName);
-    
+
     /**
      * Examples:
      * The user-defined-attribute "hidden"="true"/"false"
      * was introduced in gnucash2.0 to hide accounts.
-     * 
+     *
      * @param name the name of the user-defined attribute
      * @return the value or null if not set
      */
     String getUserDefinedAttribute(final String name);
-    
+
     /**
-     * 
+     *
      * @return all keys that can be used with ${@link #getUserDefinedAttribute(String)}}.
      */
     Collection<String> getUserDefinedAttributeKeys();

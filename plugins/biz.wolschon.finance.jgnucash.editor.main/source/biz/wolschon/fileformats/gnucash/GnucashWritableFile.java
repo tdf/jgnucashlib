@@ -18,15 +18,13 @@
 package biz.wolschon.fileformats.gnucash;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 
-import biz.wolschon.numbers.FixedPointNumber;
 import javax.xml.bind.JAXBException;
 
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashAccountWritingImpl;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2;
+import biz.wolschon.numbers.FixedPointNumber;
 
 /**
  * created: 16.05.2005 <br/>
@@ -172,7 +170,7 @@ public interface GnucashWritableFile extends GnucashFile {
      * @throws JAXBException if we have problems with the xml-backend
      */
     GnucashWritableTransaction createWritableTransaction() throws JAXBException;
-    
+
     /**
      * @return a new transaction with no splits that is already added to this file
      * @throws JAXBException if we have problems with the xml-backend
@@ -181,7 +179,7 @@ public interface GnucashWritableFile extends GnucashFile {
 
 
     /**
-     * 
+     *
      * @param impl the transaction to remove.
      * @throws JAXBException if we have issues with the XML-backend
      */
@@ -199,7 +197,7 @@ public interface GnucashWritableFile extends GnucashFile {
      * @throws JAXBException if we have problems with the xml-backend
      */
     GnucashWritableJob createWritableJob(final GnucashCustomer customer) throws JAXBException;
-    
+
     /**
      * @return a new job with no values that is already added to this file
      * @throws JAXBException if we have problems with the xml-backend
@@ -212,7 +210,7 @@ public interface GnucashWritableFile extends GnucashFile {
      * @throws JAXBException if we have problems with the xml-backend
      */
     GnucashWritableAccount createWritableAccount() throws JAXBException;
-    
+
     /**
      * @return a new account that is already added to this file as a top-level account
      * @throws JAXBException if we have problems with the xml-backend

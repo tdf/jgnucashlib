@@ -22,7 +22,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
@@ -46,8 +45,6 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
 
 
     protected GnucashObjectImpl helper;
-    
-    
 
 
     /**
@@ -58,8 +55,8 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
      */
     public GnucashAccountImpl(final GncAccountType peer,
                               final GnucashFile gncfile) throws JAXBException {
-    	super(gncfile);
-        this.jwsdpPeer = peer;
+        super(gncfile);
+        jwsdpPeer = peer;
         helper = new GnucashObjectImpl((peer.getActSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getActSlots(), gncfile);
     }
 
@@ -68,16 +65,16 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
      * Examples:
      * The user-defined-attribute "hidden"="true"/"false"
      * was introduced in gnucash2.0 to hide accounts.
-     * 
+     *
      * @param name the name of the user-defined attribute
      * @return the value or null if not set
      */
     public String getUserDefinedAttribute(final String name) {
-    	return helper.getUserDefinedAttribute(name);
+        return helper.getUserDefinedAttribute(name);
     }
-    
+
     /**
-     * 
+     *
      * @return all keys that can be used with ${@link #getUserDefinedAttribute(String)}}.
      */
     public Collection<String> getUserDefinedAttributeKeys() {
@@ -145,8 +142,8 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
      */
     public String getCurrencyID() {
         if (jwsdpPeer.getActCommodity() == null) {
-	    return "EUR"; // default-currency because gnucash 2.2 has no currency on the root-account
-	}
+        return "EUR"; // default-currency because gnucash 2.2 has no currency on the root-account
+    }
         return jwsdpPeer.getActCommodity().getCmdtyId();
     }
 
@@ -158,6 +155,14 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
     public String getDescription() {
         return jwsdpPeer.getActDescription();
     }
+
+   /**
+    *
+    * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getAccountCode()
+    */
+   public String getAccountCode() {
+       return jwsdpPeer.getActCode();
+   }
 
 
     /**
@@ -174,7 +179,7 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
      * loading of the gnucash-file.
      * @see #mySplitsNeedSorting
      */
-    private List<GnucashTransactionSplit> mySplits = new LinkedList<GnucashTransactionSplit>();
+    private final List<GnucashTransactionSplit> mySplits = new LinkedList<GnucashTransactionSplit>();
 
     /**
      * If {@link #mySplits} needs to be sorted
@@ -251,7 +256,7 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
             "null not allowed for field this.jwsdpPeer");
         }
 
-        this.jwsdpPeer = newPeer;
+        jwsdpPeer = newPeer;
     }
 
 

@@ -57,6 +57,14 @@ public interface GnucashWritableAccount extends GnucashAccount, GnucashObject, G
     void setName(String name);
 
     /**
+     * Change the user-definable account-number.
+     * It should contain no newlines but may contain non-ascii
+     * and non-western characters.
+     * @param code the new code (not null)
+     */
+    void setAccountCode(String code);
+
+    /**
      *
      * @param desc the user-defined description (may contain multiple lines and non-ascii-characters)
      */
