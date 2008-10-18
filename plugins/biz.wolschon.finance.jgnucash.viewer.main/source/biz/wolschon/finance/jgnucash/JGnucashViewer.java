@@ -20,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -29,34 +28,32 @@ import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.xml.bind.JAXBException;
-
-import biz.wolschon.fileformats.gnucash.GnucashAccount;
-import biz.wolschon.fileformats.gnucash.GnucashFile;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl;
-import biz.wolschon.finance.jgnucash.panels.TaxReportPanel;
-import biz.wolschon.finance.jgnucash.panels.TransactionsPanel;
-import biz.wolschon.finance.jgnucash.swingModels.GnucashAccountsTreeModel;
-
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import javax.swing.JOptionPane;
-import javax.swing.JSeparator;
-import javax.swing.JTabbedPane;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.java.plugin.boot.Application;
 
+import biz.wolschon.fileformats.gnucash.GnucashAccount;
+import biz.wolschon.fileformats.gnucash.GnucashFile;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl;
 import biz.wolschon.finance.jgnucash.panels.DebugLogPanel;
+import biz.wolschon.finance.jgnucash.panels.TaxReportPanel;
+import biz.wolschon.finance.jgnucash.panels.TransactionsPanel;
+import biz.wolschon.finance.jgnucash.swingModels.GnucashAccountsTreeModel;
 
 /**
 *
@@ -158,7 +155,7 @@ public class JGnucashViewer extends JFrame implements Application {
             @Override
             public void publish(final LogRecord aRecord) {
 
-            
+
             	String message = aRecord.getLevel() + " "
                        + "in " + aRecord.getSourceClassName() + ":" + aRecord.getSourceMethodName() + "(...) "
                        + aRecord.getMessage();
@@ -277,7 +274,7 @@ public class JGnucashViewer extends JFrame implements Application {
 	 * @param selectedAccount the selectedAccount to set (may be null)
 	 */
 	public void setSelectedAccount(final GnucashAccount aSelectedAccount) {
-		this.selectedAccount = aSelectedAccount;
+		selectedAccount = aSelectedAccount;
 
     	getTransactionsPanel().setAccount(selectedAccount);
         if (selectedAccount != null) {
@@ -292,6 +289,7 @@ public class JGnucashViewer extends JFrame implements Application {
      *
      * @return javax.swing.JMenuBar
      */
+    @Override
     public JMenuBar getJMenuBar() {
         if (jJMenuBar == null) {
             jJMenuBar = new JMenuBar();
@@ -332,7 +330,7 @@ public class JGnucashViewer extends JFrame implements Application {
         }
         return myHelpMenu;
     }
- 
+
     /**
      * This method initializes FileLoadMenuItem.
      *
@@ -436,6 +434,7 @@ public class JGnucashViewer extends JFrame implements Application {
                 javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
             public void windowClosing(final java.awt.event.WindowEvent e) {
                 doExit();
             }
@@ -473,10 +472,12 @@ public class JGnucashViewer extends JFrame implements Application {
         }
         jFileChooser.setMultiSelectionEnabled(false);
         jFileChooser.setFileFilter(new FileFilter() {
+            @Override
             public boolean accept(final File f) {
                 return true; // accept all files
             }
 
+            @Override
             public String getDescription() {
                 return "gnucash files";
             }
@@ -504,6 +505,13 @@ public class JGnucashViewer extends JFrame implements Application {
         int state = getJFileChooser().showOpenDialog(this);
         if (state == JFileChooser.APPROVE_OPTION) {
             File f = getJFileChooser().getSelectedFile();
+            if (f == null) {
+                return false;
+            }
+            if (!f.exists()) {
+                JOptionPane.showMessageDialog(JGnucashViewer.this, "File does not exist", "missing file", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
             return loadFile(f);
         }
         return false;
@@ -516,7 +524,7 @@ public class JGnucashViewer extends JFrame implements Application {
     public boolean loadFile(final File f) {
         try {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            
+
             setModel(createModelFromFile(f));
             getAccountsTree().setModel(
                     new GnucashAccountsTreeModel(getModel()));
@@ -543,10 +551,11 @@ public class JGnucashViewer extends JFrame implements Application {
         return myModel;
     }
     public void setModel(final GnucashFile model) {
-        if (model == null)
+        if (model == null) {
             throw new IllegalArgumentException(
                     "null not allowed for field this.model");
-        this.myModel = model;
+        }
+        myModel = model;
     }
 
 	@Override
