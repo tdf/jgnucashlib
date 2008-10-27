@@ -447,6 +447,7 @@
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
+                    <xs:element name="invoice_notes" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="invoice_billing_id" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="invoice_active" type="xs:int"/>
                     <xs:element name="invoice_posttxn" minOccurs="0" maxOccurs="1" >
@@ -535,6 +536,7 @@
                       </xs:complexType>
                     </xs:element>
                     <xs:element name="entry_i-price" type="xs:string" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="entry_i-discount" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="entry_invoice">
                       <xs:complexType>
                         <xs:simpleContent>
