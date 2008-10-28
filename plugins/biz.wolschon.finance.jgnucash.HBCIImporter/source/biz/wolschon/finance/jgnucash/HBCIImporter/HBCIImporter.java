@@ -121,6 +121,18 @@ public class HBCIImporter extends AbstractScriptableImporter {
      */
     public void synchronizeAllTransactions() {
 
+
+        File pintanfile;
+        try {
+            pintanfile = File.createTempFile("pintan", "hbci");
+            pintanfile.deleteOnExit();
+            pintanfile.delete(); // the file MUST not exist
+        } catch (IOException e1) {
+            LOG.log(Level.SEVERE, "[IOException] Problem in "
+                       + getClass().getName(),
+                         e1);
+            pintanfile = new File("/tmp/pintan." + Math.random());
+        }
         try {
             HBCICallback callback = new PropertiesHBCICallback(this
                     .getMyProperties());
@@ -129,19 +141,16 @@ public class HBCIImporter extends AbstractScriptableImporter {
 
             org.kapott.hbci.manager.HBCIUtils.setParam("log.loglevel.default",
                     "" + org.kapott.hbci.manager.HBCIUtils.LOG_WARN);
-            final String cpd = "client.passport.default";
-            org.kapott.hbci.manager.HBCIUtils.setParam(cpd, "PinTan");
+
+            org.kapott.hbci.manager.HBCIUtils.setParam("client.passport.default", "PinTan");
+
             org.kapott.hbci.manager.HBCIUtils.setParam(
-                    "client.passport.PinTan.filename", "/tmp/pintanfile");
-            // org.kapott.hbci.manager.HBCIUtils.setParam("client.passport.PinTan.certfile","/tmp/pintancert");
+                    "client.passport.PinTan.filename", pintanfile.getAbsolutePath());
             org.kapott.hbci.manager.HBCIUtils.setParam(
                     "client.passport.PinTan.init", "1");
 
             org.kapott.hbci.passport.HBCIPassport passport = org.kapott.hbci.passport.AbstractHBCIPassport
                     .getInstance();
-            LOG.fine("host=" + passport.getHost());
-            passport.setHost("hbci.comdirect.de/pintan/HbciPinTanHttpGate");
-            LOG.fine("host=" + passport.getHost());
 
             String pversion = passport.getHBCIVersion();
             if (pversion == null || pversion.length() < 1) {
@@ -258,14 +267,16 @@ public class HBCIImporter extends AbstractScriptableImporter {
 
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error synchronizing transactions from HBCI.", e);
+        } finally {
+            pintanfile.delete();
         }
     }
 
 
 
     @Override
-    public String runImport(GnucashWritableFile aWritableModel,
-                            GnucashWritableAccount aCurrentAccount)
+    public String runImport(final GnucashWritableFile aWritableModel,
+                            final GnucashWritableAccount aCurrentAccount)
                                                                    throws Exception {
 
         // load the properties
