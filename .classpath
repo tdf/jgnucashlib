@@ -40,6 +40,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/jpf.jar"/>
 	<classpathentry kind="lib" path="lib/jxp.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j.jar"/>
-	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.HBCIImporter/lib/hbci4java.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.HBCIImporter/lib/hbci4java.jar" sourcepath="plugins/biz.wolschon.finance.jgnucash.HBCIImporter/lib/hbci4java-2.5.9-src/src"/>
 	<classpathentry kind="output" path="classes.eclipse"/>
 </classpath>
