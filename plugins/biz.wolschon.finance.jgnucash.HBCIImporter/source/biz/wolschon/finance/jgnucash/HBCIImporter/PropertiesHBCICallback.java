@@ -181,14 +181,14 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
 
         switch (reason) {
 
-        case 7:
+        case NEED_COUNTRY:
             //if (msg.equals("Länderkennzeichen (DE für Deutschland)")) {
                 String country = getProperties().getProperty(HBCIImporter.SETTINGS_COUNTRY, "DE");
                 retData.setLength(0); // empty the buffer first
                 retData.append(country);
                 return;
             //}
-        case 16:
+        case NEED_PT_PIN:
             //if (msg.equals("Bitte geben Sie die PIN fÃ¼r das PIN/TAN-Verfahren ein")
             //      || msg.equals("Bitte geben Sie die PIN für das PIN/TAN-Verfahren ein")) {
                 String pin = getProperties().getProperty(HBCIImporter.SETTINGS_PIN);
@@ -199,7 +199,7 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
                 retData.append(pin);
                 return;
             //}
-        case 21:
+        case NEED_PASSPHRASE_LOAD:
             //  Bitte geben Sie das neue Passwort für die Sicherung der Passport-Datei ein
             //if (msg.equals("Bitte geben Sie das Passwort fÃ¼r den Zugriff auf die Passport-Datei ein")
             //      || msg.equals("Bitte geben Sie das Passwort für den Zugriff auf die Passport-Datei ein")) {
@@ -207,59 +207,63 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
                 retData.append("0000");
                 return;
             //}
-        case 22:
+        case NEED_PASSPHRASE_SAVE:
             //if (msg.equals("Bitte geben Sie das neue Passwort fÃ¼r die Sicherung der Passport-Datei ein")
             //      || msg.equals("Bitte geben Sie das neue Passwort für die Sicherung der Passport-Datei ein")) {
                 retData.setLength(0); // empty the buffer first
                 retData.append("0000");
                 return;
             //}
-        case 8:
+        case NEED_BLZ:
             //if (msg.equals("Bankleitzahl")) {
                 retData.setLength(0); // empty the buffer first
                 retData.append(getProperties().getProperty(HBCIImporter.SETTINGS_BANKCODE));
                 return;
             //}
-        case 9:
+        case NEED_HOST:
             //if (msg.equals("Hostname/IP-Adresse")) {
                 retData.setLength(0); // empty the buffer first
                 retData.append(getProperties().getProperty(HBCIImporter.SETTINGS_SERVER));
                 return;
             //}
-        case 11:
+        case NEED_USERID:
             if (msg.equals("Nutzerkennung")) {
                 retData.setLength(0); // empty the buffer first
                 retData.append(getProperties().getProperty(HBCIImporter.SETTINGS_ACCOUNT));
                 return;
             }
-        case 18:
+        case NEED_CUSTOMERID:
             if (msg.equals("Kunden-ID")) {
                 //retData.setLength(0); // empty the buffer first
                 //Feld soll freigelassen werden retData.replace(0, retData.length(), "90246243");
                 return;
             }
-        case 24: // Bitte stellen Sie jetzt die Verbindung zum Internet her
+        case NEED_CONNECTION: // Bitte stellen Sie jetzt die Verbindung zum Internet her
             return;
-        case 25: // Sie können die Internetverbindung jetzt beenden
+        case CLOSE_CONNECTION: // Sie können die Internetverbindung jetzt beenden
             return;
-        case 27: {
-            if (retData.toString().contains("900:iTAN-Verfahren")) {
+        case NEED_PT_SECMECH:
+            // we don't really care about this but prefer iTan and Einschritt if possible
+            // the fallback-case is enough to handle everything anyway.
+            if (retData.toString().contains("900:iTAN")) {
                 retData.setLength(0); // empty the buffer first
                 retData.append("900");
                 return;
             }
-            if (retData.toString().contains("999:Einschritt-Verfahren")) {
+            if (retData.toString().contains("999:Einschritt")) {
                 retData.setLength(0); // empty the buffer first
                 retData.append("999");
                 return;
             }
+            retData.setLength(3); // select whatever method comes first
 
-           }
-        }
+        default:
+            LOGGER.warn("callback: (unhandled) reason=" + reason + " msg=" + msg);
+
+       }
 
 
 
-        LOGGER.warn("callback: (unhandled) reason=" + reason + " msg=" + msg);
     }
 
 
