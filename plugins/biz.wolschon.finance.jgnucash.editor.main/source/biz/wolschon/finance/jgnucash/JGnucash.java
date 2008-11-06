@@ -328,7 +328,7 @@ public class JGnucash extends JGnucashViewer {
                                     newMenuItem.setIcon(new ImageIcon(iconUrl));
                                 }
                             } catch (Exception e) {
-                                LOGGER.error("cannot load icon for Importer-Plugin '" + pluginName + "'", e);
+                                LOGGER.error("cannot load icon for Loader-Plugin '" + pluginName + "'", e);
                             }
                         }
                         newMenuItem.setText(pluginName);
@@ -338,9 +338,9 @@ public class JGnucash extends JGnucashViewer {
                         newMenuItem.addActionListener(new OpenFilePluginMenuAction(this, ext, pluginName));
                         fileMenu.add(newMenuItem);
                     } catch (Exception e) {
-                        LOGGER.error("cannot load Importer-Plugin '" + pluginName + "'", e);
+                        LOGGER.error("cannot load Loader-Plugin '" + pluginName + "'", e);
                         JOptionPane.showMessageDialog(this, "Error",
-                                "Cannot load Importer-Plugin '" + pluginName + "'",
+                                "Cannot load Loader-Plugin '" + pluginName + "'",
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }
