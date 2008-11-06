@@ -49,12 +49,12 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
     /**
      * the JWSDP-object we are facading.
      */
-    private GncTransactionType jwsdpPeer;
+    private final GncTransactionType jwsdpPeer;
 
     /**
      * The file we belong to.
      */
-    private GnucashFile file;
+    private final GnucashFile file;
 
     /**
      * Create a new Transaction, facading a JWSDP-transaction.
@@ -75,8 +75,8 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
         }
 
 
-        this.jwsdpPeer = peer;
-        this.file = gncFile;
+        jwsdpPeer = peer;
+        file = gncFile;
 
         for (GnucashInvoice invoice : getInvoices()) {
             invoice.addTransaction(this);
@@ -171,7 +171,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      *
      * The result is in the currency of the transaction.
      * @throws JAXBException if we have issues with the XML-backend
-     * @throws NumberFormatException 
+     * @throws NumberFormatException
      * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getNegatedBalanceFormatet()
      */
     public String getNegatedBalanceFormatet() throws NumberFormatException, JAXBException {
@@ -181,7 +181,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
     /**
      * The result is in the currency of the transaction.
      * @throws JAXBException if we have issues with the XML-backend
-     * @throws NumberFormatException 
+     * @throws NumberFormatException
      * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getNegatedBalanceFormatet(java.util.Locale)
      */
     public String getNegatedBalanceFormatet(final Locale loc) throws NumberFormatException, JAXBException {
@@ -288,6 +288,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      *
      * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getFile()
      */
+    @Override
     public GnucashFile getFile() {
         return file;
     }
@@ -347,7 +348,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getFirstSplit()
      */
     public GnucashTransactionSplit getFirstSplit() throws JAXBException {
-        return (GnucashTransactionSplit) getSplits().iterator().next();
+        return getSplits().iterator().next();
     }
 
     /**
@@ -359,7 +360,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
     public GnucashTransactionSplit getSecondSplit() throws JAXBException {
         Iterator<GnucashTransactionSplit> iter = getSplits().iterator();
         iter.next();
-        return (GnucashTransactionSplit) iter.next();
+        return iter.next();
     }
 
 
@@ -386,7 +387,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      * Create a new split for a split found in the jaxb-data.
      * @param element the jaxb-data
      * @return the new split-instance
-     * @throws JAXBException 
+     * @throws JAXBException
      */
     protected GnucashTransactionSplitImpl createSplit(final GncTransactionType.TrnSplitsType.TrnSplitType element) throws JAXBException {
         return new GnucashTransactionSplitImpl(element, this);
@@ -476,7 +477,6 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
             String s = jwsdpPeer.getTrnDatePosted().getTsDate();
             try {
                 //"2001-09-18 00:00:00 +0200"
-                // TODO: it thinks "2005-02-16 00:00:00 +0100" is unparsable
                 datePosted = DATEPOSTEDFORMAT.parse(s);
             } catch (Exception e) {
                 IllegalStateException ex =
@@ -498,6 +498,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      *
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("[GnucashTransactionImpl:");
@@ -528,7 +529,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
     public int compareTo(final GnucashTransaction o) {
 
 
-        GnucashTransaction other = (GnucashTransaction) o;
+        GnucashTransaction other = o;
 
         try {
             int compare = other.getDatePosted().compareTo(getDatePosted());
