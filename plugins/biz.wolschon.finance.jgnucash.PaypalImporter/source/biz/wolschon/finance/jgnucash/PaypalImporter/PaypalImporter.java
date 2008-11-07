@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Calendar;
+import java.util.Date;
+import java.math.BigDecimal;
+import biz.wolschon.numbers.FixedPointNumber;
 
 import javax.swing.JOptionPane;
 
@@ -54,7 +58,8 @@ public class PaypalImporter extends AbstractScriptableImporter {
      * then in the default-properties.
      */
     private static final String[] REQUIREDSETTINGS = new String[] {
-            PaypalImporter.SETTINGS_ACCOUNT,
+            PaypalImporter.SETTINGS_APIUSER,
+            PaypalImporter.SETTINGS_APIPASSWD,
             PaypalImporter.SETTINGS_GNUCASHACCOUNT,
             PaypalImporter.SETTINGS_CERTFILE,
             PaypalImporter.SETTINGS_CERTPASSWD
@@ -65,16 +70,22 @@ public class PaypalImporter extends AbstractScriptableImporter {
      * then in the default-properties.
      */
     private static final String[] REQUIREDSETTINGNAMES = new String[] {
-            "Your paypal account-name..",
+            "Your paypal api-user.",
+            "Your paypal api-password.",
             "Your paypal-account name in Gnucash.",
             "Your API-certificate-file",
             "Your password for the API-certificate-file"
     };
     /**
-     * The key for the setting of the account-name of the paypal-account. .
+     * The key for the setting of the paypal api-user.
      * @see #myProperties
      */
-    public static final String SETTINGS_ACCOUNT = "paypal.paypalaccountname";
+    public static final String SETTINGS_APIUSER = "paypal.apiuser";
+    /**
+     * The key for the setting of the paypal api-password.
+     * @see #myProperties
+     */
+    public static final String SETTINGS_APIPASSWD = "paypal.apipasswd";
     /**
      * The key for the setting of the account-number .
      * @see #myProperties
@@ -93,7 +104,9 @@ public class PaypalImporter extends AbstractScriptableImporter {
 
 
 
-
+ public static void main(String[] args) {
+   (new PaypalImporter()).synchronizeAllTransactions();
+}
     /**
      * Import all transactions that are not yet in the account.
      * @see #myAccount
@@ -111,15 +124,19 @@ public class PaypalImporter extends AbstractScriptableImporter {
              that only authorized individuals may view or modify them.
              */
             APIProfile profile = ProfileFactory.createSSLAPIProfile();
-            profile.setAPIUsername("sdk-seller_api1.sdk.com");
-            profile.setAPIPassword("12345678");
-            profile.setCertificateFile("../Cert/sdk-seller.p12");
-            profile.setPrivateKeyPassword("password");
-            profile.setEnvironment("beta-sandbox");
+            profile.setAPIUsername(getMyProperties().getProperty(PaypalImporter.SETTINGS_APIUSER));
+            profile.setAPIPassword(getMyProperties().getProperty(PaypalImporter.SETTINGS_APIPASSWD));
+            profile.setCertificateFile(getMyProperties().getProperty(PaypalImporter.SETTINGS_CERTFILE));
+            profile.setPrivateKeyPassword(getMyProperties().getProperty(PaypalImporter.SETTINGS_CERTPASSWD));
+//            profile.setEnvironment("beta-sandbox");
+            profile.setEnvironment("live");
             caller.setAPIProfile(profile);
 
 
             TransactionSearchRequestType request = new TransactionSearchRequestType();
+            Calendar calendar = Calendar.getInstance();                                                                                                     
+            calendar.set(2008 ,10 - 1, 20);
+            request.setStartDate(calendar);
             TransactionSearchResponseType response =
                 (TransactionSearchResponseType) caller.call("TransactionSearch", request);
             if (response.getAck().getValue() != AckCodeType._Success) {
@@ -130,92 +147,71 @@ public class PaypalImporter extends AbstractScriptableImporter {
             }
 
             PaymentTransactionSearchResultType[] ts = response.getPaymentTransactions();
-            if (ts != null) {
-                    System.out.println("Found " + ts.length + " records");
+            if (ts == null) {
+                LOG.log(Level.SEVERE, "Paypal-search had no result");
+                return;
+            }
+            System.out.println("Found " + ts.length + " records");
 
-                    // Display the results of the first transaction returned
-                    for (PaymentTransactionSearchResultType element : ts) {
+            Date lastImportedDate = null;
+            StringBuilder finalMessage = new StringBuilder();
+            for (PaymentTransactionSearchResultType element : ts) {
                             System.out.println("\nTransaction ID: " + element.getTransactionID());
                             System.out.println("Payer Name: " + element.getPayerDisplayName());
                             System.out.println("Gross Amount: " + element.getGrossAmount().getCurrencyID() + " " + element.getGrossAmount().get_value());
                             System.out.println("Fee Amount: " + element.getFeeAmount().getCurrencyID() + " " + element.getFeeAmount().get_value());
                             System.out.println("Net Amount: " + element.getNetAmount().getCurrencyID() + " " + element.getNetAmount().get_value());
-                    }
-            } else {
-                    System.out.println("Found 0 transaction");
-            }
+              //element.getNetAmount().getCurrencyID() usually =="EUR"
 
-////TODO
-//                if (result instanceof ...) {
-//                    //TODO
-//                    Date lastImportedDate = null;
-//                    StringBuilder finalMessage = new StringBuilder();
-//                    for (int i = 0; i < flatData.length; i++) {
-//
-//                        StringBuilder message = new StringBuilder();
-//                        for (String element : flatData[i].usage) {
-//                            message.append('\n').append(element);
-//                        }
-//                        message.replace(0, 1, "");
-//
-//                        Date valutaDate = flatData[i].valuta;
-//                        FixedPointNumber value = new FixedPointNumber(flatData[i].value
-//                                .getLongValue())
-//                                .divideBy(new BigDecimal(100));
-//                        if (!isTransactionPresent(valutaDate,value, message.toString())) {
-//
-//                            LOG.finer("--------------importing------------------------------");
-//                            LOG.finer("value=" + value);
-//                            LOG.finer("date=" + flatData[i].valuta);
-//                            LOG.finer("UmsLine[" + i + "] Message="
-//                                    + message.toString());
-//                            // import this transaction
-//                            importTransaction(flatData[i].valuta,
-//                                    (new FixedPointNumber(flatData[i].value
-//                                            .getLongValue()))
-//                                            .divideBy(new BigDecimal(100)),
-//                                    message.toString());
-//
-//                            finalMessage.append(flatData[i].valuta).append(" ")
-//                                    .append(value.toString()).append("\n");
-//
-//                            // create a saldo-transaction for the last imported
-//                            // transaction of each day
-//                            if (lastImportedDate != null
-//                                    && !lastImportedDate
-//                                            .equals(flatData[i].valuta)) {
-//                                Saldo saldo = flatData[i - 1].saldo;
-//                                createSaldoEntry((new FixedPointNumber(saldo.value
-//                                                      .getLongValue())).divideBy(new BigDecimal(100)),
-//                                                      saldo.timestamp);
-//                                markNonExistingTransactions(lastImportedDate);
-//                            }
-//                            lastImportedDate = flatData[i].valuta;
-//                        }
-//                    }
-//
-//                    // create a saldo-transaction after the last imported
-//                    // transaction
-//                    if (lastImportedDate != null) {
-//                        Saldo saldo = flatData[flatData.length - 1].saldo;
-//                        createSaldoEntry((new FixedPointNumber(saldo.value
-//                                              .getLongValue())).divideBy(new BigDecimal(100)),
-//                                              saldo.timestamp);
-//                        markNonExistingTransactions(lastImportedDate);
-//                    }
-//                    if (finalMessage.length() > 0) {
-//                        JOptionPane.showMessageDialog(null,
-//                                "Imorted Transactions:\n"
-//                                        + finalMessage.toString());
-//                    }
-//                } else {
-//                    LOG.warning("result is no on org.kapott.hbci.GV_Result.GVRKUms but a  ["
-//                                    + result.getClass().getName()
-//                                    + "] = "
-//                                    + result);
-//                }
-//            } // accs != null
-//
+              java.util.Calendar timestamp = element.getTimestamp();
+              Date valutaDate = timestamp.getTime();
+              StringBuilder message = new StringBuilder();
+              message.append(element.getPayerDisplayName());
+              FixedPointNumber value = new FixedPointNumber(element.getNetAmount().get_value());
+
+            if (!isTransactionPresent(valutaDate,value, message.toString())) {
+
+                LOG.finer("--------------importing------------------------------");
+                LOG.finer("value=" + value);
+                LOG.finer("date=" + valutaDate);
+                LOG.finer("Message="
+                                    + message.toString());
+                // import this transaction
+                importTransaction(valutaDate,
+                                    value,
+                                    message.toString());
+
+                finalMessage.append(valutaDate).append(" ")
+                                 .append(value.toString()).append("\n");
+
+                            // create a saldo-transaction for the last imported
+                            // transaction of each day
+                if (lastImportedDate != null && !lastImportedDate
+                                            .equals(valutaDate)) {
+//TODO                    Saldo saldo = flatData[i - 1].saldo;
+//TODO                    createSaldoEntry((new FixedPointNumber(saldo.value
+//TODO//TODO//TODO//TODO//TODO//TODO//TODO                                                   .getLongValue())).divideBy(new BigDecimal(100)),
+//TODO                                                   saldo.timestamp);
+                     markNonExistingTransactions(lastImportedDate);
+                 }
+                 lastImportedDate = valutaDate;
+
+                  // create a saldo-transaction after the last imported
+                  // transaction
+                  if (lastImportedDate != null) {
+//TODO                        Saldo saldo = flatData[flatData.length - 1].saldo;
+//TODO                        createSaldoEntry((new FixedPointNumber(saldo.value
+//TODO                                              .getLongValue())).divideBy(new BigDecimal(100)),
+//TODO                                              saldo.timestamp);
+                        markNonExistingTransactions(lastImportedDate);
+                  }
+                  if (finalMessage.length() > 0) {
+                        JOptionPane.showMessageDialog(null,
+                                "Imorted Transactions:\n"
+                                        + finalMessage.toString());
+                  }
+               }
+            }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error synchronizing transactions from Paypal.", e);
         } finally {
