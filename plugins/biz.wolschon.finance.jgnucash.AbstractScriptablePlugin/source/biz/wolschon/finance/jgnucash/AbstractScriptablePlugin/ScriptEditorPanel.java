@@ -384,196 +384,199 @@ public abstract class ScriptEditorPanel extends JPanel {
 		}
 	}
 
-	/**
-	 * @return Returns the myInputText.
-	 * @see #myInputText
-	 */
-	public String getMyInputText() {
-		return myInputText;
-	}
+    /**
+     * @return Returns the myInputText.
+     * @see #myInputText
+     */
+    public String getMyInputText() {
+        return myInputText;
+    }
 
-	/**
-	 * @param myInputText The myInputText to set.
-	 * @see #myInputText
-	 */
-	public void setMyInputText(final String myInputText) {
-		if (myInputText == null) {
-			throw new IllegalArgumentException("null 'myInputText' given!");
-		}
+    /**
+     * @param newInputText The inputText to set.
+     * @see #myInputText
+     */
+    public void setMyInputText(final String newInputText) {
+        if (newInputText == null) {
+            throw new IllegalArgumentException("null 'newInputText' given!");
+        }
 
-		Object old = this.myInputText;
-		if (old == myInputText) {
-			return; // nothing has changed
-		}
-		this.myInputText = myInputText;
-		// <<insert code to react further to this change here
-		 getTestrunButton(); // undate the enabled-state of the button
+        Object old = myInputText;
+        if (old == newInputText) {
+            return; // nothing has changed
+        }
+        myInputText = newInputText;
+        // <<insert code to react further to this change here
+         getTestrunButton(); // undate the enabled-state of the button
 
-		PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
-		if (propertyChangeFirer != null) {
-			propertyChangeFirer.firePropertyChange("myInputText", old, myInputText);
-		}
-	}
+        PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
+        if (propertyChangeFirer != null) {
+            propertyChangeFirer.firePropertyChange("myInputText", old, newInputText);
+        }
+    }
 
-	/**
-	 * @return Returns the myInputDate.
-	 * @see #myInputDate
-	 */
-	public Date getMyInputDate() {
-		return myInputDate;
-	}
+    /**
+     * @return Returns the myInputDate.
+     * @see #myInputDate
+     */
+    public Date getMyInputDate() {
+        return myInputDate;
+    }
 
-	/**
-	 * @param myInputDate The myInputDate to set.
-	 * @see #myInputDate
-	 */
-	public void setMyInputDate(final Date myInputDate) {
-		if (myInputDate == null) {
-			throw new IllegalArgumentException("null 'myInputDate' given!");
-		}
+    /**
+     * @param newInputDate The inputDate to set.
+     * @see #myInputDate
+     */
+    public void setMyInputDate(final Date newInputDate) {
+        if (newInputDate == null) {
+            throw new IllegalArgumentException("null 'myInputDate' given!");
+        }
 
-		Object old = this.myInputDate;
-		if (old == myInputDate) {
-			return; // nothing has changed
-		}
-		this.myInputDate = myInputDate;
-		// <<insert code to react further to this change here
-		 getTestrunButton(); // undate the enabled-state of the button
+        Object old = myInputDate;
+        if (old == newInputDate) {
+            return; // nothing has changed
+        }
+        myInputDate = newInputDate;
+        // <<insert code to react further to this change here
+         getTestrunButton(); // undate the enabled-state of the button
 
-		PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
-		if (propertyChangeFirer != null) {
-			propertyChangeFirer.firePropertyChange("myInputDate", old, myInputDate);
-		}
-	}
+        PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
+        if (propertyChangeFirer != null) {
+            propertyChangeFirer.firePropertyChange("myInputDate", old, newInputDate);
+        }
+    }
 
-	/**
-	 * @return Returns the myInputValue.
-	 * @see #myInputValue
-	 */
-	public FixedPointNumber getMyInputValue() {
-		return myInputValue;
-	}
+    /**
+     * @return Returns the myInputValue.
+     * @see #myInputValue
+     */
+    public FixedPointNumber getMyInputValue() {
+        return myInputValue;
+    }
 
-	/**
-	 * @param myInputValue The myInputValue to set.
-	 * @see #myInputValue
-	 */
-	public void setMyInputValue(final FixedPointNumber myInputValue) {
-		if (myInputValue == null) {
-			throw new IllegalArgumentException("null 'myInputValue' given!");
-		}
+    /**
+     * @param myInputValue The myInputValue to set.
+     * @see #myInputValue
+     */
+    public void setMyInputValue(final FixedPointNumber myInputValue) {
+        if (myInputValue == null) {
+            throw new IllegalArgumentException("null 'myInputValue' given!");
+        }
 
-		Object old = this.myInputValue;
-		if (old == myInputValue) {
-			return; // nothing has changed
-		}
-		this.myInputValue = myInputValue;
-		// <<insert code to react further to this change here
-		 getTestrunButton(); // undate the enabled-state of the button
+        Object old = this.myInputValue;
+        if (old == myInputValue) {
+            return; // nothing has changed
+        }
+        this.myInputValue = myInputValue;
+        // <<insert code to react further to this change here
+         getTestrunButton(); // undate the enabled-state of the button
 
-		PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
-		if (propertyChangeFirer != null) {
-			propertyChangeFirer.firePropertyChange("myInputValue", old,
-					myInputValue);
-		}
-	}
+        PropertyChangeSupport propertyChangeFirer = getPropertyChangeSupport();
+        if (propertyChangeFirer != null) {
+            propertyChangeFirer.firePropertyChange("myInputValue", old,
+                    myInputValue);
+        }
+    }
 
 
     /**
-	 * @return Returns the myButtonsPanel.
-	 * @see #myButtonsPanel
-	 */
-	private JPanel getButtonsPanel() {
-		if (myButtonsPanel == null) {
-			myButtonsPanel = new JPanel();
-			myButtonsPanel.setLayout(new GridLayout(1, 3));
-			myButtonsPanel.add(getTestrunButton());
-			myButtonsPanel.add(getCancelButton());
-			myButtonsPanel.add(getSaveButton());
-		}
-		return myButtonsPanel;
-	}
+     * @return Returns the myButtonsPanel.
+     * @see #myButtonsPanel
+     */
+    private JPanel getButtonsPanel() {
+        if (myButtonsPanel == null) {
+            myButtonsPanel = new JPanel();
+            myButtonsPanel.setLayout(new GridLayout(1, 3));
+            myButtonsPanel.add(getTestrunButton());
+            myButtonsPanel.add(getCancelButton());
+            myButtonsPanel.add(getSaveButton());
+        }
+        return myButtonsPanel;
+    }
 
     /**
      * CANCEL-button.
-	 * @return Returns the myCancelButton.
-	 * @see #myCancelButton
-	 */
-	private JButton getCancelButton() {
-		if (myCancelButton == null) {
-			myCancelButton = new JButton("Cancel");
-			myCancelButton.addActionListener(new ActionListener() {
+     * @return Returns the myCancelButton.
+     * @see #myCancelButton
+     */
+    private JButton getCancelButton() {
+        if (myCancelButton == null) {
+            myCancelButton = new JButton("Cancel");
+            myCancelButton.addActionListener(new ActionListener() {
 
-				@Override
-				public void actionPerformed(final ActionEvent e) {
-					wasCanceled = true;
-					getFrame().dispose();
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    wasCanceled = true;
+                    getFrame().dispose();
 
-				}
+                }
 
-			});
-		}
+            });
+        }
 
-		return myCancelButton;
-	}
+        return myCancelButton;
+    }
 
-	/**
-	 * SAVE-button.
-	 * @return Returns the mySaveButton.
-	 * @see #mySaveButton
-	 */
-	private JButton getSaveButton() {
-		if (mySaveButton == null) {
-			mySaveButton = new JButton("Save");
-			mySaveButton.addActionListener(new ActionListener() {
+    /**
+     * SAVE-button.
+     * @return Returns the mySaveButton.
+     * @see #mySaveButton
+     */
+    private JButton getSaveButton() {
+        if (mySaveButton == null) {
+            mySaveButton = new JButton("Save");
+            mySaveButton.addActionListener(new ActionListener() {
 
 
-				@Override
-				public void actionPerformed(final ActionEvent e) {
-					wasCanceled = false;
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    wasCanceled = false;
 
-					try {
-						File filename = getScriptFileName();
-						FileWriter fw = new FileWriter(filename);
-						fw.write(myEditorArea.getText());
-						fw.close();
-						addScriptToSettings(getMyScriptNumber(),
-						                    "import_scripts" + File.separator + getMyScriptNumber() + ".js");
-						mySettings.store(new FileWriter(getConfigFile()), "saved by ScriptEditprPanel");
-					} catch (IOException e1) {
-						wasCanceled = true;
-						LOG.log(Level.SEVERE,"[IOException] Problem in "
-						           + getClass().getName(),
-						             e1);
-						return;
-					}
+                    try {
+                        File filename = getScriptFileName();
+                        FileWriter fw = new FileWriter(filename);
+                        fw.write(myEditorArea.getText());
+                        fw.close();
+                        addScriptToSettings(getMyScriptNumber(),
+                                            getScriptFileName().getPath());
+                        mySettings.store(new FileWriter(getConfigFile()), "saved by ScriptEditprPanel");
+                    } catch (IOException e1) {
+                        wasCanceled = true;
+                        LOG.log(Level.SEVERE,"[IOException] Problem in "
+                                   + getClass().getName(),
+                                     e1);
+                        return;
+                    }
 
-					getFrame().dispose();
-				}
+                    getFrame().dispose();
+                }
 
-			});
-		}
+            });
+        }
 
-		return mySaveButton;
-	}
+        return mySaveButton;
+    }
 
-	private Window getFrame() {
-		Container parent = ScriptEditorPanel.this.getParent();
-		while (parent != null) {
-			if (parent instanceof Window) {
-				return (Window) parent;
-			}
-			parent = parent.getParent();
-		}
-		return null;
-	}
+    /**
+     * @return the frame that contains this panel.
+     */
+    private Window getFrame() {
+        Container parent = ScriptEditorPanel.this.getParent();
+        while (parent != null) {
+            if (parent instanceof Window) {
+                return (Window) parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
 
-	/**
-	 * This number is incremented with every testrun made.
-	 */
-	private int testRunNumber = 0;
+    /**
+     * This number is incremented with every testrun made.
+     */
+    private int testRunNumber = 0;
 
-	/**
+    /**
      * The button to test-run the script on a
      * dummy-database..
 	 * @return Returns the myCancelButton.

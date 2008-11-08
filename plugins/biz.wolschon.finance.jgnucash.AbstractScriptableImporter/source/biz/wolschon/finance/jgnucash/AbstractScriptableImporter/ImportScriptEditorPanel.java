@@ -68,6 +68,11 @@ public class ImportScriptEditorPanel extends ScriptEditorPanel {
      */
     private final AbstractScriptableImporter myImportPlugin;
 
+    /**
+     * The filename of the script.
+     */
+    private final File filename;
+
      /**
      * @return Returns the importPlugin.
      * @see #myImportPlugin
@@ -82,6 +87,7 @@ public class ImportScriptEditorPanel extends ScriptEditorPanel {
       * @param myInputDate The date of the transaction. (May be null)
       * @param myInputValue The value of the transaction. (May be null)
       * @param properties The complete and current settings of the HBCIImporter.
+      * @param anImporter the plugin that makes use of us (no spaces, all lowercase short name).
       */
     public ImportScriptEditorPanel(final int myScriptNumber,
                                          final String myInputText,
@@ -91,6 +97,9 @@ public class ImportScriptEditorPanel extends ScriptEditorPanel {
                                          final AbstractScriptableImporter anImporter) {
        super(myScriptNumber, myInputText, myInputDate, myInputValue, properties);
        myImportPlugin = anImporter;
+       File dir = new File(getConfigFile().getParentFile(), "import_scripts");
+       dir.mkdirs();
+       filename = new File(dir, anImporter.getPluginName() + getMyScriptNumber() + ".js");
     }
 
     /**
@@ -116,9 +125,6 @@ public class ImportScriptEditorPanel extends ScriptEditorPanel {
      */
     @Override
     public File getScriptFileName() {
-        File dir = new File(getConfigFile().getParentFile(), "import_scripts");
-        dir.mkdirs();
-        File filename = new File(dir, getMyScriptNumber() + ".js");
         return filename;
     }
 

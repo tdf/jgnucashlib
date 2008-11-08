@@ -101,11 +101,6 @@ public class PaypalImporter extends AbstractScriptableImporter {
      */
     public static final String SETTINGS_CERTPASSWD = "paypal.cert.password";
 
-
-
- public static void main(String[] args) {
-   (new PaypalImporter()).synchronizeAllTransactions();
-}
     /**
      * Import all transactions that are not yet in the account.
      * @see #myAccount
@@ -161,6 +156,7 @@ public class PaypalImporter extends AbstractScriptableImporter {
                             System.out.println("Fee Amount: " + element.getFeeAmount().getCurrencyID() + " " + element.getFeeAmount().get_value());
                             System.out.println("Net Amount: " + element.getNetAmount().getCurrencyID() + " " + element.getNetAmount().get_value());
               //element.getNetAmount().getCurrencyID() usually =="EUR"
+                            //TODO: we need to support different currencies too
 
               java.util.Calendar timestamp = element.getTimestamp();
               Date valutaDate = timestamp.getTime();
@@ -168,7 +164,7 @@ public class PaypalImporter extends AbstractScriptableImporter {
               message.append(element.getPayerDisplayName());
               FixedPointNumber value = new FixedPointNumber(element.getNetAmount().get_value());
 
-            if (!isTransactionPresent(valutaDate,value, message.toString())) {
+            if (!isTransactionPresent(valutaDate, value, message.toString())) {
 
                 LOG.finer("--------------importing------------------------------");
                 LOG.finer("value=" + value);
@@ -204,18 +200,18 @@ public class PaypalImporter extends AbstractScriptableImporter {
 //TODO                                              saldo.timestamp);
                         markNonExistingTransactions(lastImportedDate);
                   }
-                  if (finalMessage.length() > 0) {
-                        JOptionPane.showMessageDialog(null,
-                                "Imorted Transactions:\n"
-                                        + finalMessage.toString());
-                  }
+
                }
+            }
+            if (finalMessage.length() > 0) {
+                JOptionPane.showMessageDialog(null,
+                        "Imorted Transactions:\n"
+                        + finalMessage.toString());
             }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Error synchronizing transactions from Paypal.", e);
         } finally {
         }
-        JOptionPane.showMessageDialog(null, "not implemented yet.");
     }
 
 
