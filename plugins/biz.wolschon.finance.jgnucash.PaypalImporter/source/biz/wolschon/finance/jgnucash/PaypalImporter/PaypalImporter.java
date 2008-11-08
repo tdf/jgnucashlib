@@ -18,19 +18,18 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Calendar;
-import java.util.Date;
-import java.math.BigDecimal;
-import biz.wolschon.numbers.FixedPointNumber;
 
 import javax.swing.JOptionPane;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.finance.jgnucash.AbstractScriptableImporter.AbstractScriptableImporter;
+import biz.wolschon.numbers.FixedPointNumber;
 
 import com.paypal.sdk.profiles.APIProfile;
 import com.paypal.sdk.profiles.ProfileFactory;
@@ -134,7 +133,7 @@ public class PaypalImporter extends AbstractScriptableImporter {
 
 
             TransactionSearchRequestType request = new TransactionSearchRequestType();
-            Calendar calendar = Calendar.getInstance();                                                                                                     
+            Calendar calendar = Calendar.getInstance();
             calendar.set(2008 ,10 - 1, 20);
             request.setStartDate(calendar);
             TransactionSearchResponseType response =
@@ -233,7 +232,7 @@ public class PaypalImporter extends AbstractScriptableImporter {
                 .load(getClass()
                         .getClassLoader()
                         .getResourceAsStream(
-                                "biz/wolschon/finance/jgnucash/HBCIImporter/default_paypal.properties"));
+                                "biz/wolschon/finance/jgnucash/PaypalImporter/default_paypal.properties"));
 
         File configfile = getConfigFile();
         if (configfile.exists()) {
