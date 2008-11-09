@@ -149,27 +149,74 @@ public class PaypalImporter extends AbstractScriptableImporter {
 
             Date lastImportedDate = null;
             StringBuilder finalMessage = new StringBuilder();
-            for (PaymentTransactionSearchResultType element : ts) {
-                            System.out.println("\nTransaction ID: " + element.getTransactionID());
-                            System.out.println("Payer Name: " + element.getPayerDisplayName());
-                            System.out.println("Gross Amount: " + element.getGrossAmount().getCurrencyID() + " " + element.getGrossAmount().get_value());
-                            System.out.println("Fee Amount: " + element.getFeeAmount().getCurrencyID() + " " + element.getFeeAmount().get_value());
-                            System.out.println("Net Amount: " + element.getNetAmount().getCurrencyID() + " " + element.getNetAmount().get_value());
-              //element.getNetAmount().getCurrencyID() usually =="EUR"
-                            //TODO: we need to support different currencies too
+            for (int currentTransaction = 0; currentTransaction < ts.length; currentTransaction++) {
+                PaymentTransactionSearchResultType element = ts[currentTransaction];
 
-              java.util.Calendar timestamp = element.getTimestamp();
-              Date valutaDate = timestamp.getTime();
-              StringBuilder message = new StringBuilder();
-              message.append(element.getPayerDisplayName());
-              FixedPointNumber value = new FixedPointNumber(element.getNetAmount().get_value());
+                java.util.Calendar timestamp = element.getTimestamp();
+                Date valutaDate = timestamp.getTime();
+                StringBuilder message = new StringBuilder();
+                message.append(element.getPayerDisplayName());
+                FixedPointNumber value = new FixedPointNumber(element.getNetAmount().get_value());
+
+                //////////////////////////////////////////////////////////////////////
+                // we need to support different currencies
+                // this only works for payments made yet but it works
+
+/* Withdrawals in different currencies are split into 3 transactions
+ * by paypal:
+Payer Name: actual customer
+Gross Amount: USD -20.00
+Fee Amount: USD 0.00
+Net Amount: USD -20.00
+----------------
+Transaction ID: AAAAAAAAAAAAAAAAAAAA
+Payer Name: From Euro
+Gross Amount: USD 20.00
+Fee Amount: USD 0.00
+Net Amount: USD 20.00
+-----------------
+Transaction ID: BBBBBBBBBBBBBBBBBBBBB
+Payer Name: To U.S. Dollar
+Gross Amount: EUR -15.80
+Fee Amount: EUR 0.00
+Net Amount: EUR -15.80
+
+since it is usually not needed tu support multiple currencies in AbstractScriptableImporter,
+we don't extend it to support this but combine such 3 transactions here before handing them
+to our base-class for import.
+ * */
+              if (!element.getNetAmount().getCurrencyID().toString().equals(getDefaultAccount().getCurrencyID())) {
+                  String foreignCurrency = element.getNetAmount().getCurrencyID().toString();
+                  String foreignValue = element.getNetAmount().get_value();
+                  String ourCurrency = getDefaultAccount().getCurrencyID();
+                  // (paypal and gnucash use uppercase ISO-names for the currencies)
+                  if (ts.length > currentTransaction + 2
+                         && foreignValue.startsWith("-")
+                         && ts[currentTransaction + 1].getPayerDisplayName().startsWith("From ")
+                         && ts[currentTransaction + 2].getPayerDisplayName().startsWith("To ")
+                         && ts[currentTransaction + 1].getNetAmount().getCurrencyID().toString().equals(foreignCurrency)
+                         && ts[currentTransaction + 2].getNetAmount().getCurrencyID().toString().equals(ourCurrency)
+                         && ts[currentTransaction + 1].getNetAmount().get_value().equals(foreignValue.substring(1))) {
+
+                      LOG.fine("combining a foreign-currency transaction with currency-conversion into a single transaction");
+
+                      value = new FixedPointNumber(ts[currentTransaction + 2].getNetAmount().get_value());
+                      currentTransaction += 2;
+
+                  } else {
+
+                      LOG.warning("we got a foreign-currency transaction that we cannot handle. Handling it as a EUR-transaction. The saldo will be wrong!");
+
+                  }
+              }
+              //////////////////////////////////////////////////////////////////////
 
             if (!isTransactionPresent(valutaDate, value, message.toString())) {
 
                 LOG.finer("--------------importing------------------------------");
-                LOG.finer("value=" + value);
-                LOG.finer("date=" + valutaDate);
-                LOG.finer("Message="
+                LOG.finer("value=" + value + "\n"
+                        + "date=" + valutaDate + "\n"
+                        + "Message="
                                     + message.toString());
                 // import this transaction
                 importTransaction(valutaDate,
