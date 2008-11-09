@@ -42,6 +42,13 @@ import biz.wolschon.numbers.FixedPointNumber;
 public class HBCIImporter extends AbstractScriptableImporter {
 
     /**
+     * Internally HBCI4Java represents monetary values as cent,
+     * so we need to divity by this constant on 100.
+     */
+    private static final BigDecimal CENTPEREURO = new BigDecimal(100);
+
+
+    /**
      * Automatically created logger for debug and error-output.
      */
     private static final Logger LOG = Logger.getLogger(HBCIImporter.class.getName());
@@ -121,7 +128,6 @@ public class HBCIImporter extends AbstractScriptableImporter {
      */
     public void synchronizeAllTransactions() {
 
-
         File pintanfile;
         try {
             pintanfile = File.createTempFile("pintan", "hbci");
@@ -131,8 +137,10 @@ public class HBCIImporter extends AbstractScriptableImporter {
             LOG.log(Level.SEVERE, "[IOException] Problem in "
                        + getClass().getName(),
                          e1);
+            // fall back to a default-filename
             pintanfile = new File("/tmp/pintan." + Math.random());
         }
+
         try {
             HBCICallback callback = new PropertiesHBCICallback(this
                     .getMyProperties());
@@ -210,8 +218,8 @@ public class HBCIImporter extends AbstractScriptableImporter {
                         Date valutaDate = flatData[i].valuta;
                         FixedPointNumber value = new FixedPointNumber(flatData[i].value
                                 .getLongValue())
-                                .divideBy(new BigDecimal(100));
-                        if (!isTransactionPresent(valutaDate,value, message.toString())) {
+                                .divideBy(CENTPEREURO);
+                        if (!isTransactionPresent(valutaDate, value, message.toString())) {
 
                             LOG.finer("--------------importing------------------------------");
                             LOG.finer("value=" + value);
@@ -222,11 +230,13 @@ public class HBCIImporter extends AbstractScriptableImporter {
                             importTransaction(flatData[i].valuta,
                                     (new FixedPointNumber(flatData[i].value
                                             .getLongValue()))
-                                            .divideBy(new BigDecimal(100)),
+                                            .divideBy(CENTPEREURO),
                                     message.toString());
 
                             finalMessage.append(flatData[i].valuta).append(" ")
-                                    .append(value.toString()).append("\n");
+                                    .append(value.toString())
+                                    .append(" - ").append(message.toString())
+                                    .append("\n");
 
                             // create a saldo-transaction for the last imported
                             // transaction of each day
@@ -235,7 +245,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
                                             .equals(flatData[i].valuta)) {
                                 Saldo saldo = flatData[i - 1].saldo;
                                 createSaldoEntry((new FixedPointNumber(saldo.value
-                                                      .getLongValue())).divideBy(new BigDecimal(100)),
+                                                      .getLongValue())).divideBy(CENTPEREURO),
                                                       saldo.timestamp);
                                 markNonExistingTransactions(lastImportedDate);
                             }
@@ -248,7 +258,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
                     if (lastImportedDate != null) {
                         Saldo saldo = flatData[flatData.length - 1].saldo;
                         createSaldoEntry((new FixedPointNumber(saldo.value
-                                              .getLongValue())).divideBy(new BigDecimal(100)),
+                                              .getLongValue())).divideBy(CENTPEREURO),
                                               saldo.timestamp);
                         markNonExistingTransactions(lastImportedDate);
                     }

@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
+import javax.xml.bind.JAXBException;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
@@ -45,6 +46,13 @@ import com.paypal.soap.api.TransactionSearchResponseType;
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public class PaypalImporter extends AbstractScriptableImporter {
+
+    /**
+     * We go back one day at a time until we reach this many
+     * days where we find nothing to do.
+     */
+    private static final int MAXDAYSWITHNOIMPORT = 10;
+
 
     /**
      * Automatically created logger for debug and error-output.
@@ -129,38 +137,75 @@ public class PaypalImporter extends AbstractScriptableImporter {
 
             TransactionSearchRequestType request = new TransactionSearchRequestType();
             Calendar calendar = Calendar.getInstance();
-            calendar.set(2008 ,10 - 1, 20);
-            request.setStartDate(calendar);
-            TransactionSearchResponseType response =
-                (TransactionSearchResponseType) caller.call("TransactionSearch", request);
-            if (response.getAck().getValue() != AckCodeType._Success) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
 
-
-                LOG.log(Level.SEVERE, "Paypal-search failed");
-                return;
-            }
-
-            PaymentTransactionSearchResultType[] ts = response.getPaymentTransactions();
-            if (ts == null) {
-                LOG.log(Level.SEVERE, "Paypal-search had no result");
-                return;
-            }
-            System.out.println("Found " + ts.length + " records");
-
-            Date lastImportedDate = null;
+            // Paypal is limited to 100 transactions per result.
+            // thus we:
+            // * start with the current day,
+            // *then go back one day at a time
+            // * until we reached 10 days
+            //   with no transaction that needed importing.
             StringBuilder finalMessage = new StringBuilder();
-            for (int currentTransaction = 0; currentTransaction < ts.length; currentTransaction++) {
-                PaymentTransactionSearchResultType element = ts[currentTransaction];
+            int daysWithNoImportCountdown = MAXDAYSWITHNOIMPORT;
+            while (daysWithNoImportCountdown > 0) {
+                calendar.add(Calendar.DAY_OF_MONTH, -1);
+                request.setStartDate(calendar);
 
-                java.util.Calendar timestamp = element.getTimestamp();
-                Date valutaDate = timestamp.getTime();
-                StringBuilder message = new StringBuilder();
-                message.append(element.getPayerDisplayName());
-                FixedPointNumber value = new FixedPointNumber(element.getNetAmount().get_value());
+                TransactionSearchResponseType response =
+                    (TransactionSearchResponseType) caller.call("TransactionSearch", request);
+                if (response.getAck().getValue() != AckCodeType._Success) {
+                    LOG.log(Level.SEVERE, "Paypal-search with start-date " + calendar.getTime().toString() + " failed");
+                    return;
+                }
 
-                //////////////////////////////////////////////////////////////////////
-                // we need to support different currencies
-                // this only works for payments made yet but it works
+                PaymentTransactionSearchResultType[] ts = response.getPaymentTransactions();
+                if (ts == null) {
+                    LOG.log(Level.INFO, "Paypal-search  with start-date " + calendar.getTime().toString() + " had no result");
+                    continue;
+                }
+                LOG.log(Level.INFO, "Found " + ts.length + " records at all for day " + calendar.getTime().toString());
+
+                int importedCount = importDay(ts, finalMessage, calendar.getTime());
+                if (importedCount == 0) {
+                    daysWithNoImportCountdown--;
+                }
+            }
+            if (finalMessage.length() > 0) {
+                JOptionPane.showMessageDialog(null,
+                        "Imorted Transactions:\n"
+                        + finalMessage.toString());
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Error synchronizing transactions from Paypal.", e);
+        }
+    }
+
+
+
+    /**
+     * Import a single day worth of transactions.
+     * @param ts the transactions for the day
+     * @param finalMessage message to be displayed after importing all relevant days
+     * @param date the day we are importing
+     * @return the number of imported or moved transactions
+     * @throws JAXBException on issues with the gnucash-backend
+     */
+    private int importDay(final PaymentTransactionSearchResultType[] ts,
+                           final StringBuilder finalMessage,
+                           final Date date) throws JAXBException {
+        int retval = 0;
+        for (int currentTransaction = 0; currentTransaction < ts.length; currentTransaction++) {
+            PaymentTransactionSearchResultType element = ts[currentTransaction];
+
+            java.util.Calendar timestamp = element.getTimestamp();
+            Date valutaDate = timestamp.getTime();
+            StringBuilder message = new StringBuilder();
+            message.append(element.getPayerDisplayName());
+            FixedPointNumber value = new FixedPointNumber(element.getNetAmount().get_value());
+
+            //////////////////////////////////////////////////////////////////////
+            // we need to support different currencies
+            // this only works for payments made yet but it works
 
 /* Withdrawals in different currencies are split into 3 transactions
  * by paypal:
@@ -185,80 +230,56 @@ since it is usually not needed tu support multiple currencies in AbstractScripta
 we don't extend it to support this but combine such 3 transactions here before handing them
 to our base-class for import.
  * */
-              if (!element.getNetAmount().getCurrencyID().toString().equals(getDefaultAccount().getCurrencyID())) {
-                  String foreignCurrency = element.getNetAmount().getCurrencyID().toString();
-                  String foreignValue = element.getNetAmount().get_value();
-                  String ourCurrency = getDefaultAccount().getCurrencyID();
-                  // (paypal and gnucash use uppercase ISO-names for the currencies)
-                  if (ts.length > currentTransaction + 2
-                         && foreignValue.startsWith("-")
-                         && ts[currentTransaction + 1].getPayerDisplayName().startsWith("From ")
-                         && ts[currentTransaction + 2].getPayerDisplayName().startsWith("To ")
-                         && ts[currentTransaction + 1].getNetAmount().getCurrencyID().toString().equals(foreignCurrency)
-                         && ts[currentTransaction + 2].getNetAmount().getCurrencyID().toString().equals(ourCurrency)
-                         && ts[currentTransaction + 1].getNetAmount().get_value().equals(foreignValue.substring(1))) {
+          if (!element.getNetAmount().getCurrencyID().toString().equals(getDefaultAccount().getCurrencyID())) {
+              String foreignCurrency = element.getNetAmount().getCurrencyID().toString();
+              String foreignValue = element.getNetAmount().get_value();
+              String ourCurrency = getDefaultAccount().getCurrencyID();
+              // (paypal and gnucash use uppercase ISO-names for the currencies)
+              if (ts.length > currentTransaction + 2
+                     && foreignValue.startsWith("-")
+                     && ts[currentTransaction + 1].getPayerDisplayName().startsWith("From ")
+                     && ts[currentTransaction + 2].getPayerDisplayName().startsWith("To ")
+                     && ts[currentTransaction + 1].getNetAmount().getCurrencyID().toString().equals(foreignCurrency)
+                     && ts[currentTransaction + 2].getNetAmount().getCurrencyID().toString().equals(ourCurrency)
+                     && ts[currentTransaction + 1].getNetAmount().get_value().equals(foreignValue.substring(1))) {
 
-                      LOG.fine("combining a foreign-currency transaction with currency-conversion into a single transaction");
+                  LOG.fine("combining a foreign-currency transaction with currency-conversion into a single transaction");
 
-                      value = new FixedPointNumber(ts[currentTransaction + 2].getNetAmount().get_value());
-                      currentTransaction += 2;
+                  value = new FixedPointNumber(ts[currentTransaction + 2].getNetAmount().get_value());
+                  currentTransaction += 2;
 
-                  } else {
+              } else {
 
-                      LOG.warning("we got a foreign-currency transaction that we cannot handle. Handling it as a EUR-transaction. The saldo will be wrong!");
+                  LOG.warning("we got a foreign-currency transaction that we cannot handle. Handling it as a EUR-transaction. The account-balance will be wrong!");
 
-                  }
               }
-              //////////////////////////////////////////////////////////////////////
+          }
+          //////////////////////////////////////////////////////////////////////
 
-            if (!isTransactionPresent(valutaDate, value, message.toString())) {
+        if (!isTransactionPresent(valutaDate, value, message.toString())) {
 
-                LOG.finer("--------------importing------------------------------");
-                LOG.finer("value=" + value + "\n"
-                        + "date=" + valutaDate + "\n"
-                        + "Message="
-                                    + message.toString());
-                // import this transaction
-                importTransaction(valutaDate,
-                                    value,
-                                    message.toString());
+            retval++;
+            LOG.finer("--------------importing------------------------------");
+            LOG.finer("value=" + value + "\n"
+                    + "date=" + valutaDate + "\n"
+                    + "Message=" + message.toString());
+            // import this transaction
+            importTransaction(valutaDate,
+                                value,
+                                message.toString());
 
-                finalMessage.append(valutaDate).append(" ")
-                                 .append(value.toString()).append("\n");
+            finalMessage.append(valutaDate).append(" ")
+                             .append(value.toString())
+                             .append(" - ").append(message.toString())
+                             .append("\n");
 
-                            // create a saldo-transaction for the last imported
-                            // transaction of each day
-                if (lastImportedDate != null && !lastImportedDate
-                                            .equals(valutaDate)) {
-//TODO                    Saldo saldo = flatData[i - 1].saldo;
-//TODO                    createSaldoEntry((new FixedPointNumber(saldo.value
-//TODO//TODO//TODO//TODO//TODO//TODO//TODO                                                   .getLongValue())).divideBy(new BigDecimal(100)),
-//TODO                                                   saldo.timestamp);
-                     markNonExistingTransactions(lastImportedDate);
-                 }
-                 lastImportedDate = valutaDate;
+                        // create a saldo-transaction for the last imported
+                        // transaction of each day
 
-                  // create a saldo-transaction after the last imported
-                  // transaction
-                  if (lastImportedDate != null) {
-//TODO                        Saldo saldo = flatData[flatData.length - 1].saldo;
-//TODO                        createSaldoEntry((new FixedPointNumber(saldo.value
-//TODO                                              .getLongValue())).divideBy(new BigDecimal(100)),
-//TODO                                              saldo.timestamp);
-                        markNonExistingTransactions(lastImportedDate);
-                  }
-
-               }
-            }
-            if (finalMessage.length() > 0) {
-                JOptionPane.showMessageDialog(null,
-                        "Imorted Transactions:\n"
-                        + finalMessage.toString());
-            }
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error synchronizing transactions from Paypal.", e);
-        } finally {
+           }
         }
+        markNonExistingTransactions(date);
+        return retval;
     }
 
 
