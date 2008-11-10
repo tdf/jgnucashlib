@@ -23,7 +23,17 @@ import java.io.Reader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -32,15 +42,17 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashCustomer;
-import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry;
 import biz.wolschon.fileformats.gnucash.GnucashJob;
+import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
@@ -53,10 +65,6 @@ import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookTyp
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.impl.runtime.DefaultJAXBContextImpl;
 import biz.wolschon.finance.ComplexCurrencyTable;
 import biz.wolschon.numbers.FixedPointNumber;
-
-import org.apache.commons.logging.LogFactory;
-
-import org.apache.commons.logging.Log;
 
 /**
  * created: 13.05.2005<br/>
@@ -78,7 +86,7 @@ public class GnucashFileImpl implements GnucashFile {
     /**
      * my CurrencyTable.
      */
-    private ComplexCurrencyTable currencyTable = new ComplexCurrencyTable();
+    private final ComplexCurrencyTable currencyTable = new ComplexCurrencyTable();
 
 
     /**
@@ -113,9 +121,10 @@ public class GnucashFileImpl implements GnucashFile {
      * @return the identified taxtable or null
      */
     public GnucashTaxTable getTaxTableByID(final String id) {
-        if (taxTablesById == null)
+        if (taxTablesById == null) {
             getTaxTables();
-        return (GnucashTaxTable) taxTablesById.get(id);
+        }
+        return taxTablesById.get(id);
     }
 
     /**
@@ -147,8 +156,9 @@ public class GnucashFileImpl implements GnucashFile {
             Collection<GnucashAccount> retval = new TreeSet<GnucashAccount>();
 
             for (GnucashAccount account : getAccounts()) {
-                if (account.getParentAccountId() == null)
+                if (account.getParentAccountId() == null) {
                     retval.add(account);
+                }
 
             }
 
@@ -169,24 +179,26 @@ public class GnucashFileImpl implements GnucashFile {
      * @return the sorted collection of children of that account
      */
     public Collection getAccountsByParentID(final String id) {
-        if (accountid2account == null)
+        if (accountid2account == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
         SortedSet retval = new TreeSet();
 
-        for (Iterator iter = accountid2account.values().iterator(); iter
-                .hasNext();) {
-            GnucashAccount account = (GnucashAccount) iter.next();
+        for (Object element : accountid2account.values()) {
+         GnucashAccount account = (GnucashAccount) element;
 
-            String parent = account.getParentAccountId();
-            if (parent == null) {
-                if (id == null)
-                    retval.add(account);
-            } else {
-                if (parent.equals(id))
-                    retval.add(account);
-            }
+         String parent = account.getParentAccountId();
+         if (parent == null) {
+        if (id == null) {
+            retval.add(account);
         }
+         } else {
+        if (parent.equals(id)) {
+            retval.add(account);
+        }
+         }
+      }
 
         return retval;
     }
@@ -197,15 +209,18 @@ public class GnucashFileImpl implements GnucashFile {
      */
     public GnucashAccount getAccountByName(final String name) {
 
-        if (accountid2account == null)
+        if (accountid2account == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
 
         for (GnucashAccount account : accountid2account.values()) {
-            if (account.getName().equals(name))
+            if (account.getName().equals(name)) {
                 return account;
-            if (account.getQualifiedName().equals(name))
+            }
+            if (account.getQualifiedName().equals(name)) {
                 return account;
+            }
         }
         return null;
     }
@@ -222,8 +237,9 @@ public class GnucashFileImpl implements GnucashFile {
      */
     public GnucashAccount getAccountByNameEx(final String nameRegEx) {
 
-        if (accountid2account == null)
+        if (accountid2account == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
         GnucashAccount foundAccount = getAccountByName(nameRegEx);
         if (foundAccount != null) {
@@ -234,8 +250,9 @@ public class GnucashFileImpl implements GnucashFile {
 
         for (GnucashAccount account : accountid2account.values()) {
             Matcher matcher = pattern.matcher(account.getName());
-            if (matcher.matches())
+            if (matcher.matches()) {
                 return account;
+            }
         }
         return null;
     }
@@ -283,7 +300,7 @@ public class GnucashFileImpl implements GnucashFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getInvoiceByID(java.lang.String)
      */
     public GnucashInvoice getInvoiceByID(final String id) {
-        return (GnucashInvoice) invoiceid2invoice.get(id);
+        return invoiceid2invoice.get(id);
     }
 
     /**
@@ -309,8 +326,9 @@ public class GnucashFileImpl implements GnucashFile {
     public Collection<GnucashInvoice> getUnpayedInvoices() throws JAXBException {
         Collection<GnucashInvoice> retval = new LinkedList<GnucashInvoice>();
         for (GnucashInvoice invoice : getInvoices()) {
-            if (invoice.getAmmountUnPayed().isPositive())
+            if (invoice.getAmmountUnPayed().isPositive()) {
                 retval.add(invoice);
+            }
         }
 
         return retval;
@@ -325,8 +343,9 @@ public class GnucashFileImpl implements GnucashFile {
             final GnucashCustomer customer) throws JAXBException {
         Collection<GnucashInvoice> retval = new LinkedList<GnucashInvoice>();
         for (GnucashInvoice invoice : getUnpayedInvoices()) {
-            if (invoice.getJob().getCustomerId().equals(customer.getId()))
+            if (invoice.getJob().getCustomerId().equals(customer.getId())) {
                 retval.add(invoice);
+            }
         }
 
         return retval;
@@ -334,15 +353,16 @@ public class GnucashFileImpl implements GnucashFile {
 
     /**
      *
-     * 
+     *
      * @throws JAXBException if we have issues with the XML-backend
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getPayedInvoices()
      */
     public Collection<GnucashInvoice> getPayedInvoices() throws JAXBException {
         Collection<GnucashInvoice> retval = new LinkedList<GnucashInvoice>();
         for (GnucashInvoice invoice : getInvoices()) {
-            if (!invoice.getAmmountUnPayed().isPositive())
+            if (!invoice.getAmmountUnPayed().isPositive()) {
                 retval.add(invoice);
+            }
         }
 
         return retval;
@@ -352,6 +372,17 @@ public class GnucashFileImpl implements GnucashFile {
      * @see #getFile()
      */
     private File file;
+
+    /**
+     * @param pCmdtySpace the namespace for pCmdtyId
+     * @param pCmdtyId the currency-name
+     * @return the latest price-quote in the gnucash-file in EURO
+     * @see {@link GnucashFile#getLatestPrice(String, String)}
+     */
+    public FixedPointNumber getLatestPrice(final String pCmdtySpace,
+                                            final String pCmdtyId) {
+        return getLatestPrice(pCmdtySpace, pCmdtyId, 0);
+    }
 
     /**
      * the top-level Element of the gnucash-files parsed and checked for
@@ -414,10 +445,11 @@ public class GnucashFileImpl implements GnucashFile {
      */
     @SuppressWarnings("unchecked")
     protected void setRootElement(final GncV2 pRootElement) {
-        if (pRootElement == null)
+        if (pRootElement == null) {
             throw new IllegalArgumentException(
                     "null not allowed for field this.rootElement");
-        this.rootElement = pRootElement;
+        }
+        rootElement = pRootElement;
 
         // fill prices
 
@@ -484,8 +516,8 @@ public class GnucashFileImpl implements GnucashFile {
         transactionid2transaction = new HashMap<String, GnucashTransaction>();
         for (GncTransactionType jwsdpTransaction
                 : (List<GncTransactionType>) pRootElement.getGncBook().getGncTransaction()) {
-            
-            
+
+
             try {
             	GnucashTransactionImpl account = createTransaction(jwsdpTransaction);
                 transactionid2transaction.put(account.getId(), account);
@@ -505,7 +537,7 @@ public class GnucashFileImpl implements GnucashFile {
                            + jwsdpTransaction.getTrnId().getValue(),
                           e);
            }
-            
+
         }
 
         customerid2customer = new HashMap<String, GnucashCustomer>();
@@ -543,7 +575,7 @@ public class GnucashFileImpl implements GnucashFile {
 	 */
 	private void loadPriceDatabase(final GncV2 pRootElement) {
 		if (pRootElement.getGncBook().getGncPricedb() == null) {
-        	//case: no priceDB in file        
+        	//case: no priceDB in file
         	getCurrencyTable().clear();
         } else {
         	if (pRootElement.getGncBook().getGncPricedb().getVersion() != 1) {
@@ -553,7 +585,7 @@ public class GnucashFileImpl implements GnucashFile {
         				+ pRootElement.getGncBook().getGncPricedb().getVersion()
         				+ " prices will not be loaded!");
         	} else {
-
+        	  //TODO: use base-currency from gnucash-file
         		getCurrencyTable().clear();
         		getCurrencyTable().setConversionFactor("ISO4217",
         				"EUR",
@@ -564,42 +596,42 @@ public class GnucashFileImpl implements GnucashFile {
         			GncV2Type.GncBookType.GncPricedbType.PriceType price = (GncV2Type.GncBookType.GncPricedbType.PriceType) iter.next();
         			PriceCommodityType comodity = price.getPriceCommodity();
 
-        			// check if we already have a latest price for this comodity
-        			// (=currency, fund, ...)
-        			if (getCurrencyTable().getConversionFactor(comodity.getCmdtySpace(),
-        					comodity.getCmdtyId()) != null) {
-        				continue;
-        			}
+                    // check if we already have a latest price for this comodity
+                    // (=currency, fund, ...)
+                    if (getCurrencyTable().getConversionFactor(comodity.getCmdtySpace(),
+                            comodity.getCmdtyId()) != null) {
+                        continue;
+                    }
+//TODO: use base-currency from gnucash-file
+                    if (comodity.getCmdtySpace().equals("ISO4217")
+                            &&
+                            comodity.getCmdtyId().equals("EUR")) {
+                        LOGGER.warn("Ignoring price-quote for EUR because EUR is"
+                                + "our base-currency.");
+                        continue;
+                    }
 
-        			if (comodity.getCmdtySpace().equals("ISO4217")
-        					&&
-        					comodity.getCmdtyId().equals("EUR")) {
-        				LOGGER.warn("Ignoring price-quote for EUR because EUR is"
-        						+ "our base-currency.");
-        				continue;
-        			}
+                    // get the latest price in the file and insert it into
+                    // our currency table
+                    FixedPointNumber factor = getLatestPrice(
+                            comodity.getCmdtySpace(),
+                            comodity.getCmdtyId());
 
-        			// get the latest price in the file and insert it into
-        			// our currency table
-        			FixedPointNumber factor = getLatestPrice(
-        					comodity.getCmdtySpace(),
-        					comodity.getCmdtyId());
-
-        			if (factor != null) {
-        				getCurrencyTable().setConversionFactor(comodity.getCmdtySpace(),
-        						comodity.getCmdtyId(),
-        						factor);
-        			} else {
-        				LOGGER.warn("The gnucash-file defines a factor for a comodity '"
-        						+ comodity.getCmdtySpace()
-        						+ "' - '"
-        						+ comodity.getCmdtyId()
-        						+ "' but has no comodity for it");
-        			}
-        		}
-        	}
+                    if (factor != null) {
+                        getCurrencyTable().setConversionFactor(comodity.getCmdtySpace(),
+                                comodity.getCmdtyId(),
+                                factor);
+                    } else {
+                        LOGGER.warn("The gnucash-file defines a factor for a comodity '"
+                                + comodity.getCmdtySpace()
+                                + "' - '"
+                                + comodity.getCmdtyId()
+                                + "' but has no comodity for it");
+                    }
+                }
+            }
         }
-	}
+    }
 
 
     /**
@@ -610,16 +642,7 @@ public class GnucashFileImpl implements GnucashFile {
     /**
      * @param pCmdtySpace the namespace for pCmdtyId
      * @param pCmdtyId the currency-name
-     * @return the latest price-quote in the gnucash-file in EURO
-     * @see {@link GnucashFile#getLatestPrice(String, String)}
-     */
-    public FixedPointNumber getLatestPrice(final String pCmdtySpace,
-                                            final String pCmdtyId) {
-    	return getLatestPrice(pCmdtySpace, pCmdtyId, 0);
-    }
-    /**
-     * @param pCmdtySpace the namespace for pCmdtyId
-     * @param pCmdtyId the currency-name
+     * @param depth used for recursion. Allways call with '0'
      * @param used for aborting recursive quotes (quotes to other then the base-
      *        currency) we abort if the depth reached 6.
      * @return the latest price-quote in the gnucash-file in EURO
@@ -629,16 +652,18 @@ public class GnucashFileImpl implements GnucashFile {
                                             final String pCmdtyId,
                                             final int depth) {
 
-        if (pCmdtySpace == null)
+        if (pCmdtySpace == null) {
             throw new IllegalArgumentException("null parameter 'pCmdtySpace' "
                                              + "given");
-        if (pCmdtyId == null)
+        }
+        if (pCmdtyId == null) {
             throw new IllegalArgumentException("null parameter 'pCmdtyId' "
                                              + "given");
+        }
 
         Date latestDate = null;
         FixedPointNumber latestQuote = null;
-        
+
         // factor is used if the quote is not to our base-currency
         FixedPointNumber factor = new FixedPointNumber(1);
 
@@ -706,11 +731,13 @@ public class GnucashFileImpl implements GnucashFile {
                     }*/
 
 
-                    if (!priceQuote.getPriceCommodity().getCmdtySpace().equals(pCmdtySpace))
+                    if (!priceQuote.getPriceCommodity().getCmdtySpace().equals(pCmdtySpace)) {
                         continue;
+                    }
 
-                    if (!priceQuote.getPriceCommodity().getCmdtyId().equals(pCmdtyId))
+                    if (!priceQuote.getPriceCommodity().getCmdtyId().equals(pCmdtyId)) {
                         continue;
+                    }
 
                     /*if (priceQuote.getPriceCommodity().getCmdtySpace().equals("FUND")
                             &&
@@ -723,32 +750,32 @@ public class GnucashFileImpl implements GnucashFile {
                                   + "' expecting 'last' ");
                         continue;
                     }*/
-                    
+
 
                     if (!priceQuote.getPriceCurrency()
                             .getCmdtySpace().equals("ISO4217")) {
-                    	if (depth > 5) {
-                    		LOGGER.warn("ignoring price-quote that is not in an"                    	
+                        if (depth > 5) {
+                            LOGGER.warn("ignoring price-quote that is not in an"
                                   + " ISO4217 -currency but in '"
-                                  + priceQuote.getPriceCurrency().getCmdtyId());                        
-                    		continue;
-                    	}
-                    	factor = getLatestPrice(priceQuote.getPriceCurrency()
+                                  + priceQuote.getPriceCurrency().getCmdtyId());
+                            continue;
+                        }
+                        factor = getLatestPrice(priceQuote.getPriceCurrency()
                                 .getCmdtySpace(), priceQuote.getPriceCurrency()
-                                .getCmdtyId(), depth+1);
-                    }
-                    else
-                    if (!priceQuote.getPriceCurrency()
-                            .getCmdtyId().equals("EUR")) {
-                    	if (depth > 5) {
-                    		LOGGER.warn("ignoring price-quote that is not in EUR "
-                                  + "but in  '"
-                                  + priceQuote.getPriceCurrency().getCmdtyId());                        
-                    		continue;
-                    	}
-                    	factor = getLatestPrice(priceQuote.getPriceCurrency()
-                                .getCmdtySpace(), priceQuote.getPriceCurrency()
-                                .getCmdtyId(), depth+1); 
+                                .getCmdtyId(), depth + 1);
+                    } else { //TODO: use base-currency from gnucash-file
+                        if (!priceQuote.getPriceCurrency()
+                                .getCmdtyId().equals("EUR")) {
+                            if (depth > 5) {
+                                LOGGER.warn("ignoring price-quote that is not in EUR "
+                                        + "but in  '"
+                                        + priceQuote.getPriceCurrency().getCmdtyId());
+                                continue;
+                            }
+                            factor = getLatestPrice(priceQuote.getPriceCurrency()
+                                    .getCmdtySpace(), priceQuote.getPriceCurrency()
+                                    .getCmdtyId(), depth + 1);
+                        }
                     }
 
                     Date date = PRICEQUOTEDATEFORMAT.parse(
@@ -813,9 +840,10 @@ public class GnucashFileImpl implements GnucashFile {
                             + "')= " + latestQuote
                             + " from "
                             + latestDate);
-
+        if (latestQuote == null) {
+            return null;
+        }
         return factor.multiply(latestQuote);
-
     }
 
 
@@ -920,10 +948,11 @@ public class GnucashFileImpl implements GnucashFile {
      *            the file loaded
      */
     protected void setFile(final File pFile) {
-        if (pFile == null)
+        if (pFile == null) {
             throw new IllegalArgumentException(
                     "null not allowed for field this.file");
-        this.file = pFile;
+        }
+        file = pFile;
     }
 
     /**
@@ -1007,28 +1036,29 @@ public class GnucashFileImpl implements GnucashFile {
         } catch (JAXBException ex) {
 
             // output what has been reat to far
-        	if (reader instanceof NamespaceRemovererReader)
-            try {
-                NamespaceRemovererReader nsr = (NamespaceRemovererReader)reader;
-                int pos = (int) nsr.getPosition();
-                char[] c = new char[pos];
-                NamespaceRemovererReader reader2 = new NamespaceRemovererReader(
-                        new EuroConverterReader(new InputStreamReader(
-                                new FileInputStream(pFile), "ISO8859-15")));
+        	if (reader instanceof NamespaceRemovererReader) {
                 try {
-                    reader2.read(c);
-                } finally {
-                    reader2.close();
+                    NamespaceRemovererReader nsr = reader;
+                    int pos = (int) nsr.getPosition();
+                    char[] c = new char[pos];
+                    NamespaceRemovererReader reader2 = new NamespaceRemovererReader(
+                            new EuroConverterReader(new InputStreamReader(
+                                    new FileInputStream(pFile), "ISO8859-15")));
+                    try {
+                        reader2.read(c);
+                    } finally {
+                        reader2.close();
+                    }
+                    System.err.println("reat so far:");
+                    String s = new String(c);
+                    System.err.println(s.substring(Math.max(0, s.length() - 500)));
+                } catch (Throwable x) {
+                    // ignore
                 }
-                System.err.println("reat so far:");
-                String s = new String(c);
-                System.err.println(s.substring(Math.max(0, s.length() - 500)));
-            } catch (Throwable x) {
-                // ignore
             }
 
-            if (reader instanceof NamespaceRemovererReader && ((NamespaceRemovererReader)reader).debugLastReatLength > 0) {
-            	NamespaceRemovererReader nsr = (NamespaceRemovererReader)reader;
+            if (reader instanceof NamespaceRemovererReader && (reader).debugLastReatLength > 0) {
+            	NamespaceRemovererReader nsr = reader;
                 System.err.println("last reat chars: '"
                         + new String(nsr.debugLastTeat, 0,
                                      nsr.debugLastReatLength) + "'");
@@ -1071,9 +1101,10 @@ public class GnucashFileImpl implements GnucashFile {
      *             on jaxb-errors
      */
     protected JAXBContext getJAXBContext() throws JAXBException {
-        if (myJAXBContext == null)
+        if (myJAXBContext == null) {
             myJAXBContext = DefaultJAXBContextImpl
                     .newInstance("biz.wolschon.fileformats.gnucash.jwsdpimpl.generated", this.getClass().getClassLoader());
+        }
         return myJAXBContext;
     }
 
@@ -1087,8 +1118,9 @@ public class GnucashFileImpl implements GnucashFile {
         for (Iterator iter = getRootElement().getGncBook().getGncCountData()
                 .iterator(); iter.hasNext();) {
             GncCountDataType count = (GncCountDataType) iter.next();
-            if (count.getCdType().equals(type))
+            if (count.getCdType().equals(type)) {
                 return count;
+            }
         }
         return null;
     }
@@ -1107,13 +1139,15 @@ public class GnucashFileImpl implements GnucashFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getAccountByID(java.lang.String)
      */
     public GnucashAccount getAccountByID(final String id) {
-        if (accountid2account == null)
+        if (accountid2account == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
         GnucashAccount retval = accountid2account.get(id);
-        if (retval == null)
+        if (retval == null) {
             System.err.println("No Account with id '" + id + "'. We know "
                     + accountid2account.size() + " accounts.");
+        }
         return retval;
     }
 
@@ -1122,13 +1156,15 @@ public class GnucashFileImpl implements GnucashFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getCustomerByID(java.lang.String)
      */
     public GnucashCustomer getCustomerByID(final String id) {
-        if (accountid2account == null)
+        if (accountid2account == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
         GnucashCustomer retval = customerid2customer.get(id);
-        if (retval == null)
+        if (retval == null) {
             LOGGER.warn("No Customer with id '" + id + "'. We know "
                     + customerid2customer.size() + " accounts.");
+        }
         return retval;
     }
 
@@ -1138,12 +1174,14 @@ public class GnucashFileImpl implements GnucashFile {
      */
     public GnucashCustomer getCustomerByName(final String name) {
 
-        if (accountid2account == null)
+        if (accountid2account == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
         for (GnucashCustomer customer : getCustomers()) {
-            if (customer.getName().equals(name))
+            if (customer.getName().equals(name)) {
                 return customer;
+            }
         }
         return null;
     }
@@ -1169,8 +1207,8 @@ public class GnucashFileImpl implements GnucashFile {
 
         Collection retval = new LinkedList();
 
-        for (Iterator iter = jobid2job.values().iterator(); iter.hasNext();) {
-            GnucashJob job = (GnucashJob) iter.next();
+        for (Object element : jobid2job.values()) {
+            GnucashJob job = (GnucashJob) element;
             if (job.getCustomerId().equals(customer.getId())) {
                 retval.add(job);
             }
@@ -1189,7 +1227,7 @@ public class GnucashFileImpl implements GnucashFile {
         }
 
 
-        GnucashJob retval = (GnucashJob) jobid2job.get(id);
+        GnucashJob retval = jobid2job.get(id);
         if (retval == null) {
             LOGGER.warn("No Job with id '"
                        + id
@@ -1217,14 +1255,16 @@ public class GnucashFileImpl implements GnucashFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getTransactionByID(java.lang.String)
      */
     public GnucashTransaction getTransactionByID(final String id) {
-        if (transactionid2transaction == null)
+        if (transactionid2transaction == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
-        GnucashTransaction retval = (GnucashTransaction) transactionid2transaction
+        GnucashTransaction retval = transactionid2transaction
                 .get(id);
-        if (retval == null)
+        if (retval == null) {
             LOGGER.warn("No Transaction with id '" + id + "'. We know "
                     + customerid2customer.size() + " accounts.");
+        }
         return retval;
     }
 
@@ -1233,8 +1273,9 @@ public class GnucashFileImpl implements GnucashFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getTransactions()
      */
     public Collection<? extends GnucashTransaction> getTransactions() {
-        if (transactionid2transaction == null)
+        if (transactionid2transaction == null) {
             throw new IllegalStateException("no root-element loaded");
+        }
 
         return Collections.unmodifiableCollection(transactionid2transaction
                 .values());
@@ -1267,7 +1308,7 @@ public class GnucashFileImpl implements GnucashFile {
          */
         public NamespaceRemovererReader(final Reader pInput) {
             super();
-            this.input = pInput;
+            input = pInput;
         }
 
         /**
@@ -1288,7 +1329,7 @@ public class GnucashFileImpl implements GnucashFile {
                 "null not allowed for field this.input");
             }
 
-            this.input = newInput;
+            input = newInput;
         }
 
         /**
@@ -1312,6 +1353,7 @@ public class GnucashFileImpl implements GnucashFile {
          *
          * @see java.io.Reader#close()
          */
+        @Override
         public void close() throws IOException {
             input.close();
         }
@@ -1354,6 +1396,7 @@ public class GnucashFileImpl implements GnucashFile {
          *
          * @see java.io.Reader#read(char[], int, int)
          */
+        @Override
         public int read(final char[] cbuf,
                         final int off,
                         final int len) throws IOException {
@@ -1365,14 +1408,15 @@ public class GnucashFileImpl implements GnucashFile {
             for (int i = off; i < off + reat; i++) {
                 position++;
 
-                if (isInTag && (cbuf[i] == '"' || cbuf[i] == '\''))
+                if (isInTag && (cbuf[i] == '"' || cbuf[i] == '\'')) {
                     toggleIsInQuotation();
-                else if (cbuf[i] == '<' && !isInQuotation)
+                } else if (cbuf[i] == '<' && !isInQuotation) {
                     isInTag = true;
-                else if (cbuf[i] == '>' && !isInQuotation)
+                } else if (cbuf[i] == '>' && !isInQuotation) {
                     isInTag = false;
-                else if (cbuf[i] == ':' && isInTag && !isInQuotation)
+                } else if (cbuf[i] == ':' && isInTag && !isInQuotation) {
                     cbuf[i] = '_';
+                }
 
             }
 
@@ -1385,8 +1429,9 @@ public class GnucashFileImpl implements GnucashFile {
         private void toggleIsInQuotation() {
             if (isInQuotation) {
                 isInQuotation = false;
-            } else
+            } else {
                 isInQuotation = true;
+            }
         }
     }
 
@@ -1410,7 +1455,7 @@ public class GnucashFileImpl implements GnucashFile {
          */
         public EuroConverterReader(final Reader pInput) {
             super();
-            this.input = pInput;
+            input = pInput;
         }
 
         /**
@@ -1431,7 +1476,7 @@ public class GnucashFileImpl implements GnucashFile {
                 "null not allowed for field this.input");
             }
 
-            this.input = newInput;
+            input = newInput;
         }
 
         /**
@@ -1443,6 +1488,7 @@ public class GnucashFileImpl implements GnucashFile {
          *
          * @see java.io.Reader#close()
          */
+        @Override
         public void close() throws IOException {
             input.close();
 
@@ -1452,6 +1498,7 @@ public class GnucashFileImpl implements GnucashFile {
          *
          * @see java.io.Reader#read(char[], int, int)
          */
+        @Override
         public int read(final char[] cbuf,
                         final int off,
                         final int len) throws IOException {
@@ -1513,15 +1560,17 @@ public class GnucashFileImpl implements GnucashFile {
                     if (cbuf[i] == ';') {
                         // found it!!!
                         cbuf[i - REPLACESTRINGLENGTH] = '¤';
-                        if (i != reat - 1)
+                        if (i != reat - 1) {
                             System.arraycopy(cbuf, (i + 1), cbuf,
                                     (i - (REPLACESTRINGLENGTH - 1)),
                                     (reat - i - 1));
+                        }
                         int reat2 = input
                                 .read(cbuf, reat - REPLACESTRINGLENGTH,
                                         REPLACESTRINGLENGTH);
-                        if (reat2 != REPLACESTRINGLENGTH)
+                        if (reat2 != REPLACESTRINGLENGTH) {
                             reat -= (REPLACESTRINGLENGTH - reat2);
+                        }
                         i -= (REPLACESTRINGLENGTH - 1);
                         state = 0;
                     } else {
