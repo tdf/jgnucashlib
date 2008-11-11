@@ -1200,7 +1200,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
 
        PriceCurrencyType baseCurrency = getObjectFactory().createGncV2TypeGncBookTypeGncPricedbTypePriceTypePriceCurrencyType();
        baseCurrency.setCmdtySpace("ISO4217");
-       baseCurrency.setCmdtyId("EUR");
+       baseCurrency.setCmdtyId(getDefaultCurrencyID());
 
        GncV2Type.GncBookType.GncPricedbType.PriceType newQuote = getObjectFactory().createGncV2TypeGncBookTypeGncPricedbTypePriceType();
        newQuote.setPriceSource("JGnucashLib");

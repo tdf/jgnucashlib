@@ -25,10 +25,8 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import biz.wolschon.fileformats.gnucash.GnucashCustomer;
 import biz.wolschon.fileformats.gnucash.GnucashWritableCustomer;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Address;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncCustomerType;
@@ -56,7 +54,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
     /**
      * Our helper to implement the GnucashWritableObject-interface.
      */
-    private GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
+    private final GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#setUserDefinedAttribute(java.lang.String, java.lang.String)
@@ -92,8 +90,8 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
      */
     public void remove() {
         GncGncCustomerType peer = getJwsdpPeer();
-        ((GnucashFileWritingImpl) getFile()).getRootElement().getGncBook().getGncGncCustomer().remove(peer);
-        ((GnucashFileWritingImpl) getFile()).removeCustomer(this);
+        (getFile()).getRootElement().getGncBook().getGncGncCustomer().remove(peer);
+        (getFile()).removeCustomer(this);
     }
 
 
@@ -108,8 +106,9 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
      */
     protected static GncGncCustomerType createCustomer(final GnucashFileWritingImpl file, final String guid) throws JAXBException {
 
-        if (guid == null)
+        if (guid == null) {
             throw new IllegalArgumentException("null guid given!");
+        }
 
 
         ObjectFactory factory = file.getObjectFactory();
@@ -163,7 +162,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
 
         {
             GncV2Type.GncBookType.GncGncCustomerType.CustCurrencyType currency = factory.createGncV2TypeGncBookTypeGncGncCustomerTypeCustCurrencyType();
-            currency.setCmdtyId("EUR");
+            currency.setCmdtyId(file.getDefaultCurrencyID());
             currency.setCmdtySpace("ISO4217");
             customer.setCustCurrency(currency);
         }
@@ -191,6 +190,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
      * The gnucash-file is the top-level class to contain everything.
      * @return the file we are associated with
      */
+    @Override
     public GnucashFileWritingImpl getFile() {
         return (GnucashFileWritingImpl) super.getFile();
     }
@@ -205,8 +205,9 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         getFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-        if (propertyChangeSupport != null)
+        if (propertyChangeSupport != null) {
             propertyChangeSupport.firePropertyChange("customerNumber", old, number);
+        }
     }
 
     /**
@@ -219,8 +220,9 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         getFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-        if (propertyChangeSupport != null)
+        if (propertyChangeSupport != null) {
             propertyChangeSupport.firePropertyChange("discount", old, discount);
+        }
     }
 
     /**
@@ -233,8 +235,9 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         getFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-        if (propertyChangeSupport != null)
+        if (propertyChangeSupport != null) {
             propertyChangeSupport.firePropertyChange("notes", old, notes);
+        }
     }
 
 
@@ -248,13 +251,15 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         getFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-        if (propertyChangeSupport != null)
+        if (propertyChangeSupport != null) {
             propertyChangeSupport.firePropertyChange("name", old, name);
+        }
     }
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getAddress()
      */
+    @Override
     public GnucashWritableCustomer.WritableAddress getAddress() {
         return getWritableAddress();
     }
@@ -262,6 +267,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getShippingAddress()
      */
+    @Override
     public GnucashWritableCustomer.WritableAddress getShippingAddress() {
         return getWritableShippingAddress();
     }
@@ -290,8 +296,9 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
             getJwsdpPeer().setCustAddr(adrImpl.getJwsdpPeer());
         } else */{
             try {
-                if (getJwsdpPeer().getCustAddr() == null)
+                if (getJwsdpPeer().getCustAddr() == null) {
                     getJwsdpPeer().setCustAddr(getFile().getObjectFactory().createAddress());
+                }
             } catch (JAXBException e) {
                 LOGGER.error("[JAXBException] Problem in "
                            + getClass().getName(),
@@ -322,8 +329,9 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
             getJwsdpPeer().setCustShipaddr(adrImpl.getJwsdpPeer());
         } else */{
             try {
-                if (getJwsdpPeer().getCustShipaddr() == null)
+                if (getJwsdpPeer().getCustShipaddr() == null) {
                     getJwsdpPeer().setCustShipaddr(getFile().getObjectFactory().createAddress());
+                }
             } catch (JAXBException e) {
                 LOGGER.error("[JAXBException] Problem in "
                            + getClass().getName(),

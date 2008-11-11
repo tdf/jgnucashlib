@@ -106,7 +106,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
 
         GncAccountType account = factory.createGncAccountType();
         //left unset account.setActCode();
-        account.setActCommodityScu((short)100); //TODO: what is the meaning?
+        account.setActCommodityScu((short) 100); // x,yz
         account.setActDescription("no description yet");
 //      left unset account.setActLots();
         account.setActName("UNNAMED");
@@ -119,7 +119,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
 
         {
             GncAccountType.ActCommodityType currency = factory.createGncAccountTypeActCommodityType();
-            currency.setCmdtyId("EUR");
+            currency.setCmdtyId(file.getDefaultCurrencyID());
             currency.setCmdtySpace("ISO4217");
             account.setActCommodity(currency);
         }

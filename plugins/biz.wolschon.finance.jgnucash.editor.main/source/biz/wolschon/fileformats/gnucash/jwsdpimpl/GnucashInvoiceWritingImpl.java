@@ -20,11 +20,9 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.xml.bind.JAXBException;
-
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
@@ -32,20 +30,20 @@ import biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry;
 import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
-import biz.wolschon.fileformats.gnucash.GnucashTaxTable.TaxTableEntry;
 import biz.wolschon.fileformats.gnucash.GnucashWritableInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
+import biz.wolschon.fileformats.gnucash.GnucashTaxTable.TaxTableEntry;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotsType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActLotsType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActLotsType.GncLotType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncInvoiceType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncInvoiceType.InvoicePosttxnType;
 import biz.wolschon.numbers.FixedPointNumber;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActLotsType.GncLotType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActLotsType;
 
 /**
  * @author Marcus@Wolschon.biz
@@ -72,6 +70,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
      * The gnucash-file is the top-level class to contain everything.
      * @return the file we are associated with
      */
+    @Override
     public GnucashWritableFile getFile() {
         return (GnucashWritableFile) super.getFile();
     }
@@ -118,7 +117,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
                  ||
             tax.getEntries().isEmpty()
                  ||
-            ((GnucashTaxTable.TaxTableEntry) tax.getEntries().iterator().next())
+            (tax.getEntries().iterator().next())
             .getAmount().equals(new FixedPointNumber())) {
             // no taxes
             entry.setTaxable(false);
@@ -174,7 +173,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
         invoice.setInvoiceBillingId(invoiceNumber);
         {
             GncV2Type.GncBookType.GncGncInvoiceType.InvoiceCurrencyType currency = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoiceCurrencyType();
-            currency.setCmdtyId("EUR");
+            currency.setCmdtyId(file.getDefaultCurrencyID());
             currency.setCmdtySpace("ISO4217");
             invoice.setInvoiceCurrency(currency);
         }
@@ -246,7 +245,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
                                                                 final ObjectFactory factory,
                                                                 final String invoiceID,
                                                                 final Date dueDate) throws JAXBException {
-        GnucashTransactionImpl postTransaction = new GnucashTransactionWritingImpl(file, file.createGUID());	
+        GnucashTransactionImpl postTransaction = new GnucashTransactionWritingImpl(file, file.createGUID());
 
         SlotsType slots = postTransaction.getJwsdpPeer().getTrnSlots();
 
@@ -411,11 +410,12 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
 
 
 
-        if (!isModifiable())
+        if (!isModifiable()) {
             throw new IllegalStateException("This Invoice has payments and is not modifiable!");
+        }
 
         this.subtractEntry(impl);
-        this.entries.remove(impl);
+        entries.remove(impl);
     }
 
 
@@ -429,9 +429,10 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
 System.err.println("GnucashInvoiceWritingImpl.addEntry " + entry.toString());
 
 
-        if (!isModifiable())
+        if (!isModifiable()) {
             throw new IllegalArgumentException("This invoice has payments and is"
                     + " thus not modifiable");
+        }
 
         super.addEntry(entry);
 
@@ -449,10 +450,11 @@ System.err.println("GnucashInvoiceWritingImpl.addEntry " + entry.toString());
 
         if (entry.isTaxable()) {
             taxtable = entry.getTaxTable();
-            if (taxtable == null)
+            if (taxtable == null) {
                 throw new IllegalArgumentException("The given entry has no tax-table (it's taxtable-id is '"
                         + entry.getJwsdpPeer().getEntryITaxtable().getValue()
                         + "')");
+            }
         }
 
 
@@ -486,9 +488,10 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
 
         if (entry.isTaxable()) {
             taxtable = entry.getTaxTable();
-            if (taxtable == null)
+            if (taxtable == null) {
                 throw new IllegalArgumentException("The given entry has no tax-table (it's taxtable-id is '"
                         + entry.getJwsdpPeer().getEntryITaxtable().getValue() + "')");
+            }
         }
 
 
@@ -522,7 +525,7 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
         if (isTaxable) {
 
             // get the first account of the taxTable
-            TaxTableEntry taxTableEntry = (TaxTableEntry) taxtable.getEntries().iterator().next();
+            TaxTableEntry taxTableEntry = taxtable.getEntries().iterator().next();
             GnucashAccount accountToTransferTaxTo =  taxTableEntry.getAccount();
             FixedPointNumber entryTaxAmount = ((FixedPointNumber) sumInclTaxes.clone()).subtract(sumExclTaxes);
 
@@ -537,8 +540,8 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
             //failed for subtractEntry assert entryTaxAmount.isPositive() || entryTaxAmount.equals(new FixedPointNumber());
 
             boolean postTransactionTaxUpdated = false;
-            for (Iterator iter = postTransaction.getSplits().iterator(); iter.hasNext();) {
-                GnucashTransactionSplitWritingImpl split = (GnucashTransactionSplitWritingImpl) iter.next();
+            for (Object element : postTransaction.getSplits()) {
+                GnucashTransactionSplitWritingImpl split = (GnucashTransactionSplitWritingImpl) element;
                 if (split.getAccountID().equals(accountToTransferTaxTo.getId())) {
 
 //quantity gets updated automagically                 split.setQuantity(split.getQuantity().subtract(entryTaxAmount));
@@ -614,8 +617,8 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
         System.err.println("GnucashInvoiceWritingImpl.updateNonTaxableEntry "
                 + " #slits=" + postTransaction.getSplits().size());
 
-        for (Iterator iter = postTransaction.getSplits().iterator(); iter.hasNext();) {
-            GnucashTransactionSplitWritingImpl split = (GnucashTransactionSplitWritingImpl) iter.next();
+        for (Object element : postTransaction.getSplits()) {
+            GnucashTransactionSplitWritingImpl split = (GnucashTransactionSplitWritingImpl) element;
             if (split.getAccountID().equals(accountToTransferMoneyTo)) {
 
 
@@ -655,8 +658,8 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
         // (e.g. "Forderungen aus Lieferungen und Leistungen")
 
         boolean postTransactionNetSumUpdated = false;
-        for (Iterator iter = postTransaction.getSplits().iterator(); iter.hasNext();) {
-            GnucashTransactionSplitWritingImpl split = (GnucashTransactionSplitWritingImpl) iter.next();
+        for (Object element : postTransaction.getSplits()) {
+            GnucashTransactionSplitWritingImpl split = (GnucashTransactionSplitWritingImpl) element;
             if (split.getAccountID().equals(accountToTransferMoneyFrom)) {
 
 
@@ -679,7 +682,7 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
        getFile().setModified(true);
     }
 
-	
+
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableInvoice#isModifiable()
@@ -693,8 +696,9 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
      * @see #isModifiable()
      */
     protected void atemptChange() {
-        if (!isModifiable())
+        if (!isModifiable()) {
             throw new IllegalStateException("this invoice is NOT changable because there are already payment for it made!");
+        }
     }
 
 
@@ -739,8 +743,9 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
 
         // change the date of the transaction too
         GnucashWritableTransaction postTr = getWritingPostTransaction();
-        if (postTr != null)
+        if (postTr != null) {
             postTr.setDatePosted(d);
+        }
     }
 
     /**
@@ -801,8 +806,9 @@ protected void subtractEntry(final GnucashInvoiceEntryImpl entry) throws JAXBExc
      */
     public void remove() throws JAXBException {
 
-        if (!isModifiable())
+        if (!isModifiable()) {
             throw new IllegalStateException("Invoice has payments and cannot be deleted!");
+        }
 
         // we copy the list because element.remove() modifies it
         Collection<GnucashInvoiceEntry> entries2 = new LinkedList<GnucashInvoiceEntry>();

@@ -17,21 +17,15 @@
  */
 package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
-import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransaction;
@@ -48,7 +42,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
     /**
      * Our helper to implement the GnucashWritableObject-interface.
      */
-    private GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
+    private final GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#setUserDefinedAttribute(java.lang.String, java.lang.String)
@@ -56,9 +50,9 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
     public void setUserDefinedAttribute(final String name, final String value) throws JAXBException {
         helper.setUserDefinedAttribute(name, value);
     }
-    
-    
-	
+
+
+
     /**
      * @param file the file we belong to
      * @param jwsdpPeer the JWSDP-object we are facading.
@@ -93,6 +87,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
      * @return the new split-instance
      * @throws JAXBException if we have issues with the XML-backend
      */
+    @Override
     protected GnucashTransactionSplitImpl createSplit(final GncTransactionType.TrnSplitsType.TrnSplitType element) throws JAXBException {
         GnucashTransactionSplitWritingImpl gnucashTransactionSplitWritingImpl = new GnucashTransactionSplitWritingImpl(element, this);
         if (getPropertyChangeSupport() != null) {
@@ -114,7 +109,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
         }
         return gnucashTransactionSplitWritingImpl;
     }
-    
+
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableTransaction#createWritingSplit(biz.wolschon.fileformats.gnucash.GnucashAccount)
      */
@@ -163,7 +158,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
 
         {
             GncTransactionType.TrnCurrencyType currency = factory.createGncTransactionTypeTrnCurrencyType();
-            currency.setCmdtyId("EUR");
+            currency.setCmdtyId(file.getDefaultCurrencyID());
             currency.setCmdtySpace("ISO4217");
             transaction.setTrnCurrency(currency);
         }
@@ -191,8 +186,9 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
     public void remove(final GnucashWritableTransactionSplit impl) throws JAXBException {
         getJwsdpPeer().getTrnSplits().getTrnSplit().remove(((GnucashTransactionSplitWritingImpl) impl).getJwsdpPeer());
         getWritingFile().setModified(true);
-        if (mySplits != null)
-           mySplits.remove(impl);
+        if (mySplits != null) {
+            mySplits.remove(impl);
+        }
         GnucashAccountWritingImpl account =  (GnucashAccountWritingImpl)
                            impl.getAccount();
         if (account != null) {
@@ -212,6 +208,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
      * @throws JAXBException if we have issues with the XML-backend
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableTransaction#getWritingFirstSplit()
      */
+    @Override
     public GnucashWritableTransactionSplit getFirstSplit() throws JAXBException {
         return (GnucashWritableTransactionSplit) super.getFirstSplit();
     }
@@ -229,7 +226,8 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
      * @throws JAXBException if we have issues with the XML-backend
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableTransaction#getWritingSecondSplit()
     */
-   public GnucashWritableTransactionSplit getSecondSplit() throws JAXBException {
+   @Override
+public GnucashWritableTransactionSplit getSecondSplit() throws JAXBException {
        return (GnucashWritableTransactionSplit) super.getSecondSplit();
    }
 
@@ -353,7 +351,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
             }
         }
     }
-    
+
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableTransaction#setTransactionNumber(java.lang.String)
      */
@@ -375,7 +373,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
 
 
 
-	
+
 
 
 }
