@@ -1,5 +1,5 @@
 /**
- * GnucashFile.java
+ * GnucashFile.java .
  * Created on 13.05.2005
  * (c) 2005 by "Wolschon Softwaredesign und Beratung".
  *
@@ -7,7 +7,7 @@
  * -----------------------------------------------------------
  * major Changes:
  *  13.05.2005 - initial version
- * ...
+ *  11.11.2008 - added getDefaultCurrencyID()
  *
  */
 package biz.wolschon.fileformats.gnucash;
@@ -43,7 +43,13 @@ public interface GnucashFile {
      * @return Returns the currencyTable.
      */
     ComplexCurrencyTable getCurrencyTable();
-
+    /**
+     * Use a heuristic to determine the  defaultcurrency-id.
+     * If we cannot find one, we default to EUR.<br/>
+     * Comodity-stace is fixed as "ISO4217" .
+     * @return the default-currencyID to use.
+     */
+    String getDefaultCurrencyID();
     /**
      * @param id id of a taxtable
      * @return the identified taxtable or null

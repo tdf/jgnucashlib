@@ -7,6 +7,7 @@
  * -----------------------------------------------------------
  * major Changes:
  *  13.05.2005 - initial version
+ *  11.11.2008 - using defaultCurrency from Gnucash-file
  * ...
  *
  */
@@ -55,6 +56,7 @@ import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccount;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncCountDataType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
@@ -569,32 +571,52 @@ public class GnucashFileImpl implements GnucashFile {
 
     }
 
+    /**
+     * Use a heuristic to determine the  defaultcurrency-id.
+     * If we cannot find one, we default to EUR.<br/>
+     * Comodity-stace is fixed as "ISO4217" .
+     * @return the default-currencyID to use.
+     */
+    @SuppressWarnings("unchecked")
+    public String getDefaultCurrencyID() {
+        GncV2 root = getRootElement();
+        if (root == null) {
+            return "EUR";
+        }
+        List<biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccount> gncAccounts = root.getGncBook().getGncAccount();
+        for (GncAccount gncAccount : gncAccounts) {
+            if (gncAccount.getActCommodity() != null
+                && gncAccount.getActCommodity().getCmdtySpace().equals("ISO4217")) {
+                return gncAccount.getActCommodity().getCmdtyId();
+            }
+        }
+        return "EUR";
+    }
 
-	/**
-	 * @param pRootElement
-	 */
-	private void loadPriceDatabase(final GncV2 pRootElement) {
-		if (pRootElement.getGncBook().getGncPricedb() == null) {
-        	//case: no priceDB in file
-        	getCurrencyTable().clear();
+    /**
+     * @param pRootElement
+     */
+    private void loadPriceDatabase(final GncV2 pRootElement) {
+        if (pRootElement.getGncBook().getGncPricedb() == null) {
+            //case: no priceDB in file
+            getCurrencyTable().clear();
         } else {
-        	if (pRootElement.getGncBook().getGncPricedb().getVersion() != 1) {
+            if (pRootElement.getGncBook().getGncPricedb().getVersion() != 1) {
 
-        		LOGGER.warn("We know only the format of the price-db 1, "
-        				+ "the file has version "
-        				+ pRootElement.getGncBook().getGncPricedb().getVersion()
-        				+ " prices will not be loaded!");
-        	} else {
-        	  //TODO: use base-currency from gnucash-file
-        		getCurrencyTable().clear();
-        		getCurrencyTable().setConversionFactor("ISO4217",
-        				"EUR",
-        				new FixedPointNumber(1));
+                LOGGER.warn("We know only the format of the price-db 1, "
+                        + "the file has version "
+                        + pRootElement.getGncBook().getGncPricedb().getVersion()
+                        + " prices will not be loaded!");
+            } else {
+                  getCurrencyTable().clear();
+                  getCurrencyTable().setConversionFactor("ISO4217",
+                          getDefaultCurrencyID(),
+                          new FixedPointNumber(1));
 
-        		for (Iterator iter = pRootElement.getGncBook()
-        				.getGncPricedb().getPrice().iterator(); iter.hasNext();) {
-        			GncV2Type.GncBookType.GncPricedbType.PriceType price = (GncV2Type.GncBookType.GncPricedbType.PriceType) iter.next();
-        			PriceCommodityType comodity = price.getPriceCommodity();
+                  for (Iterator iter = pRootElement.getGncBook()
+                          .getGncPricedb().getPrice().iterator(); iter.hasNext();) {
+                      GncV2Type.GncBookType.GncPricedbType.PriceType price = (GncV2Type.GncBookType.GncPricedbType.PriceType) iter.next();
+                      PriceCommodityType comodity = price.getPriceCommodity();
 
                     // check if we already have a latest price for this comodity
                     // (=currency, fund, ...)
@@ -602,11 +624,14 @@ public class GnucashFileImpl implements GnucashFile {
                             comodity.getCmdtyId()) != null) {
                         continue;
                     }
-//TODO: use base-currency from gnucash-file
+
+                    String baseCurrency = getDefaultCurrencyID();
                     if (comodity.getCmdtySpace().equals("ISO4217")
                             &&
-                            comodity.getCmdtyId().equals("EUR")) {
-                        LOGGER.warn("Ignoring price-quote for EUR because EUR is"
+                            comodity.getCmdtyId().equals(baseCurrency)) {
+                        LOGGER.warn("Ignoring price-quote for "
+                                + baseCurrency + " because "
+                                + baseCurrency + " is"
                                 + "our base-currency.");
                         continue;
                     }
@@ -645,8 +670,9 @@ public class GnucashFileImpl implements GnucashFile {
      * @param depth used for recursion. Allways call with '0'
      * @param used for aborting recursive quotes (quotes to other then the base-
      *        currency) we abort if the depth reached 6.
-     * @return the latest price-quote in the gnucash-file in EURO
+     * @return the latest price-quote in the gnucash-file in the default-currency
      * @see {@link GnucashFile#getLatestPrice(String, String)}
+     * @see #getDefaultCurrencyID()
      */
     private FixedPointNumber getLatestPrice(final String pCmdtySpace,
                                             final String pCmdtyId,
@@ -763,11 +789,12 @@ public class GnucashFileImpl implements GnucashFile {
                         factor = getLatestPrice(priceQuote.getPriceCurrency()
                                 .getCmdtySpace(), priceQuote.getPriceCurrency()
                                 .getCmdtyId(), depth + 1);
-                    } else { //TODO: use base-currency from gnucash-file
+                    } else {
                         if (!priceQuote.getPriceCurrency()
-                                .getCmdtyId().equals("EUR")) {
+                                .getCmdtyId().equals(getDefaultCurrencyID())) {
                             if (depth > 5) {
-                                LOGGER.warn("ignoring price-quote that is not in EUR "
+                                LOGGER.warn("ignoring price-quote that is not in "
+                                        + getDefaultCurrencyID() + " "
                                         + "but in  '"
                                         + priceQuote.getPriceCurrency().getCmdtyId());
                                 continue;

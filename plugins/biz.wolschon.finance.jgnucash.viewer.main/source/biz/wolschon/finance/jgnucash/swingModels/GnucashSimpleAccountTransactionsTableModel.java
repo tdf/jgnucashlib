@@ -39,13 +39,13 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     /**
      * The account who's transactions we are showing.
      */
-    private GnucashAccount account;
+    private final GnucashAccount account;
 
 
     /**
      * The columns we display.
      */
-    private String[] defaultColumnNames = new String[] {"date", "transaction", "description", "+", "-", "balance"};
+    private final String[] defaultColumnNames = new String[] {"date", "transaction", "description", "+", "-", "balance"};
 
     /**
      * @param account
@@ -61,7 +61,7 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
      */
     public GnucashSimpleAccountTransactionsTableModel() {
         super();
-        this.account = null;
+        account = null;
     }
 
     /**
@@ -77,7 +77,7 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
      * @see javax.swing.table.TableModel#getRowCount()
      */
     public int getRowCount() {
-        
+
         List<GnucashTransactionSplit> transactionSplits = getTransactionSplits();
         if(transactionSplits == null) {
             return 0;
@@ -123,7 +123,7 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
      */
     public static final  NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
 
-    
+
     /**
      * Get the TransactionsSplit at the given index.
      * Throws an exception if the index is invalid.
@@ -131,10 +131,10 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
      * @return the split
      */
     public GnucashTransactionSplit getTransactionSplit(final int rowIndex) {
-    	GnucashTransactionSplit split = (GnucashTransactionSplit)getTransactionSplits().get(rowIndex);
+    	GnucashTransactionSplit split = getTransactionSplits().get(rowIndex);
     	return split;
     }
-    
+
     /**
      *
      * @see javax.swing.table.TableModel#getValueAt(int, int)
@@ -150,31 +150,38 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
             }
             case 1: { //transaction
                 String desc = split.getTransaction().getDescription();
-                if(desc== null || desc.trim().length()==0)
+                if(desc== null || desc.trim().length()==0) {
                     return "";
+                }
                 return desc;
             }
             case 2: { //description
                 String desc = split.getDescription();
-                if(desc== null || desc.trim().length()==0)
+                if(desc== null || desc.trim().length()==0) {
                     return "";
+                }
                 return desc;
             }
             case 3: { // +
-              if(split.getValue().isPositive()) {
+              if (split.getValue().isPositive()) {
+                  //TODO: use default-currency here
                   if (account != null && !account.getCurrencyID().equals("EUR")) {
                       return split.getValueFormatet();
                   }
                return currencyFormat.format(split.getValue());
-              } else return "";
+              } else {
+                return "";
+            }
             }
             case 4: { // -
-                if(!split.getValue().isPositive()) {
+                if (!split.getValue().isPositive()) {
                     if (account != null && !account.getCurrencyID().equals("EUR")) {
                         return split.getValueFormatet();
                     }
                  return currencyFormat.format(split.getValue());
-                } else return "";
+                } else {
+                    return "";
+                }
               }
             case 5: { // balance
                 if (account != null) {
@@ -187,9 +194,9 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
                 throw new IllegalArgumentException("illegal columnIndex "+columnIndex);
             }
 
-            
+
         } catch(Exception x) {
-        	
+
         	String message = "Internal Error in "
     			+ getClass().getName() + ":getValueAt(int rowIndex="+
     			+ rowIndex
@@ -230,8 +237,8 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     /**
      * @see #addTableModelListener(TableModelListener)
      */
-    private Set<TableModelListener> myTableModelListeners = new HashSet<TableModelListener>();
- 
+    private final Set<TableModelListener> myTableModelListeners = new HashSet<TableModelListener>();
+
     /**
      *
      * @see javax.swing.table.TableModel#addTableModelListener(javax.swing.event.TableModelListener)

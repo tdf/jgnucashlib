@@ -5,19 +5,21 @@
  */
 package biz.wolschon.finance;
 
-//other imports
-import java.util.*;
 
 //automatically created logger for debug and error -output
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
-import biz.wolschon.numbers.FixedPointNumber;
-
-//automatically created propertyChangeListener-Support
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import biz.wolschon.fileformats.gnucash.GnucashFile;
+import biz.wolschon.numbers.FixedPointNumber;
 
 
 /**
@@ -28,35 +30,39 @@ import java.io.Serializable;
  *<br/>
  *
  * Currency-Table that can work with multiple namespaces.<br/>
- * By default "ISO4217"-"EUR" is added with the value 1. (to be used as a base.currency)
+ * By default "ISO4217"-GnucashFile.getDefaultCurrencyID() is added with the value 1. (to be used as a base.currency)
  *
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
+ * @see GnucashFile#getDefaultCurrencyID()
  */
 public class ComplexCurrencyTable extends SimpleCurrencyTable implements Serializable {
 
-	
+
 	public interface ComplexCurrencyTableChangeListener {
 		void conversionFactorChanged(final String namespace, final String currency, final FixedPointNumber factor);
 	}
-	
+
 	private transient volatile List<ComplexCurrencyTableChangeListener> listeners = null;
-	
+
 	public void addComplexCurrencyTableChangeListener(final ComplexCurrencyTableChangeListener listener) {
-		if (this.listeners == null)
-			this.listeners = new LinkedList<ComplexCurrencyTableChangeListener>();
-		this.listeners.add(listener);
+		if (listeners == null) {
+            listeners = new LinkedList<ComplexCurrencyTableChangeListener>();
+        }
+		listeners.add(listener);
 	}
 	public void removeComplexCurrencyTableChangeListener(final ComplexCurrencyTableChangeListener listener) {
-		if (this.listeners == null)
-			this.listeners = new LinkedList<ComplexCurrencyTableChangeListener>();
-		this.listeners.remove(listener);
+		if (listeners == null) {
+            listeners = new LinkedList<ComplexCurrencyTableChangeListener>();
+        }
+		listeners.remove(listener);
 	}
-	
+
 	protected void fireCurrencyTableChanged(final String namespace, final String currency, final FixedPointNumber factor) {
-		if (this.listeners != null)
-		for (ComplexCurrencyTableChangeListener listener : this.listeners) {
-			listener.conversionFactorChanged(namespace, currency, factor);
-		}		
+		if (listeners != null) {
+            for (ComplexCurrencyTableChangeListener listener : listeners) {
+            	listener.conversionFactorChanged(namespace, currency, factor);
+            }
+        }
 	}
 
     /**
@@ -144,6 +150,7 @@ private static final Log LOGGER = LogFactory.getLog(ComplexCurrencyTable.class);
  * and hashCode.
  * @return className and hashCode
  */
+@Override
 public String toString() {
     return "ComplexCurrencyTable@" + hashCode();
 }
@@ -154,8 +161,9 @@ public String toString() {
  * @param namespace the new namespace to add.
  */
 public void addNameSpace(final String namespace) {
-    if (getNamespace(namespace) != null)
+    if (getNamespace(namespace) != null) {
         return;
+    }
 
     SimpleCurrencyTable currencyTable = new SimpleCurrencyTable();
     currencyTable.clear();
@@ -169,8 +177,9 @@ public void addNameSpace(final String namespace) {
  */
 public void addNameSpace(final String namespace,
                          final SimpleCurrencyTable values) {
-    if (namespace2CurrencyTable == null)
-        namespace2CurrencyTable = new HashMap();
+    if (namespace2CurrencyTable == null) {
+        namespace2CurrencyTable = new HashMap<String, SimpleCurrencyTable>();
+    }
     namespace2CurrencyTable.put(namespace, values);
 }
 
@@ -179,19 +188,23 @@ public void addNameSpace(final String namespace,
 /**
  * @see biz.wolschon.finance.SimpleCurrencyTable#clear()
  */
+@Override
 public void clear() {
     super.clear();
-    if (namespace2CurrencyTable == null)
+    if (namespace2CurrencyTable == null) {
         namespace2CurrencyTable = new HashMap();
+    }
     namespace2CurrencyTable.clear();
 }
 
 /**
  * @see biz.wolschon.finance.SimpleCurrencyTable#convertFromBaseCurrency(biz.wolschon.numbers.FixedPointNumber, java.lang.String)
  */
+@Override
 public boolean convertFromBaseCurrency(FixedPointNumber pValue, String pIso4217CurrencyCode) {
-    if (pIso4217CurrencyCode == null)
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
+    }
 
     return convertFromBaseCurrency("ISO4217", pValue, pIso4217CurrencyCode);
 }
@@ -204,15 +217,18 @@ public boolean convertToBaseCurrency(final String namespace,
                                         final FixedPointNumber pValue,
                                         final String pIso4217CurrencyCode) {
 
-    if (namespace == null)
+    if (namespace == null) {
         throw new IllegalArgumentException("null namepace given!");
-    if (pIso4217CurrencyCode == null)
+    }
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
+    }
 
     SimpleCurrencyTable table = getNamespace(namespace);
 
-    if (table == null)
+    if (table == null) {
         return false;
+    }
 
     return table.convertToBaseCurrency(pValue, pIso4217CurrencyCode);
 }
@@ -225,15 +241,18 @@ public boolean convertFromBaseCurrency(final String namespace,
                                         final FixedPointNumber pValue,
                                         final String pIso4217CurrencyCode) {
 
-    if (namespace == null)
+    if (namespace == null) {
         throw new IllegalArgumentException("null namepace given!");
-    if (pIso4217CurrencyCode == null)
+    }
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
+    }
 
     SimpleCurrencyTable table = getNamespace(namespace);
 
-    if (table == null)
+    if (table == null) {
         return false;
+    }
 
     return table.convertFromBaseCurrency(pValue, pIso4217CurrencyCode);
 }
@@ -241,35 +260,42 @@ public boolean convertFromBaseCurrency(final String namespace,
 /**
  * @see biz.wolschon.finance.SimpleCurrencyTable#convertToBaseCurrency(biz.wolschon.numbers.FixedPointNumber, java.lang.String)
  */
+@Override
 public boolean convertToBaseCurrency(final FixedPointNumber pValue,
                                      final String pIso4217CurrencyCode) {
-    if (pIso4217CurrencyCode == null)
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
+    }
     return convertToBaseCurrency("ISO4217", pValue, pIso4217CurrencyCode);
 }
 
 /**
  * @see biz.wolschon.finance.SimpleCurrencyTable#getConversionFactor(java.lang.String)
  */
+@Override
 public FixedPointNumber getConversionFactor(final String pIso4217CurrencyCode) {
-    if (pIso4217CurrencyCode == null)
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
+    }
     return getConversionFactor("ISO4217", pIso4217CurrencyCode);
 }
 
 /**
  * @see biz.wolschon.finance.SimpleCurrencyTable#setConversionFactor(java.lang.String, biz.wolschon.numbers.FixedPointNumber)
  */
+@Override
 public void setConversionFactor(final String pIso4217CurrencyCode,
                                 final FixedPointNumber pFactor) {
 
-    if (pIso4217CurrencyCode == null)
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
-    if (pFactor == null)
+    }
+    if (pFactor == null) {
         throw new IllegalArgumentException("null conversion-factor given!");
+    }
 
     setConversionFactor("ISO4217", pIso4217CurrencyCode, pFactor);
-    
+
     fireCurrencyTableChanged("ISO4217", pIso4217CurrencyCode, pFactor);
 }
 
@@ -281,12 +307,15 @@ public void setConversionFactor(final String namespace,
                                 final String pIso4217CurrencyCode,
                                 final FixedPointNumber pFactor) {
 
-    if (namespace == null)
+    if (namespace == null) {
         throw new IllegalArgumentException("null namepace given!");
-    if (pIso4217CurrencyCode == null)
+    }
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
-    if (pFactor == null)
+    }
+    if (pFactor == null) {
         throw new IllegalArgumentException("null conversion-factor given!");
+    }
 
     SimpleCurrencyTable table = getNamespace(namespace);
     if (table == null) {
@@ -295,7 +324,7 @@ public void setConversionFactor(final String namespace,
     }
 
     table.setConversionFactor(pIso4217CurrencyCode, pFactor);
-    
+
     fireCurrencyTableChanged(namespace, pIso4217CurrencyCode, pFactor);
 }
 
@@ -305,8 +334,9 @@ public void setConversionFactor(final String namespace,
 public FixedPointNumber getConversionFactor(final String namespace,
                                 final String pIso4217CurrencyCode) {
 
-    if (pIso4217CurrencyCode == null)
+    if (pIso4217CurrencyCode == null) {
         throw new IllegalArgumentException("null currency-id given!");
+    }
 
     SimpleCurrencyTable table = getNamespace(namespace);
     if (table == null) {
@@ -318,9 +348,10 @@ public FixedPointNumber getConversionFactor(final String namespace,
 
 
 public Collection<String> getNameSpaces() {
-	if (namespace2CurrencyTable == null)
-        namespace2CurrencyTable = new HashMap();
-	
+	if (namespace2CurrencyTable == null) {
+        namespace2CurrencyTable = new HashMap<String, SimpleCurrencyTable>();
+    }
+
 	return namespace2CurrencyTable.keySet();
 }
 
@@ -329,13 +360,15 @@ public Collection<String> getNameSpaces() {
  * @return
  */
 protected SimpleCurrencyTable getNamespace(String namespace) {
-    if (namespace == null)
+    if (namespace == null) {
         throw new IllegalArgumentException("null namepace given!");
+    }
 
-    if (namespace2CurrencyTable == null)
-        namespace2CurrencyTable = new HashMap();
+    if (namespace2CurrencyTable == null) {
+        namespace2CurrencyTable = new HashMap<String, SimpleCurrencyTable>();
+    }
 
-    return (SimpleCurrencyTable) namespace2CurrencyTable.get(namespace);
+    return namespace2CurrencyTable.get(namespace);
 }
 
 /**
@@ -351,10 +384,10 @@ public ComplexCurrencyTable() {
  * @param pNamespace
  */
 public Collection<String> getCurrencies(final String pNamespace) {
-	SimpleCurrencyTable namespace = getNamespace(pNamespace);
-	if (namespace == null) {
-		return new HashSet<String>();
-	}
-	return namespace.getCurrencies();
+    SimpleCurrencyTable namespace = getNamespace(pNamespace);
+    if (namespace == null) {
+        return new HashSet<String>();
+    }
+    return namespace.getCurrencies();
 }
 }
