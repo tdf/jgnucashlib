@@ -42,6 +42,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -177,18 +178,18 @@ public class TransactionSum extends JPanel {
     /**
      * The label that contains the sum.
      */
-    private JLabel mySumLabel = new JLabel();
+    private final JLabel mySumLabel = new JLabel();
     /**
      * The label that contains the name
      * to display left of the sum.
      */
-    private JLabel myNameLabel = new JLabel();
+    private final JLabel myNameLabel = new JLabel();
     /**
      * The label to display a link
      * for a drilldown to the list of
      * transactions covered.
      */
-    private JLabel myDrilldownLabel = new JLabel();
+    private final JLabel myDrilldownLabel = new JLabel();
 
     /**
      * @param books The financial data we operate on.
@@ -290,8 +291,13 @@ public class TransactionSum extends JPanel {
 
         ////////////////////////////////////
         // set output
-        mySumLabel.setText(sum.toString() + ""
-                + targetAccounts.iterator().next().getCurrencyID());
+        Iterator<GnucashAccount> iterator = targetAccounts.iterator();
+        if (iterator.hasNext()) {
+            mySumLabel.setText(sum.toString() + ""
+                    + iterator.next().getCurrencyID());
+        } else {
+            mySumLabel.setText("no account");
+        }
     }
 
     /**
@@ -353,6 +359,7 @@ public class TransactionSum extends JPanel {
      *
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(
             final PropertyChangeListener listener) {
         if (myPropertyChange == null) {
@@ -369,6 +376,7 @@ public class TransactionSum extends JPanel {
      * @param propertyName  The name of the property to listen on.
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(final String propertyName,
             final PropertyChangeListener listener) {
         if (myPropertyChange == null) {
@@ -383,6 +391,7 @@ public class TransactionSum extends JPanel {
      * @param propertyName  The name of the property that was listened on.
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public final void removePropertyChangeListener(final String propertyName,
             final PropertyChangeListener listener) {
         if (myPropertyChange != null) {
@@ -398,6 +407,7 @@ public class TransactionSum extends JPanel {
      *
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public final synchronized void removePropertyChangeListener(
             final PropertyChangeListener listener) {
         if (myPropertyChange != null) {
