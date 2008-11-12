@@ -327,259 +327,259 @@ public class TransactionsPanel extends JPanel {
        return transactionTable;
    }
 
-	/**
-	 * This method initializes selectionSummaryLabel.
-	 *
-	 * @return JLabel
-	 */
-	private JLabel getSelectionSummaryLabel() {
-		if (selectionSummaryLabel == null) {
-			selectionSummaryLabel = new JLabel();
-			selectionSummaryLabel.setText("");
-		}
-		return selectionSummaryLabel;
-	}
+   /**
+    * This method initializes selectionSummaryLabel.
+    *
+    * @return JLabel
+    */
+   private JLabel getSelectionSummaryLabel() {
+       if (selectionSummaryLabel == null) {
+           selectionSummaryLabel = new JLabel();
+           selectionSummaryLabel.setText("");
+       }
+       return selectionSummaryLabel;
+   }
 
-	/**
-	 * This method initializes selectionSummaryLabel.
-	 *
-	 * @return JLabel
-	 */
-	private JComboBox getSelectionSummaryAccountComboBox() {
-		if (selectionSummaryAccountComboBox == null) {
-			selectionSummaryAccountComboBox = new JComboBox();
-			selectionSummaryAccountComboBox.setEditable(false);
-			selectionSummaryAccountComboBox.addItemListener(new ItemListener() {
-				public void itemStateChanged(final java.awt.event.ItemEvent e) {
-				    updateSelectionSummary();
-				};
-			});
-		}
-		return selectionSummaryAccountComboBox;
-	}
+   /**
+    * This method initializes selectionSummaryLabel.
+    *
+    * @return JLabel
+    */
+   private JComboBox getSelectionSummaryAccountComboBox() {
+       if (selectionSummaryAccountComboBox == null) {
+           selectionSummaryAccountComboBox = new JComboBox();
+           selectionSummaryAccountComboBox.setEditable(false);
+           selectionSummaryAccountComboBox.addItemListener(new ItemListener() {
+               public void itemStateChanged(final java.awt.event.ItemEvent e) {
+                   updateSelectionSummary();
+               };
+           });
+       }
+       return selectionSummaryAccountComboBox;
+   }
 
-	/**
-	 * This method initializes selectionSummaryPanel.
-	 *
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getSelectionSummaryPanel() {
-		if (selectionSummaryPanel == null) {
-			selectionSummaryPanel = new JPanel();
-			selectionSummaryPanel.setLayout(new BorderLayout());
-			selectionSummaryPanel.add(getSelectionSummaryLabel(),
-					BorderLayout.CENTER);
-			selectionSummaryPanel.add(getSelectionSummaryAccountComboBox(),
-					BorderLayout.SOUTH);
-		}
-		return selectionSummaryPanel;
-	}
+   /**
+    * This method initializes selectionSummaryPanel.
+    *
+    * @return javax.swing.JPanel
+    */
+   private JPanel getSelectionSummaryPanel() {
+       if (selectionSummaryPanel == null) {
+           selectionSummaryPanel = new JPanel();
+           selectionSummaryPanel.setLayout(new BorderLayout());
+           selectionSummaryPanel.add(getSelectionSummaryLabel(),
+                   BorderLayout.CENTER);
+           selectionSummaryPanel.add(getSelectionSummaryAccountComboBox(),
+                   BorderLayout.SOUTH);
+       }
+       return selectionSummaryPanel;
+   }
 
-	/**
+    /**
      * This method initializes ShowTransactionPanel.
      *
      * @return javax.swing.JPanel
      */
-	protected ShowTransactionPanel getSingleTransactionPanel() {
-	    if (mySingleTransactionPanel == null) {
-	        mySingleTransactionPanel = new ShowTransactionPanel();
-        }
-        return mySingleTransactionPanel;
-	}
+   protected ShowTransactionPanel getSingleTransactionPanel() {
+       if (mySingleTransactionPanel == null) {
+           mySingleTransactionPanel = new ShowTransactionPanel();
+       }
+       return mySingleTransactionPanel;
+   }
 
 
-	/**
-	 * Put all accounts into the model of
-	 * the selectionSummaryAccountComboBox.
-	 */
-	private void updateSelectionSummaryAccountList() {
+   /**
+    * Put all accounts into the model of
+    * the selectionSummaryAccountComboBox.
+    */
+   private void updateSelectionSummaryAccountList() {
 
-		Set<GnucashAccount> accounts = new TreeSet<GnucashAccount>();
+       Set<GnucashAccount> accounts = new TreeSet<GnucashAccount>();
 
-		int selectedCount = getTransactionTable().getSelectedRowCount();
-		if (selectedCount < 1) {
-			// get all accounts of all splits
-			int count = model.getRowCount();
+       int selectedCount = getTransactionTable().getSelectedRowCount();
+       if (selectedCount < 1) {
+           // get all accounts of all splits
+           int count = model.getRowCount();
 
-			for (int i=0; i<count; i++) {
-				GnucashTransactionSplit transactionSplit =
-					model.getTransactionSplit(i);
+           for (int i=0; i<count; i++) {
+               GnucashTransactionSplit transactionSplit =
+                   model.getTransactionSplit(i);
 
-				try {
-                    Collection<? extends GnucashTransactionSplit> splits =
-                    	transactionSplit.getTransaction().getSplits();
-                    for (GnucashTransactionSplit split : splits) {
-                    	try {
-                    		GnucashAccount account = split.getAccount();
-                    		if (account != null) {
-                    			if (!accounts.contains(account)) {
-                                    accounts.add(account);
-                                }
-                    		}
-                    	} catch( Exception x) {
-                    		System.err.println("Ignoring account in "
-                    				+ "TransactionPanel::updateSelectionSummary"
-                    				+ "AccountList() because of:");
-                    		x.printStackTrace(System.err);
-                    	}
-                    }
-                } catch (JAXBException e) {
-                    LOGGER.error("[JAXBException] Problem in "
-                               + getClass().getName(),
-                                 e);
-                }
-			}
-		} else {
-			// show a summary only for the selected transactions
-			int[] selectedRows = getTransactionTable().getSelectedRows();
+               try {
+                   Collection<? extends GnucashTransactionSplit> splits =
+                       transactionSplit.getTransaction().getSplits();
+                   for (GnucashTransactionSplit split : splits) {
+                       try {
+                           GnucashAccount account = split.getAccount();
+                           if (account != null) {
+                               if (!accounts.contains(account)) {
+                                   accounts.add(account);
+                               }
+                           }
+                       } catch( Exception x) {
+                           System.err.println("Ignoring account in "
+                                   + "TransactionPanel::updateSelectionSummary"
+                                   + "AccountList() because of:");
+                           x.printStackTrace(System.err);
+                       }
+                   }
+               } catch (JAXBException e) {
+                   LOGGER.error("[JAXBException] Problem in "
+                              + getClass().getName(),
+                                e);
+               }
+           }
+       } else {
+           // show a summary only for the selected transactions
+           int[] selectedRows = getTransactionTable().getSelectedRows();
 
-			for (int selectedRow : selectedRows) {
-				GnucashTransactionSplit             transactionSplit = model.getTransactionSplit(selectedRow);
-				try {
-                    Collection<? extends GnucashTransactionSplit> splits = transactionSplit.getTransaction().getSplits();
-                    for (GnucashTransactionSplit split : splits) {
-                    	if (!accounts.contains(split.getAccount())) {
-                    		accounts.add(split.getAccount());
-                    	}
-                    }
-                } catch (JAXBException e) {
-                    LOGGER.error("[JAXBException] Problem in "
-                               + getClass().getName(),
-                                 e);
-                }
-			}
-		}
-
-
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		for (GnucashAccount account : accounts) {
-			model.addElement(account);
-		}
-
-		JComboBox list = getSelectionSummaryAccountComboBox();
-		list.setModel(model);
-		list.setSelectedIndex(-1);
-	}
+           for (int selectedRow : selectedRows) {
+               GnucashTransactionSplit             transactionSplit = model.getTransactionSplit(selectedRow);
+               try {
+                   Collection<? extends GnucashTransactionSplit> splits = transactionSplit.getTransaction().getSplits();
+                   for (GnucashTransactionSplit split : splits) {
+                       if (!accounts.contains(split.getAccount())) {
+                           accounts.add(split.getAccount());
+                       }
+                   }
+               } catch (JAXBException e) {
+                   LOGGER.error("[JAXBException] Problem in "
+                              + getClass().getName(),
+                                e);
+               }
+           }
+       }
 
 
-	/**
-	 * If the user has selected an account to display a summary for,
-	 * we add all splits of the given split's transaction that have
-	 * that account. If nothing is selected, we add the given split.
-	 * @param retval the list of splits to add to
-	 * @param split the split who's transaction to look at
-	 * @throws JAXBException if we have issues accessing the XML-Backend.
-	 */
-	private void replaceSplitsWithSelectedAccountsSplits(
-			final Set<GnucashTransactionSplit> retval,
-			final GnucashTransactionSplit split) throws JAXBException {
+       DefaultComboBoxModel model = new DefaultComboBoxModel();
+       for (GnucashAccount account : accounts) {
+           model.addElement(account);
+       }
 
-		JComboBox combo = getSelectionSummaryAccountComboBox();
-		GnucashAccount selectedAccount =
-			(GnucashAccount) combo.getSelectedItem();
-		if (selectedAccount == null) {
-			retval.add(split);
-		} else {
-			GnucashTransaction transaction = split.getTransaction();
-			for (GnucashTransactionSplit split2 : transaction.getSplits()) {
-				if (split2 == null) {
-					continue;
-				}
-				GnucashAccount account = split2.getAccount();
-				if (account != null && account.equals(selectedAccount)) {
-					retval.add(split2);
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * If the user has selected an account to display a summary for,
-	 * we return All splits of the selected transactions that are
-	 * for that account. Else we return all selected Splits.
-	 * If no Splits are selected, we use all splits as the selected<
-	 * ones.
-	 * @return the splits of the selected/all transactions featuring this/the
-	 *         selected account.
-	 * @throws JAXBException if we have issues accessing the XML-Backend.
-	 */
-	private Collection<GnucashTransactionSplit> getSplitsForSummary() throws JAXBException {
-		int[] selectedRows = getTransactionTable().getSelectedRows();
-		Set<GnucashTransactionSplit> retval
-		= new HashSet<GnucashTransactionSplit>();
-
-		if (selectedRows == null || selectedRows.length == 0) {
-			int count = model.getRowCount();
-			for (int i = 0; i < count; i++) {
-				GnucashTransactionSplit transactionSplit
-				= model.getTransactionSplit(i);
-				replaceSplitsWithSelectedAccountsSplits(retval,
-						transactionSplit);
-			}
-		} else {
-			for (int selectedRow : selectedRows) {
-				GnucashTransactionSplit transactionSplit
-				= model.getTransactionSplit(selectedRow);
-				replaceSplitsWithSelectedAccountsSplits(retval,
-						transactionSplit);
-			}
-		}
-
-		return retval;
-	}
-
-	/**
-	 * Update the text in the selectionSummaryLabel
-	 * to show summary-information about the currently
-	 * selected transactions.
-	 * @throws JAXBException if we have issues accessing the XML-Backend.
-	 */
-	private void updateSelectionSummary() {
-
-		int selectedCount = getTransactionTable().getSelectedRowCount();
-		FixedPointNumber valueSumPlus = new FixedPointNumber(0);
-		FixedPointNumber valueSumMinus = new FixedPointNumber(0);
-		FixedPointNumber valueSumBalance = new FixedPointNumber(0);
-		NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
-
-		Collection<GnucashTransactionSplit> splits;
-        try {
-            splits = getSplitsForSummary();
-        } catch (JAXBException e) {
-            LOGGER.error("[JAXBException] Problem in "
-                       + getClass().getName(),
-                         e);
-            getSelectionSummaryLabel().setText("ERROR [JAXBException]: " + e.getMessage());
-            return;
-        }
-
-		for (GnucashTransactionSplit transactionSplit : splits) {
-			FixedPointNumber value = transactionSplit.getValue();
-			valueSumBalance.add(value);
-			if (value.isPositive()) {
-				valueSumPlus.add(value);
-			} else {
-				valueSumMinus.add(value);
-			}
-		}
+       JComboBox list = getSelectionSummaryAccountComboBox();
+       list.setModel(model);
+       list.setSelectedIndex(-1);
+   }
 
 
-		if (selectedCount < 1) {
-			// show a summary for all transactions displayed
-			int count = model.getRowCount();
-			getSelectionSummaryLabel().setText(count + " transactions "
-					+ currencyFormat.format(valueSumPlus)
-					+ currencyFormat.format(valueSumMinus)
-					+ "=" + currencyFormat.format(valueSumBalance));
-		} else {
-			// show a summary only for the selected transactions
-			getSelectionSummaryLabel().setText(selectedCount
-					+ " transactions selected "
-					+ currencyFormat.format(valueSumPlus)
-					+ currencyFormat.format(valueSumMinus)
-					+ "=" + currencyFormat.format(valueSumBalance));
-		}
+   /**
+    * If the user has selected an account to display a summary for,
+    * we add all splits of the given split's transaction that have
+    * that account. If nothing is selected, we add the given split.
+    * @param retval the list of splits to add to
+    * @param split the split who's transaction to look at
+    * @throws JAXBException if we have issues accessing the XML-Backend.
+    */
+   private void replaceSplitsWithSelectedAccountsSplits(
+           final Set<GnucashTransactionSplit> retval,
+           final GnucashTransactionSplit split) throws JAXBException {
 
-	}
+       JComboBox combo = getSelectionSummaryAccountComboBox();
+       GnucashAccount selectedAccount =
+           (GnucashAccount) combo.getSelectedItem();
+       if (selectedAccount == null) {
+           retval.add(split);
+       } else {
+           GnucashTransaction transaction = split.getTransaction();
+           for (GnucashTransactionSplit split2 : transaction.getSplits()) {
+               if (split2 == null) {
+                   continue;
+               }
+               GnucashAccount account = split2.getAccount();
+               if (account != null && account.equals(selectedAccount)) {
+                   retval.add(split2);
+               }
+           }
+       }
+
+   }
+
+   /**
+    * If the user has selected an account to display a summary for,
+    * we return All splits of the selected transactions that are
+    * for that account. Else we return all selected Splits.
+    * If no Splits are selected, we use all splits as the selected<
+    * ones.
+    * @return the splits of the selected/all transactions featuring this/the
+    *         selected account.
+    * @throws JAXBException if we have issues accessing the XML-Backend.
+    */
+   private Collection<GnucashTransactionSplit> getSplitsForSummary() throws JAXBException {
+       int[] selectedRows = getTransactionTable().getSelectedRows();
+       Set<GnucashTransactionSplit> retval
+       = new HashSet<GnucashTransactionSplit>();
+
+       if (selectedRows == null || selectedRows.length == 0) {
+           int count = model.getRowCount();
+           for (int i = 0; i < count; i++) {
+               GnucashTransactionSplit transactionSplit
+               = model.getTransactionSplit(i);
+               replaceSplitsWithSelectedAccountsSplits(retval,
+                       transactionSplit);
+           }
+       } else {
+           for (int selectedRow : selectedRows) {
+               GnucashTransactionSplit transactionSplit
+               = model.getTransactionSplit(selectedRow);
+               replaceSplitsWithSelectedAccountsSplits(retval,
+                       transactionSplit);
+           }
+       }
+
+       return retval;
+   }
+
+   /**
+    * Update the text in the selectionSummaryLabel
+    * to show summary-information about the currently
+    * selected transactions.
+    * @throws JAXBException if we have issues accessing the XML-Backend.
+    */
+   private void updateSelectionSummary() {
+
+       int selectedCount = getTransactionTable().getSelectedRowCount();
+       FixedPointNumber valueSumPlus = new FixedPointNumber(0);
+       FixedPointNumber valueSumMinus = new FixedPointNumber(0);
+       FixedPointNumber valueSumBalance = new FixedPointNumber(0);
+       NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+
+       Collection<GnucashTransactionSplit> splits;
+       try {
+           splits = getSplitsForSummary();
+       } catch (JAXBException e) {
+           LOGGER.error("[JAXBException] Problem in "
+                      + getClass().getName(),
+                        e);
+           getSelectionSummaryLabel().setText("ERROR [JAXBException]: " + e.getMessage());
+           return;
+       }
+
+       for (GnucashTransactionSplit transactionSplit : splits) {
+           FixedPointNumber value = transactionSplit.getValue();
+           valueSumBalance.add(value);
+           if (value.isPositive()) {
+               valueSumPlus.add(value);
+           } else {
+               valueSumMinus.add(value);
+           }
+       }
+
+
+       if (selectedCount < 1) {
+           // show a summary for all transactions displayed
+           int count = model.getRowCount();
+           getSelectionSummaryLabel().setText(count + " transactions "
+                   + currencyFormat.format(valueSumPlus)
+                   + currencyFormat.format(valueSumMinus)
+                   + "=" + currencyFormat.format(valueSumBalance));
+       } else {
+           // show a summary only for the selected transactions
+           getSelectionSummaryLabel().setText(selectedCount
+                   + " transactions selected "
+                   + currencyFormat.format(valueSumPlus)
+                   + currencyFormat.format(valueSumMinus)
+                   + "=" + currencyFormat.format(valueSumBalance));
+       }
+
+   }
 }
