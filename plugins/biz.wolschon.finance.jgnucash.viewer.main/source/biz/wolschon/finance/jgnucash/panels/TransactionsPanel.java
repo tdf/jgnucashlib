@@ -220,7 +220,7 @@ public class TransactionsPanel extends JPanel {
     *
     * @return javax.swing.JTable
     */
-   private JTable getTransactionTable() {
+   protected JTable getTransactionTable() {
        if (transactionTable == null) {
            transactionTable = new JTable() {
 
