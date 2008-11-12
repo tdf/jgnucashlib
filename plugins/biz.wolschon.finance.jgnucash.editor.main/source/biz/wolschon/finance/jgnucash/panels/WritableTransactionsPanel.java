@@ -59,14 +59,15 @@ public class WritableTransactionsPanel extends TransactionsPanel {
     public WritableTransactionsPanel() {
         super();
     }
-    
+
     /**
      * @param account if null, an empty table will be shown.
-	 */
-	 public WritableTransactionsPanel(final GnucashAccount account) {
-		 super();
-		 setAccount(account);
-	 }
+     */
+     public WritableTransactionsPanel(final GnucashAccount account) {
+         super();
+         setAccount(account);
+         //TODO: add context-menu
+     }
 
 
     //TODO: override tableModel to allow editing by the user of transaction-descriptions+dates and split-values for transactions with exactly 2 splits.
@@ -87,6 +88,7 @@ public class WritableTransactionsPanel extends TransactionsPanel {
      * and hashCode.
      * @return className and hashCode
      */
+    @Override
     public String toString() {
         return "WritableTransactionsPanel@" + hashCode();
     }
@@ -109,7 +111,7 @@ public class WritableTransactionsPanel extends TransactionsPanel {
      */
     protected ShowTransactionPanel getSingleWritableTransactionPanel() {
         if (mySingleWritableTransactionPanel == null) {
-            mySingleWritableTransactionPanel = new ShowWritableTransactionPanel(); 
+            mySingleWritableTransactionPanel = new ShowWritableTransactionPanel();
         }
         return mySingleWritableTransactionPanel;
     }
