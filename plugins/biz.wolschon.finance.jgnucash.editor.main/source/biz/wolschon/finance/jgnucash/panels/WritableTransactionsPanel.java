@@ -33,7 +33,11 @@ package biz.wolschon.finance.jgnucash.panels;
 //other imports
 
 //automatically created logger for debug and error -output
+import java.awt.Component;
 import java.util.logging.Logger;
+
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 
@@ -48,10 +52,15 @@ import biz.wolschon.fileformats.gnucash.GnucashAccount;
  * WritableTransactionsPanel.java<br/>
  * created: 21.09.2008 07:49:55 <br/>
  *<br/><br/>
- * <b>Variant of TransactionsPanel that allows editing the transactions.</a>
+ * <b>Variant of TransactionsPanel that allows editing the transactions.</b>
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public class WritableTransactionsPanel extends TransactionsPanel {
+
+    /**
+     * the context-menu for the transactionTable.
+     */
+    private JPopupMenu myContextMenu;
 
     /**
      *
@@ -66,7 +75,6 @@ public class WritableTransactionsPanel extends TransactionsPanel {
      public WritableTransactionsPanel(final GnucashAccount account) {
          super();
          setAccount(account);
-         //TODO: add context-menu
      }
 
 
@@ -193,6 +201,28 @@ public class WritableTransactionsPanel extends TransactionsPanel {
 //    }
 //
 //    //-------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see biz.wolschon.finance.jgnucash.panels.TransactionsPanel#getTransactionTable()
+     */
+    @Override
+    protected JTable getTransactionTable() {
+        JTable transactionTable = super.getTransactionTable();
+        transactionTable.add(getTransactionTableContextMenu());
+        return transactionTable;
+    }
+
+   /**
+    * @return the context-menu for the transactionTable.
+    * @see #getTransactionTable()
+    */
+   private Component getTransactionTableContextMenu() {
+       if (myContextMenu == null) {
+           myContextMenu = new JPopupMenu();
+           // TODO add plugins
+       }
+       return myContextMenu;
+   }
 
 }
 
