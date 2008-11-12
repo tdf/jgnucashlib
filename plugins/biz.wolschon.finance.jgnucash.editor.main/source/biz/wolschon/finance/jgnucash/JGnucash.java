@@ -247,7 +247,9 @@ public class JGnucash extends JGnucashViewer {
                             message.toString(),
                             "Plugins-Report",
                             JOptionPane.INFORMATION_MESSAGE);
-                }});
+                }
+                }
+            );
         }
         return helpPluginReport;
     }
@@ -270,7 +272,7 @@ public class JGnucash extends JGnucashViewer {
      */
     protected WritableTransactionsPanel getWritableTransactionsPanel() {
         if (writableTransactionsPanel == null) {
-            writableTransactionsPanel = new WritableTransactionsPanel();
+            writableTransactionsPanel = new WritableTransactionsPanel(getPluginManager(), getPluginDescriptor());
         }
         return writableTransactionsPanel;
     }

@@ -36,7 +36,7 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
-import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
+import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
 
 
 /**
@@ -57,5 +57,5 @@ public interface TransactionMenuAction {
      * @throws JAXBException on backend-issues
      * @throws IOException on comunication-issues
      */
-    void handleSelectedTransactions(final Collection<GnucashWritableTransaction> transactions) throws JAXBException, IOException;
+    void handleSelectedTransactions(final Collection<GnucashWritableTransactionSplit> transactions) throws JAXBException, IOException;
 }

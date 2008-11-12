@@ -5,12 +5,19 @@
 package biz.wolschon.fileformats.gnucash.baseclasses;
 
 //other imports
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Currency;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
-//automatically created logger for debug and error -output
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
@@ -18,10 +25,6 @@ import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.finance.ComplexCurrencyTable;
 import biz.wolschon.numbers.FixedPointNumber;
-
-//automatically created propertyChangeListener-Support
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 
 
 /**
@@ -35,20 +38,20 @@ import java.beans.PropertyChangeSupport;
  * @author <a href="Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public abstract class SimpleAccount  implements GnucashAccount {
-	
-	
+
+
 
 	/**
      * Our logger for debug- and error-ourput.
      */
     private static final Log LOGGER = LogFactory.getLog(SimpleAccount.class);
-    
+
 
     /**
      * The file we belong to.
      */
-    private GnucashFile myFile;
-    
+    private final GnucashFile myFile;
+
     /**
      * @param slots ${@link #mySlots}
      * @param myFile The file we belong to
@@ -58,7 +61,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
         this.myFile = myFile;
     }
 
-    
+
 
     /**
      * The returned list ist sorted by the natural order of the Transaction-Splits.
@@ -69,15 +72,15 @@ public abstract class SimpleAccount  implements GnucashAccount {
          List<GnucashTransactionSplit> splits = getTransactionSplits();
          List<GnucashTransaction> retval = new ArrayList<GnucashTransaction>(splits.size());
 
-         for (Iterator iter = splits.iterator(); iter.hasNext();) {
-             GnucashTransactionSplit split = (GnucashTransactionSplit) iter.next();
+         for (Object element : splits) {
+             GnucashTransactionSplit split = (GnucashTransactionSplit) element;
              retval.add(split.getTransaction());
          }
 
          return retval;
      }
 
-	
+
 
      /**
       * @return Returns the file.
@@ -86,23 +89,26 @@ public abstract class SimpleAccount  implements GnucashAccount {
      public GnucashFile getFile() {
          return myFile;
      }
-	
+
     /**
      * @param account the account to test
      * @return true if this is a child of us or any child's or us.
      */
     public boolean isChildAccountRecursive(final GnucashAccount account) {
 
-        if (this == account)
+        if (this == account) {
             return true;
+        }
 
 
-        for (Iterator iter = getChildren().iterator(); iter.hasNext();) {
-            GnucashAccount child = (GnucashAccount) iter.next();
-            if (this == child)
+        for (Object element : getChildren()) {
+            GnucashAccount child = (GnucashAccount) element;
+            if (this == child) {
                 return true;
-            if (child.isChildAccountRecursive(account))
+            }
+            if (child.isChildAccountRecursive(account)) {
                 return true;
+            }
         }
         return false;
     }
@@ -112,6 +118,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
      *
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         return getQualifiedName();
     }
@@ -124,7 +131,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
     public FixedPointNumber getBalance() {
      return getBalance(new Date());
     }
-    
+
     /**
      * get name including the name of the parent.accounts.
      * @return e.g. "Aktiva::test::test2"
@@ -184,14 +191,16 @@ public abstract class SimpleAccount  implements GnucashAccount {
            return null;
        }
 
-       if (currency == null || retval.equals(new FixedPointNumber()))
-           return retval;
+       if (currency == null || retval.equals(new FixedPointNumber())) {
+        return retval;
+    }
 
        // is conversion needed?
        if (getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY)
                 &&
-            getCurrencyID().equals(currency.getCurrencyCode()))
-           return retval;
+            getCurrencyID().equals(currency.getCurrencyCode())) {
+        return retval;
+    }
 
        ComplexCurrencyTable currencyTable = getFile().getCurrencyTable();
 
@@ -223,7 +232,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
        return retval;
    }
-   
+
    /**
    *
    * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursiveFormated(java.util.Date)
@@ -268,19 +277,23 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
        GnucashTransactionSplit lastSplit = null;
 
-       for (Iterator iter = getTransactionSplits().iterator(); iter.hasNext();) {
-          GnucashTransactionSplit split = (GnucashTransactionSplit) iter.next();
-          if (date == null || split.getTransaction().getDatePosted().before(date))
-          if (lastSplit == null || split.getTransaction().getDatePosted().after(lastSplit.getTransaction().getDatePosted()))
-              lastSplit = split;
+       for (Object element : getTransactionSplits()) {
+          GnucashTransactionSplit split = (GnucashTransactionSplit) element;
+          if (date == null || split.getTransaction().getDatePosted().before(date)) {
+            if (lastSplit == null || split.getTransaction().getDatePosted().after(lastSplit.getTransaction().getDatePosted())) {
+                lastSplit = split;
+            }
+        }
       }
 
        for (Iterator iter = getSubAccounts().iterator(); iter.hasNext();) {
           GnucashAccount account = (GnucashAccount) iter.next();
           GnucashTransactionSplit split = account.getLastSplitBeforeRecursive(date);
-          if (split != null && split.getTransaction() != null)
-          if (lastSplit == null || split.getTransaction().getDatePosted().after(lastSplit.getTransaction().getDatePosted()))
-                  lastSplit = split;
+          if (split != null && split.getTransaction() != null) {
+            if (lastSplit == null || split.getTransaction().getDatePosted().after(lastSplit.getTransaction().getDatePosted())) {
+                lastSplit = split;
+            }
+        }
       }
 
 
@@ -301,13 +314,14 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
        FixedPointNumber retval = getBalance(date, currencyNameSpace, currencyName);
 
-       if (retval == null)
-           retval = new FixedPointNumber();
+       if (retval == null) {
+        retval = new FixedPointNumber();
+    }
 
 
 
-       for (Iterator iter = getChildren().iterator(); iter.hasNext();) {
-           GnucashAccount child = (GnucashAccount) iter.next();
+       for (Object element : getChildren()) {
+           GnucashAccount child = (GnucashAccount) element;
            retval.add(child.getBalanceRecursive(date, currencyNameSpace, currencyName));
        }
 
@@ -326,13 +340,14 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
      FixedPointNumber retval = getBalance(date, currency);
 
-     if (retval == null)
-         retval = new FixedPointNumber();
+     if (retval == null) {
+        retval = new FixedPointNumber();
+    }
 
 
 
-     for (Iterator iter = getChildren().iterator(); iter.hasNext();) {
-         GnucashAccount child = (GnucashAccount) iter.next();
+     for (Object element : getChildren()) {
+         GnucashAccount child = (GnucashAccount) element;
          retval.add(child.getBalanceRecursive(date, currency));
      }
 
@@ -344,13 +359,15 @@ public abstract class SimpleAccount  implements GnucashAccount {
   *         or any sub-accounts
   */
  public boolean hasTransactionsRecursive() {
-     if (this.hasTransactions())
-         return true;
+     if (this.hasTransactions()) {
+        return true;
+    }
 
-     for (Iterator iter = getChildren().iterator(); iter.hasNext();) {
-         GnucashAccount child = (GnucashAccount) iter.next();
-         if (child.hasTransactionsRecursive())
-                 return true;
+     for (Object element : getChildren()) {
+         GnucashAccount child = (GnucashAccount) element;
+         if (child.hasTransactionsRecursive()) {
+            return true;
+        }
      }
 
      return false;
@@ -385,8 +402,9 @@ public abstract class SimpleAccount  implements GnucashAccount {
        // is conversion needed?
        if (getCurrencyNameSpace().equals(currencyNameSpace)
                 &&
-           getCurrencyID().equals(currencyName))
-           return retval;
+           getCurrencyID().equals(currencyName)) {
+        return retval;
+    }
 
 
 
@@ -440,8 +458,9 @@ public abstract class SimpleAccount  implements GnucashAccount {
      */
     public Currency getCurrency() {
 
-        if (!getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY))
+        if (!getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY)) {
             return null;
+        }
 
         String gnucashCurrencyID = getCurrencyID();
         return Currency.getInstance(gnucashCurrencyID);
@@ -505,14 +524,15 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
         FixedPointNumber balance = new FixedPointNumber();
 
-        for (Iterator iter = getTransactionSplits().iterator(); iter.hasNext();) {
-            GnucashTransactionSplit split = (GnucashTransactionSplit) iter.next();
+        for (Object element : getTransactionSplits()) {
+            GnucashTransactionSplit split = (GnucashTransactionSplit) element;
 
             if (date != null
                   &&
                 split.getTransaction().getDatePosted().after(date)) {
-                if (after != null)
+                if (after != null) {
                     after.add(split);
+                }
                 continue;
             }
 
@@ -531,8 +551,8 @@ public abstract class SimpleAccount  implements GnucashAccount {
             final GnucashTransactionSplit lastIncludesSplit) {
 
         FixedPointNumber balance = new FixedPointNumber();
-        for (Iterator iter = getTransactionSplits().iterator(); iter.hasNext();) {
-            GnucashTransactionSplit split = (GnucashTransactionSplit) iter.next();
+        for (Object element : getTransactionSplits()) {
+            GnucashTransactionSplit split = (GnucashTransactionSplit) element;
 
              balance.add(split.getQuantity());
 
@@ -553,9 +573,9 @@ public abstract class SimpleAccount  implements GnucashAccount {
     	if (id == null) {
 			throw new IllegalArgumentException("null id given!");
 		}
-    	
-        for (Iterator iter = getTransactionSplits().iterator(); iter.hasNext();) {
-            GnucashTransactionSplit element = (GnucashTransactionSplit) iter.next();
+
+        for (Object element2 : getTransactionSplits()) {
+            GnucashTransactionSplit element = (GnucashTransactionSplit) element2;
             if (id.equals(element.getId())) {
                 return element;
             }
@@ -564,7 +584,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
         return null;
     }
 
-	
+
     /**
      * This is an extension to ${@link #compareNamesTo(Object)}
      * that makes shure that NEVER 2 accounts with different
@@ -576,26 +596,28 @@ public abstract class SimpleAccount  implements GnucashAccount {
      * If one starts with a number and the other does not,
      * the one starting with a number is "bigger"<br/>
      * else and if both integers are equals a normals comparison of the
-     * §{@link java.lang.String} is done.     *
+     * ${@link java.lang.String} is done.     *
      * @param   o the Object to be compared.
      * @return  a negative integer, zero, or a positive integer as this object
      *      is less than, equal to, or greater than the specified object.
      *
      * @throws ClassCastException if the specified object's type prevents it
-     *         from being compared to this Object. 
+     *         from being compared to this Object.
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(final Object o) {
 
         int i = compareNamesTo(o);
-        if (i != 0)
+        if (i != 0) {
             return i;
+        }
 
         if (o instanceof GnucashAccount) {
             GnucashAccount other = (GnucashAccount) o;
             i = other.getId().compareTo(getId());
-            if (i != 0)
+            if (i != 0) {
                 return i;
+            }
         }
 
         return ("" + hashCode()).compareTo("" + o.hashCode());
@@ -647,21 +669,26 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
         Integer i0 = startsWithNumber(other);
         Integer i1 = startsWithNumber(me);
-        if (i0 == null && i1 != null)
+        if (i0 == null && i1 != null) {
             return 1;
-        if (i1 == null && i0 != null)
+        }
+        if (i1 == null && i0 != null) {
             return -1;
-        if (i0 == null)
+        }
+        if (i0 == null) {
             return me.compareTo(other);
-        if (i1 == null)
+        }
+        if (i1 == null) {
             return me.compareTo(other);
+        }
 
-        if (i1.equals(i0))
+        if (i1.equals(i0)) {
             return me.compareTo(other);
+        }
 
         return i1.compareTo(i0);
     }
-    
+
 
     /**
      * Helper used in ${@link #compareTo(Object)} to
@@ -673,10 +700,12 @@ public abstract class SimpleAccount  implements GnucashAccount {
         int digitCount = 0;
         for (int i = 0; i < s.length()
                           &&
-                        Character.isDigit(s.charAt(i)); i++)
-                digitCount++;
-        if (digitCount == 0)
+                        Character.isDigit(s.charAt(i)); i++) {
+            digitCount++;
+        }
+        if (digitCount == 0) {
             return null;
+        }
         return new Integer(s.substring(0, digitCount));
     }
 
@@ -757,5 +786,5 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
 //  -------------------------------------------------------
 
-  
+
 }

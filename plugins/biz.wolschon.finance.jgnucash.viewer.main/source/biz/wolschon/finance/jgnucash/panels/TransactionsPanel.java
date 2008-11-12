@@ -174,9 +174,7 @@ public class TransactionsPanel extends JPanel {
     }
 
     /**
-     * This method initializes this
-     *
-     * @return void
+     * This method initializes this panel.
      */
     private void initialize() {
         this.setSize(300, 200);

@@ -32,14 +32,35 @@ package biz.wolschon.finance.jgnucash.panels;
 
 //other imports
 
-//automatically created logger for debug and error -output
+
+
+
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.java.plugin.PluginManager;
+import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
+import org.java.plugin.registry.PluginDescriptor;
+
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
+import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
+import biz.wolschon.finance.jgnucash.plugin.TransactionMenuAction;
+import biz.wolschon.finance.jgnucash.swingModels.GnucashSimpleAccountTransactionsTableModel;
 
 //automatically created propertyChangeListener-Support
 //import java.beans.PropertyChangeListener;
@@ -56,6 +77,100 @@ import biz.wolschon.fileformats.gnucash.GnucashAccount;
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public class WritableTransactionsPanel extends TransactionsPanel {
+    /**
+     * Our logger for debug- and error-output.
+     */
+    static final Log LOGGER = LogFactory.getLog(WritableTransactionsPanel.class);
+
+    /**
+     * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
+     * Project: jgnucashLib-GPL<br/>
+     * TransactionMenuActionMenuAction<br/>
+     * created: 12.11.2008 <br/>
+     *<br/><br/>
+     * <b>Have a plugin react to it's menu-point in the context-menu.</b>
+     * @author  <a href="mailto:Marcus@Wolschon.biz">fox</a>
+     */
+    public class TransactionMenuActionMenuAction implements ActionListener {
+        /**
+         * The plugin.
+         */
+        private final Extension ext;
+
+        /**
+         * The name of the plugin.
+         */
+        private final String pluginName;
+
+
+        /**
+         * @param aWritableTransactionsPanel
+         * @param aExt
+         * @param aPluginName
+         */
+        public TransactionMenuActionMenuAction(final Extension aExt,
+                final String aPluginName) {
+            ext = aExt;
+            pluginName = aPluginName;
+        }
+
+        /* (non-Javadoc)
+         * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+         */
+        @Override
+        public void actionPerformed(final ActionEvent aE) {
+            try {
+                JTable table = WritableTransactionsPanel.this.getTransactionTable();
+                GnucashSimpleAccountTransactionsTableModel model = (GnucashSimpleAccountTransactionsTableModel) table.getModel();
+                int[] selectedRows = table.getSelectedRows();
+                Collection<GnucashWritableTransactionSplit> transactions = new ArrayList<GnucashWritableTransactionSplit>(selectedRows.length);
+                for (int i : selectedRows) {
+                    transactions.add((GnucashWritableTransactionSplit) model.getTransactionSplit(i));
+                }
+
+
+                // Activate plug-in that declares extension.
+                getPluginManager().activatePlugin(ext.getDeclaringPluginDescriptor().getId());
+                // Get plug-in class loader.
+                ClassLoader classLoader = getPluginManager().getPluginClassLoader(
+                                          ext.getDeclaringPluginDescriptor());
+                // Load Tool class.
+                Class toolCls = classLoader.loadClass(
+                        ext.getParameter("class").valueAsString());
+                // Create Tool instance.
+                Object o = toolCls.newInstance();
+                if (!(o instanceof TransactionMenuAction)) {
+                    LOG.log(Level.SEVERE, "Plugin '" + pluginName + "' does not implement TransactionMenuAction-interface.");
+                    JOptionPane.showMessageDialog(WritableTransactionsPanel.this, "Error",
+                            "Plugin '" + pluginName + "' does not implement v-interface.",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+
+                }
+                TransactionMenuAction action = (TransactionMenuAction) o;
+                try {
+                    WritableTransactionsPanel.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    action.handleSelectedTransactions(transactions);
+                } catch (Exception e1) {
+                    LOG.log(Level.SEVERE, "MenuAction via Plugin '" + pluginName + "' failed.", e1);
+                    JOptionPane.showMessageDialog(WritableTransactionsPanel.this, "Error",
+                            "MenuAction via Plugin '" + pluginName + "' failed.\n"
+                            + "[" + e1.getClass().getName() + "]: " + e1.getMessage(),
+                            JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    WritableTransactionsPanel.this.setCursor(Cursor.getDefaultCursor());
+                }
+            } catch (Exception e1) {
+                LOGGER.error("Could not activate requested import-plugin '" + pluginName + "'.", e1);
+                JOptionPane.showMessageDialog(WritableTransactionsPanel.this, "Error",
+                        "Could not activate requested MenuAction-plugin '" + pluginName + "'.\n"
+                        + "[" + e1.getClass().getName() + "]: " + e1.getMessage(),
+                        JOptionPane.ERROR_MESSAGE);
+            }
+
+        }
+
+    }
 
     /**
      * the context-menu for the transactionTable.
@@ -63,10 +178,29 @@ public class WritableTransactionsPanel extends TransactionsPanel {
     private JPopupMenu myContextMenu;
 
     /**
+     * The main-entry-point to our plugin-api.(may be null to disable plugins.)
+     */
+    private PluginManager pluginManager = null;
+
+    /**
+     * The descriptor for our top-level application-plugin.(may be null to disable plugins.)
+     */
+    private PluginDescriptor pluginDescriptor = null;
+    /**
      *
      */
     public WritableTransactionsPanel() {
         super();
+    }
+    /**
+     * @param aPluginDescriptor for extensing the context-menu with plugins.
+     * @param aPluginManager for extensing the context-menu with plugins.
+     *
+     */
+    public WritableTransactionsPanel(final PluginManager aPluginManager, final PluginDescriptor aPluginDescriptor) {
+        super();
+        setPluginManager(aPluginManager);
+        setPluginDescriptor(aPluginDescriptor);
     }
 
     /**
@@ -219,9 +353,71 @@ public class WritableTransactionsPanel extends TransactionsPanel {
    private Component getTransactionTableContextMenu() {
        if (myContextMenu == null) {
            myContextMenu = new JPopupMenu();
-           // TODO add plugins
+           // TODO add plugins id= TransactionMenuAction
+           //biz.wolschon.finance.jgnucash.plugin.TransactionMenuAction
+           PluginManager manager = getPluginManager();
+           // if we are configured for the plugin-api
+           if (manager != null) {
+               ExtensionPoint toolExtPoint = manager.getRegistry().getExtensionPoint(
+                                             getPluginDescriptor().getId(), "TransactionMenuAction");
+               for (Iterator<Extension> it = toolExtPoint.getConnectedExtensions().iterator(); it.hasNext();) {
+                   Extension ext = it.next();
+                   String pluginName = "unknown";
+
+                   try {
+                       pluginName = ext.getParameter("name").valueAsString();
+                       JMenuItem newMenuItem = new JMenuItem();
+                       newMenuItem.putClientProperty("extension", ext);
+                       newMenuItem.setText(pluginName);
+                       newMenuItem.addActionListener(new TransactionMenuActionMenuAction(ext, pluginName));
+                       myContextMenu.add(newMenuItem);
+                   } catch (Exception e) {
+                       LOG.log(Level.SEVERE, "cannot load TransactionMenuAction-Plugin '" + pluginName + "'", e);
+                       JOptionPane.showMessageDialog(this, "Error",
+                               "Cannot load TransactionMenuAction-Plugin '" + pluginName + "'",
+                               JOptionPane.ERROR_MESSAGE);
+                   }
+               }
+           }
+
        }
        return myContextMenu;
+   }
+
+   /**
+    * The main-entry-point to our plugin-api.
+    * (may be null to disable plugins.)
+    * @return the pluginManager
+    */
+   public PluginManager getPluginManager() {
+       return pluginManager;
+   }
+
+   /**
+    * The main-entry-point to our plugin-api.
+    * (may be null to disable plugins.)
+    * @param aPluginManager the pluginManager to set
+    */
+   public void setPluginManager(final PluginManager aPluginManager) {
+       pluginManager = aPluginManager;
+   }
+
+   /**
+    * The descriptor for our top-level application-plugin.
+    * (may be null to disable plugins.)
+    * @return the pluginDescriptor
+    */
+   public PluginDescriptor getPluginDescriptor() {
+       return pluginDescriptor;
+   }
+
+   /**
+    * The descriptor for our top-level application-plugin.
+    * (may be null to disable plugins.)
+    * @param aPluginDescriptor the pluginDescriptor to set
+    */
+   public void setPluginDescriptor(final PluginDescriptor aPluginDescriptor) {
+       pluginDescriptor = aPluginDescriptor;
    }
 
 }
