@@ -28,4 +28,8 @@
 		<parameter-def id="supportsWriting"/> <!-- "true" or "false" : Supports a menu-handler "write file" that writes to where it was loaded from. -->
 		<parameter-def id="supportsWritingTo"/> <!-- "true" or "false" : Supports a menu-handler "write file to...". -->
 	</extension-point>
+	<extension-point id="TransactionMenuAction"><!-- displayed in the context-emu of selecransactions -->
+		<parameter-def id="class" /> <!-- class must implement biz.wolschon.finance.jgnucash.plugin.TransactionMenuAction -->
+		<parameter-def id="name" />
+	</extension-point>
 </plugin>

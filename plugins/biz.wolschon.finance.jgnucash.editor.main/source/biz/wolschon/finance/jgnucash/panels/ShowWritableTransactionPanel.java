@@ -33,6 +33,9 @@ package biz.wolschon.finance.jgnucash.panels;
 //other imports
 
 //automatically created logger for debug and error -output
+import java.awt.Dimension;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.ParseException;
@@ -45,20 +48,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//automatically created propertyChangeListener-Support
-import java.awt.Dimension;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.JToolTip;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.xml.bind.JAXBException;
-
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
@@ -69,7 +65,7 @@ import biz.wolschon.numbers.FixedPointNumber;
 
 /**
  * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
- * Project: jgnucashLib-V1<br/>
+ * Project: jgnucashLib-GPL<br/>
  * ShowWritableTransactionPanel.java<br/>
  * created: 21.09.2008 07:27:37 <br/>
  *<br/><br/>
@@ -107,6 +103,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      *
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(
                                                 final PropertyChangeListener listener) {
         if (myPropertyChange == null) {
@@ -123,6 +120,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      * @param propertyName  The name of the property to listen on.
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(
                                                 final String propertyName,
                                                 final PropertyChangeListener listener) {
@@ -138,6 +136,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      * @param propertyName  The name of the property that was listened on.
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public final void removePropertyChangeListener(
                                                    final String propertyName,
                                                    final PropertyChangeListener listener) {
@@ -154,6 +153,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      *
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public synchronized void removePropertyChangeListener(
                                                           final PropertyChangeListener listener) {
         if (myPropertyChange != null) {
@@ -168,6 +168,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      * and hashCode.
      * @return className and hashCode
      */
+    @Override
     public String toString() {
         return "ShowWritableTransactionPanel@" + hashCode();
     }
@@ -176,6 +177,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      * @param aTransaction The transaction to set.
      * @see #myTransaction
      */
+    @Override
     public void setTransaction(final GnucashTransaction aTransaction) {
 
         Object old = getTransaction();
@@ -203,6 +205,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      *
      * @return javax.swing.JTable
      */
+    @Override
     protected JTable getTransactionTable() {
         JTable transactionTable = super.getTransactionTable();
         if (!(transactionTable.getModel() instanceof SingleWritableTransactionTableModel)) {
@@ -215,6 +218,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      * @param aModel The model to set.
      * @see #model
      */
+    @Override
     protected void setModel(final SingleTransactionTableModel aModel) {
         super.setModel(aModel);
 
@@ -254,7 +258,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
     }
 
     /**
-     * 
+     *
      * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
      * Project: jgnucashLib-V1<br/>
      * ShowWritableTransactionPanel.java<br/>
@@ -266,7 +270,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
      */
     protected static class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
 
-        /** 
+        /**
          * ${@inheritDoc}.
          */
         @Override
@@ -275,7 +279,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
             return super.getRowCount() + 1;
         }
 
-        /** 
+        /**
          * ${@inheritDoc}.
          */
         @Override
@@ -291,7 +295,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
          *
          * @see javax.swing.table.TableModel#addTableModelListener(javax.swing.event.TableModelListener)
          */
-        private Set<TableModelListener> myTableModelListeners = new HashSet<TableModelListener>();
+        private final Set<TableModelListener> myTableModelListeners = new HashSet<TableModelListener>();
 
         /**
          * @param aTransaction the transaction we are displaying.
@@ -319,6 +323,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
          * @param aTransaction The transaction to set.
          * @see #myTransaction
          */
+        @Override
         public void setTransaction(final GnucashTransaction aTransaction) {
             if (! (aTransaction instanceof GnucashWritableTransaction)) {
                 throw new IllegalArgumentException("only writable transactions allowed."
@@ -334,7 +339,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
             super.setTransaction(aTransaction);
         }
 
-        /** 
+        /**
          * @param aRowIndex the split to return (starts with 0).
          * @return the selected split of the transaction.
          */
@@ -342,7 +347,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
             return getWritableTransactionSplits().get(aRowIndex);
         }
 
-        /** 
+        /**
          * @return all splits of the transaction.
          */
         public List<GnucashWritableTransactionSplit> getWritableTransactionSplits() {
@@ -364,7 +369,8 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
         *
         * @see javax.swing.table.TableModel#setValueAt(java.lang.Object, int, int)
         */
-       public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
+       @Override
+    public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
            if (aValue == null) {
                return;
            }
@@ -375,7 +381,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
                    switch(columnIndex) {
                    case 0: try {
 						       getWritableTransaction().setDatePosted(dateFormat.parse(aValue.toString()));
-						       for (TableModelListener listener : this.myTableModelListeners) {
+						       for (TableModelListener listener : myTableModelListeners) {
 						           listener.tableChanged(new TableModelEvent(this));
 						       }
 						   } catch (ParseException e) {
@@ -417,14 +423,14 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
                case 0: return;
 				case 1: split.setSplitAction(aValue.toString());
 					if (informListeners) {
-					       for (TableModelListener listener : this.myTableModelListeners) {
+					       for (TableModelListener listener : myTableModelListeners) {
 					           listener.tableChanged(new TableModelEvent(this));
 					       }
 					   }
 					return;
 				case 2: split.setDescription(aValue.toString());
 					if (informListeners) {
-					       for (TableModelListener listener : this.myTableModelListeners) {
+					       for (TableModelListener listener : myTableModelListeners) {
 					           listener.tableChanged(new TableModelEvent(this));
 					       }
 					   }
@@ -436,7 +442,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
 					       && split.getSplitAction().trim().length() == 0) {
 					       //remove split
 					       split.remove();
-					       for (TableModelListener listener : this.myTableModelListeners) {
+					       for (TableModelListener listener : myTableModelListeners) {
 					           listener.tableChanged(new TableModelEvent(this));
 					       }
 					       return;
@@ -452,7 +458,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
 					               e);
 					   }
 					if (informListeners) {
-					       for (TableModelListener listener : this.myTableModelListeners) {
+					       for (TableModelListener listener : myTableModelListeners) {
 					           listener.tableChanged(new TableModelEvent(this));
 					       }
 					   }
@@ -476,7 +482,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
 					               e);
 					   }
 					if (informListeners) {
-					       for (TableModelListener listener : this.myTableModelListeners) {
+					       for (TableModelListener listener : myTableModelListeners) {
 					           listener.tableChanged(new TableModelEvent(this));
 					       }
 					   }
@@ -502,7 +508,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
 					               e);
 					   }
 					if (informListeners) {
-					       for (TableModelListener listener : this.myTableModelListeners) {
+					       for (TableModelListener listener : myTableModelListeners) {
 					           listener.tableChanged(new TableModelEvent(this));
 					       }
 					   }
@@ -535,8 +541,8 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
        }
 
        /**
-        * @throws JAXBException 
-        * 
+        * @throws JAXBException
+        *
         */
        protected void balanceTransaction() throws JAXBException {
            GnucashWritableTransaction transaction = getWritableTransaction();
@@ -551,14 +557,14 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
                if (split.getAccountID().equals(balancingAccount.getId())) {
                    split.setQuantity(split.getQuantity().add(negatedBalance));
 
-                   for (TableModelListener listener : this.myTableModelListeners) {
+                   for (TableModelListener listener : myTableModelListeners) {
                        listener.tableChanged(new TableModelEvent(this, i));
                    }
                    return;
                }
            }
            transaction.createWritingSplit(balancingAccount).setQuantity(negatedBalance);
-           for (TableModelListener listener : this.myTableModelListeners) {
+           for (TableModelListener listener : myTableModelListeners) {
                listener.tableChanged(new TableModelEvent(this, getRowCount() - 1));
            }
        }
@@ -576,7 +582,8 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
         *
         * @see javax.swing.table.TableModel#addTableModelListener(javax.swing.event.TableModelListener)
         */
-       public void addTableModelListener(final TableModelListener l) {
+       @Override
+    public void addTableModelListener(final TableModelListener l) {
            myTableModelListeners.add(l);
        }
 
@@ -584,7 +591,8 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
         *
         * @see javax.swing.table.TableModel#removeTableModelListener(javax.swing.event.TableModelListener)
         */
-       public void removeTableModelListener(final TableModelListener l) {
+       @Override
+    public void removeTableModelListener(final TableModelListener l) {
            myTableModelListeners.remove(l);
        }
 
@@ -593,7 +601,8 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
         * @param aColumnIndex the column
         * @return true for most columns
         */
-       public boolean isCellEditable(final int aRowIndex, final int aColumnIndex) {
+       @Override
+    public boolean isCellEditable(final int aRowIndex, final int aColumnIndex) {
            if (aRowIndex == 0) {
                // show data of transaction
                switch(aColumnIndex) {
