@@ -8,7 +8,8 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
-//other imports
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -16,9 +17,19 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-//automatically created logger for debug and error -output
-import org.apache.commons.logging.LogFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JToolTip;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionListener;
+import javax.xml.bind.JAXBException;
+
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
@@ -27,23 +38,6 @@ import biz.wolschon.finance.jgnucash.swingModels.GnucashSimpleAccountTransaction
 import biz.wolschon.finance.jgnucash.swingModels.GnucashTransactionsSplitsTableModel;
 import biz.wolschon.finance.jgnucash.widgets.MultiLineToolTip;
 import biz.wolschon.numbers.FixedPointNumber;
-
-//automatically created propertyChangeListener-Support
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JToolTip;
-import javax.swing.SwingUtilities;
-
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-
-import javax.swing.JLabel;
-import javax.swing.event.ListSelectionListener;
-import javax.xml.bind.JAXBException;
 
 /**
  * (c) 2006 by Wolschon Softwaredesign und Beratung.<br/>
@@ -116,7 +110,7 @@ public class TransactionsPanel extends JPanel {
      * @see #model
      */
     public GnucashTransactionsSplitsTableModel getModel() {
-        return this.model;
+        return model;
     }
 
     /**
@@ -127,14 +121,14 @@ public class TransactionsPanel extends JPanel {
         if (aModel == null) {
             throw new IllegalArgumentException("null 'aModel' given!");
         }
-    
-        Object old = this.model;
+
+        Object old = model;
         if (old == aModel) {
             return; // nothing has changed
         }
-        this.model = aModel;
-        
-        getTransactionTable().setModel(this.model);
+        model = aModel;
+
+        getTransactionTable().setModel(model);
         getTransactionTable().setAutoCreateRowSorter(true);
         // set column-width
         FontMetrics metrics = Toolkit.getDefaultToolkit().getFontMetrics(transactionTable.getFont());
@@ -142,7 +136,7 @@ public class TransactionsPanel extends JPanel {
         getTransactionTable().getColumn("+").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(10000)));
         getTransactionTable().getColumn("-").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-10000)));
         getTransactionTable().getColumn("balance").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-10000)));
-        
+
         getTransactionTable().getColumn("date").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.dateFormat.format(new Date())) + 5);
         getTransactionTable().getColumn("+").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(1000000)));
         getTransactionTable().getColumn("-").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-1000000)));
@@ -154,183 +148,184 @@ public class TransactionsPanel extends JPanel {
         updateSelectionSummaryAccountList();
         updateSelectionSummary();
         getSingleTransactionPanel().setTransaction(null);
-        
+
     }
 
     /**
-	 * This is the default constructor.
-	 */
-	public TransactionsPanel() {
-		super();
-		initialize();
-	}
-
-	/**
-	 * Give an account who's transactions to display.
-	 * @param account if null, an empty table will be shown.
-	 */
-	public void setAccount(final GnucashAccount account) {
-
-
-		if (account == null) {
-		    setModel(new GnucashSimpleAccountTransactionsTableModel());
-		} else {
-		    setModel(new GnucashSimpleAccountTransactionsTableModel(account));	
-		}	
-	}
-
-	/**
-	 * This method initializes this
-	 * 
-	 * @return void
-	 */
-	private void initialize() {
-		this.setSize(300, 200);
-		this.setLayout(new BorderLayout());
-		this.add(getTransactionTableScrollPane(), BorderLayout.CENTER);
-		this.add(getSummaryPanel(), BorderLayout.SOUTH);
-		}
-
-	/**
-	 * 
-	 * @return a JPanel showing either {@link #getSelectionSummaryPanel()} or {@link #getSingleTransactionPanel()}.
-	 */
-	private JPanel getSummaryPanel() {
-	    if (this.mySummaryPanel == null) {
-	        this.mySummaryPanel = new JPanel();
-	        this.mySummaryPanel.setLayout(new CardLayout());
-	        this.mySummaryPanel.add(getSelectionSummaryPanel(), "multi");
-	        getSingleTransactionPanel().setVisible(false);
-	        this.mySummaryPanel.add(getSingleTransactionPanel(), "single");
-            getSummaryPanel().setPreferredSize(getSelectionSummaryPanel().getPreferredSize());
-	    }
-
-	    return this.mySummaryPanel;
-	}
+     * This is the default constructor.
+     */
+    public TransactionsPanel() {
+        super();
+        initialize();
+    }
 
     /**
-	 * This method initializes transactionTableScrollPane	
-	 * 	
-	 * @return javax.swing.JScrollPane	
-	 */
-	private JScrollPane getTransactionTableScrollPane() {
-		if (transactionTableScrollPane == null) {
-			transactionTableScrollPane = new JScrollPane();
-			transactionTableScrollPane.setViewportView(getTransactionTable());
-		}
-		return transactionTableScrollPane;
-	}
+     * Give an account who's transactions to display.
+     * @param account if null, an empty table will be shown.
+     */
+    public void setAccount(final GnucashAccount account) {
 
-	/**
-	 * This method initializes transactionTable.
-	 *
-	 * @return javax.swing.JTable
-	 */
-	private JTable getTransactionTable() {
-		if (transactionTable == null) {
-			transactionTable = new JTable() {
 
-				/**
-                 * Our TransactionsPanel.java.
-                 * @see long
-                 */
-                private static final long serialVersionUID = 1L;
+        if (account == null) {
+            setModel(new GnucashSimpleAccountTransactionsTableModel());
+        } else {
+            setModel(new GnucashSimpleAccountTransactionsTableModel(account));
+        }
+    }
 
-                /**
-                 * @see javax.swing.JTable#getToolTipText(java.awt.event.MouseEvent)
-                 */
-                
-                @Override
-				public String getToolTipText(final MouseEvent event) {
-					java.awt.Point p = event.getPoint();
-					int rowIndex = rowAtPoint(p);
-					// convertColumnIndexToModel is needed,
-					// because the user may reorder columns
-					//int realColumnIndex = convertColumnIndexToModel(columnAtPoint(p));
-					if (rowIndex >= 0) {
+    /**
+     * This method initializes this
+     *
+     * @return void
+     */
+    private void initialize() {
+        this.setSize(300, 200);
+        this.setLayout(new BorderLayout());
+        this.add(getTransactionTableScrollPane(), BorderLayout.CENTER);
+        this.add(getSummaryPanel(), BorderLayout.SOUTH);
+        }
 
-						GnucashSimpleAccountTransactionsTableModel model = (GnucashSimpleAccountTransactionsTableModel)getModel();
-						GnucashTransactionSplit localSplit = model.getTransactionSplit(rowIndex);
-						GnucashTransaction transaction = localSplit.getTransaction();
-						StringBuilder output = new StringBuilder();
-						output.append("\"")
-						.append(transaction.getTransactionNumber())
-						.append("\t \"")
-						.append(transaction.getDescription())
-						.append("\"\t [")
-						.append(localSplit.getAccount().getQualifiedName())
-						.append("]\t ")
-						.append(localSplit.getQuantity())
-                        .append(localSplit.getAccount().getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY) ? " " : " x ")
-						.append(localSplit.getAccount().getCurrencyID())
-						.append("\n");
+    /**
+    *
+    * @return a JPanel showing either {@link #getSelectionSummaryPanel()} or {@link #getSingleTransactionPanel()}.
+    */
+   private JPanel getSummaryPanel() {
+       if (mySummaryPanel == null) {
+           mySummaryPanel = new JPanel();
+           mySummaryPanel.setLayout(new CardLayout());
+           mySummaryPanel.add(getSelectionSummaryPanel(), "multi");
+           getSingleTransactionPanel().setVisible(false);
+           mySummaryPanel.add(getSingleTransactionPanel(), "single");
+           getSummaryPanel().setPreferredSize(getSelectionSummaryPanel().getPreferredSize());
+       }
 
-						try {
-                            for (GnucashTransactionSplit split : transaction.getSplits()) {
-                            	output.append("\"")
-                                .append(split.getSplitAction())
-                            	.append("\"\t \"")
-                            	.append(split.getDescription())
-                            	.append("\"\t [")
-                            	.append(split.getAccount().getQualifiedName())
-                            	.append("]\t ")
-                            	.append(split.getQuantity())
-                                .append(localSplit.getAccount().getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY) ? " " : " x ")
-                            	.append(split.getAccount().getCurrencyID())
-                            	.append("\n");
-                            }
-                            if (!transaction.isBalanced()) {
-                            	output.append("TRANSACTION IS NOT BALANACED! missung=" + transaction.getBalanceFormatet());
-                            }
-                        } catch (JAXBException e) {
-                            
-                            TransactionsPanel.LOGGER.error("[JAXBException] Problem in " + getClass().getName(), e);
-                            output.append("\nERROR: [" + e.getClass().getName() + "] " + e.getMessage());
-                        }
-						return output.toString();
-					}
+       return mySummaryPanel;
+   }
 
-					// show default-tooltip
-					return super.getToolTipText(event);
-				}
+   /**
+    * This method initializes transactionTableScrollPane
+    *
+    * @return javax.swing.JScrollPane
+    */
+   private JScrollPane getTransactionTableScrollPane() {
+       if (transactionTableScrollPane == null) {
+           transactionTableScrollPane = new JScrollPane();
+           transactionTableScrollPane.setViewportView(getTransactionTable());
+       }
+       return transactionTableScrollPane;
+   }
 
-				public JToolTip createToolTip() {
-					MultiLineToolTip tip = new MultiLineToolTip();
-					tip.setComponent(this);
-					return tip;
-				}
+   /**
+    * This method initializes transactionTable.
+    *
+    * @return javax.swing.JTable
+    */
+   private JTable getTransactionTable() {
+       if (transactionTable == null) {
+           transactionTable = new JTable() {
 
-			};
+               /**
+                * Our TransactionsPanel.java.
+                * @see long
+                */
+               private static final long serialVersionUID = 1L;
 
-			// add a listener to call updateSelectionSummary() every time
-			// the user changes the selected rows.
-			transactionTable.getSelectionModel().addListSelectionListener(
-					new ListSelectionListener() {
-						public void valueChanged(
-								final javax.swing.event.ListSelectionEvent e) {
-							updateSelectionSummaryAccountList();
-							updateSelectionSummary();
-							if (getTransactionTable().getSelectedRowCount() == 1) {
-							    
-				                GnucashTransactionSplit transactionSplit = model.getTransactionSplit(getTransactionTable().getSelectedRow());
-							    getSingleTransactionPanel().setTransaction(transactionSplit.getTransaction());
-							    getSingleTransactionPanel().setVisible(true);
-							    getSelectionSummaryPanel().setVisible(false);
-							    getSummaryPanel().setPreferredSize(getSingleTransactionPanel().getPreferredSize());
-							    //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
-							} else {
-							    getSingleTransactionPanel().setVisible(false);
-							    getSingleTransactionPanel().setTransaction(null);
-							    getSelectionSummaryPanel().setVisible(true);
-                                getSummaryPanel().setPreferredSize(getSelectionSummaryPanel().getPreferredSize());
-                                //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
-							}
-						};
-					});
-			setModel(new GnucashSimpleAccountTransactionsTableModel());
-		}
-		return transactionTable;
-	}
+               /**
+                * @see javax.swing.JTable#getToolTipText(java.awt.event.MouseEvent)
+                */
+
+               @Override
+               public String getToolTipText(final MouseEvent event) {
+                   java.awt.Point p = event.getPoint();
+                   int rowIndex = rowAtPoint(p);
+                   // convertColumnIndexToModel is needed,
+                   // because the user may reorder columns
+                   //int realColumnIndex = convertColumnIndexToModel(columnAtPoint(p));
+                   if (rowIndex >= 0) {
+
+                       GnucashSimpleAccountTransactionsTableModel model = (GnucashSimpleAccountTransactionsTableModel)getModel();
+                       GnucashTransactionSplit localSplit = model.getTransactionSplit(rowIndex);
+                       GnucashTransaction transaction = localSplit.getTransaction();
+                       StringBuilder output = new StringBuilder();
+                       output.append("\"")
+                       .append(transaction.getTransactionNumber())
+                       .append("\t \"")
+                       .append(transaction.getDescription())
+                       .append("\"\t [")
+                       .append(localSplit.getAccount().getQualifiedName())
+                       .append("]\t ")
+                       .append(localSplit.getQuantity())
+                       .append(localSplit.getAccount().getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY) ? " " : " x ")
+                       .append(localSplit.getAccount().getCurrencyID())
+                       .append("\n");
+
+                       try {
+                           for (GnucashTransactionSplit split : transaction.getSplits()) {
+                               output.append("\"")
+                               .append(split.getSplitAction())
+                               .append("\"\t \"")
+                               .append(split.getDescription())
+                               .append("\"\t [")
+                               .append(split.getAccount().getQualifiedName())
+                               .append("]\t ")
+                               .append(split.getQuantity())
+                               .append(localSplit.getAccount().getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY) ? " " : " x ")
+                               .append(split.getAccount().getCurrencyID())
+                               .append("\n");
+                           }
+                           if (!transaction.isBalanced()) {
+                               output.append("TRANSACTION IS NOT BALANACED! missung=" + transaction.getBalanceFormatet());
+                           }
+                       } catch (JAXBException e) {
+
+                           TransactionsPanel.LOGGER.error("[JAXBException] Problem in " + getClass().getName(), e);
+                           output.append("\nERROR: [" + e.getClass().getName() + "] " + e.getMessage());
+                       }
+                       return output.toString();
+                   }
+
+                   // show default-tooltip
+                   return super.getToolTipText(event);
+               }
+
+               @Override
+               public JToolTip createToolTip() {
+                   MultiLineToolTip tip = new MultiLineToolTip();
+                   tip.setComponent(this);
+                   return tip;
+               }
+
+           };
+
+           // add a listener to call updateSelectionSummary() every time
+           // the user changes the selected rows.
+           transactionTable.getSelectionModel().addListSelectionListener(
+                   new ListSelectionListener() {
+                       public void valueChanged(
+                               final javax.swing.event.ListSelectionEvent e) {
+                           updateSelectionSummaryAccountList();
+                           updateSelectionSummary();
+                           if (getTransactionTable().getSelectedRowCount() == 1) {
+
+                               GnucashTransactionSplit transactionSplit = model.getTransactionSplit(getTransactionTable().getSelectedRow());
+                               getSingleTransactionPanel().setTransaction(transactionSplit.getTransaction());
+                               getSingleTransactionPanel().setVisible(true);
+                               getSelectionSummaryPanel().setVisible(false);
+                               getSummaryPanel().setPreferredSize(getSingleTransactionPanel().getPreferredSize());
+                               //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
+                           } else {
+                               getSingleTransactionPanel().setVisible(false);
+                               getSingleTransactionPanel().setTransaction(null);
+                               getSelectionSummaryPanel().setVisible(true);
+                               getSummaryPanel().setPreferredSize(getSelectionSummaryPanel().getPreferredSize());
+                               //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
+                           }
+                       };
+                   });
+           setModel(new GnucashSimpleAccountTransactionsTableModel());
+       }
+       return transactionTable;
+   }
 
 	/**
 	 * This method initializes selectionSummaryLabel.
@@ -375,11 +370,11 @@ public class TransactionsPanel extends JPanel {
 			selectionSummaryPanel.add(getSelectionSummaryLabel(),
 					BorderLayout.CENTER);
 			selectionSummaryPanel.add(getSelectionSummaryAccountComboBox(),
-					BorderLayout.SOUTH);			
+					BorderLayout.SOUTH);
 		}
 		return selectionSummaryPanel;
 	}
-	
+
 	/**
      * This method initializes ShowTransactionPanel.
      *
@@ -387,7 +382,7 @@ public class TransactionsPanel extends JPanel {
      */
 	protected ShowTransactionPanel getSingleTransactionPanel() {
 	    if (mySingleTransactionPanel == null) {
-	        mySingleTransactionPanel = new ShowTransactionPanel(); 
+	        mySingleTransactionPanel = new ShowTransactionPanel();
         }
         return mySingleTransactionPanel;
 	}
@@ -417,8 +412,9 @@ public class TransactionsPanel extends JPanel {
                     	try {
                     		GnucashAccount account = split.getAccount();
                     		if (account != null) {
-                    			if (!accounts.contains(account))
-                    				accounts.add(account);
+                    			if (!accounts.contains(account)) {
+                                    accounts.add(account);
+                                }
                     		}
                     	} catch( Exception x) {
                     		System.err.println("Ignoring account in "
@@ -437,8 +433,8 @@ public class TransactionsPanel extends JPanel {
 			// show a summary only for the selected transactions
 			int[] selectedRows = getTransactionTable().getSelectedRows();
 
-			for (int i=0; i < selectedRows.length; i++) {
-				GnucashTransactionSplit             transactionSplit = model.getTransactionSplit(selectedRows[i]);
+			for (int selectedRow : selectedRows) {
+				GnucashTransactionSplit             transactionSplit = model.getTransactionSplit(selectedRow);
 				try {
                     Collection<? extends GnucashTransactionSplit> splits = transactionSplit.getTransaction().getSplits();
                     for (GnucashTransactionSplit split : splits) {
@@ -522,9 +518,9 @@ public class TransactionsPanel extends JPanel {
 						transactionSplit);
 			}
 		} else {
-			for (int i = 0; i < selectedRows.length; i++) {
+			for (int selectedRow : selectedRows) {
 				GnucashTransactionSplit transactionSplit
-				= model.getTransactionSplit(selectedRows[i]);
+				= model.getTransactionSplit(selectedRow);
 				replaceSplitsWithSelectedAccountsSplits(retval,
 						transactionSplit);
 			}
