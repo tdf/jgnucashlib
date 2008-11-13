@@ -1,0 +1,810 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Tools</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		JPF Tools Reference<br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+    <h1>JPF Tools Reference</h1>
+	<p>
+		Most JPF tools are implemented as special purpose Java classes and wrapped as Ant tasks for ease of use. To make JPF specific tasks available in your build file insert following declaration in the beginning of Ant build script:<br />
+		<code>&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;</code><br />
+		Note that jpf-tool.jar library should be available in classpath (you may use nested <code>&lt;classpath&gt;</code> element in <code>&lt;typedef&gt;</code> tag).
+	</p>
+    <p>
+		<a href="#integrityChecking">Integrity Check Tool</a><br />
+		<a href="#pluginDocumenting">Documentation Tool</a><br />
+		<a href="#pluginArchiving">Plug-in Archive Tool</a><br />
+		<a href="#singleFilePlugin">Single File Plug-in Tool</a><br />
+		<a href="#manifestInfo">Manifest Info Tool</a><br />
+		<a href="#versionUpdate">Version Update Tool</a><br />
+		<a href="#path">Classpath Tool</a><br />
+		<a href="#sort">Sorting Tool</a><br />
+	</p>
+	
+    <h3><a name="integrityChecking">Integrity Check Tool</a></h3>
+	<p>
+		The tool is implemented as Ant task (<strong>jpf-check</strong>) and allows to check integrity of plug-ins collection.
+	</p>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    	<tr>
+    		<td valign="top">usepathresolver</td>
+    		<td valign="top">If "true", JPF will try to resolve URL's specified in manifests to check existence of plug-in resources. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+    </table>
+	<h5>Parameters specified as nested elements</h5>
+	<dl>
+		<dt>fileset</dt>
+		<dd>Ant's FileSets can be used to select plug-in manifest files for plug-ins to be checked.</dd>
+	</dl>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-check" task to check plug-ins integrity --&gt;
+&lt;jpf-check
+	basedir="${basedir}/plugins"
+	includes="*/plugin.xml,*/plugin-fragment.xml"
+	verbose="true"
+	usepathresolver="true"/&gt;</pre>
+	
+    <h3><a name="pluginDocumenting">Documentation Tool</a></h3>
+	<p>The javadoc-like tool to generate documentation for plug-ins. The tool implemented as special <a href="api/org/java/plugin/tools/docgen/DocGenerator.html">utility class</a> and wrapped with Ant task (<strong>jpf-doc</strong>) for ease of use.</p>
+	<p><strong>Note:</strong> documentation design looks not very good now, but this is just design problem, not the documentation engine! Good HTML design contributions are <a href="http://sourceforge.net/forum/forum.php?forum_id=378299">welcome</a>!</p>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    	<tr>
+    		<td valign="top">destdir</td>
+    		<td valign="top">Base directory for generated documentation files.</td>
+    		<td valign="top">Yes</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">overview</td>
+    		<td valign="top">Documentation overview HTML file.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">encoding</td>
+    		<td valign="top">Source files encoding name (templates, overview etc.) Default is system encoding.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">docencoding</td>
+    		<td valign="top">Output files encoding name. Default is UTF-8.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">stylesheetfile</td>
+    		<td valign="top">CSS style sheet to use. Predefined style will be used if no file specified.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">templates</td>
+    		<td valign="top">path to template files (should be available in classpath). Predefined templates set will be used if not specified.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    </table>
+	<h5>Parameters specified as nested elements</h5>
+	<dl>
+		<dt>fileset</dt>
+		<dd>Ant's FileSets can be used to select plug-in manifest files, documentation should be generated for.</dd>
+	</dl>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-doc" task to generate plug-ins documentation --&gt;
+&lt;jpf-doc
+	basedir="${basedir}/plugins"
+	includes="*/plugin.xml,*/plugin-fragment.xml"
+	destdir="${build.home}/docs"/&gt;</pre>
+	
+    <h3><a name="pluginArchiving">Plug-in Archive Tool</a></h3>
+	<p>Tool implemented as special <a href="api/org/java/plugin/tools/configuration/PluginArchiver.html">utility class</a> and wrapped with Ant tasks (<strong>jpf-pack</strong> and <strong>jpf-unpack</strong>) for ease of use. Plug-in archive is specially prepared ZIP format file that holds all packed plug-ins and special descriptor for quick extracting plug-ins meta-data without need of unpacking the whole archive file.</p>
+	<h5>Plug-ins archiving task (jpf-pack).</h5>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    	<tr>
+    		<td valign="top">destfile</td>
+    		<td valign="top">Target archive file.</td>
+    		<td valign="top">Yes</td>
+    	</tr>
+    </table>
+	<h5>Plug-ins un-archiving task (jpf-unpack).</h5>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    	<tr>
+    		<td valign="top">srcfile</td>
+    		<td valign="top">Archive file to be unpacked.</td>
+    		<td valign="top">Yes</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">destdir</td>
+    		<td valign="top">Folder where to extract archived plug-ins.</td>
+    		<td valign="top">Yes</td>
+    	</tr>
+    </table>
+	<h5>Parameters specified as nested elements</h5>
+	<dl>
+		<dt>fileset</dt>
+		<dd>Ant's FileSets can be used to select plug-in manifest files, documentation should be generated for.</dd>
+	</dl>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-pack" task to pack plug-ins into archive --&gt;
+&lt;jpf-pack
+	basedir="${basedir}/plugins"
+	includes="*/plugin.xml,*/plugin-fragment.xml"
+	destfile="${build.home}/all-plugins.zip"/&gt;
+&lt;!-- Call "jpf-unpack" task to extract plug-ins from archive --&gt;
+&lt;jpf-unpack
+	srcfile="${build.home}/all-plugins.zip"
+	destdir="${build.home}/all-plugins-extracted"/&gt;</pre>
+	
+	<h3><a name="singleFilePlugin">Single File Plug-in Tool</a></h3>
+	<p>
+		The tool is implemented as Ant task (<strong>jpf-zip</strong>) and allows to process plug-ins collection packaging every plug-in and plug-in fragment into single ZIP file. ZIP file names compozed according to the following scheme: <code>&lt;plugin-ID&gt;-&lt;plugin-version&gt;.zip</code>
+	</p>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">destdir</td>
+    		<td valign="top">Directory to store generated ZIP files.</td>
+    		<td valign="top">Yes</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    	<tr>
+    		<td valign="top">usepathresolver</td>
+    		<td valign="top">If "true", JPF will try to resolve URL's specified in manifests to check existence of plug-in resources. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+    </table>
+	<h5>Parameters specified as nested elements</h5>
+	<dl>
+		<dt>fileset</dt>
+		<dd>Ant's FileSets can be used to select plug-in manifest files for plug-ins to be processed.</dd>
+	</dl>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-zip" task to process plug-ins packaging every plug-in as
+  single ZIP file --&gt;
+&lt;jpf-zip
+	basedir="${build.home}/plugins"
+	includes="*/*.xml"
+	destdir="${build.home}/plugins"/&gt;</pre>
+	
+	<h3><a name="manifestInfo">Manifest Info Tool</a></h3>
+	<p>Simple (but quite useful :) task (<strong>jpf-info</strong>) to read some data from plug-in manifest into project properties. This task is modeled after similar purpose <a href="api/org/java/plugin/registry/PluginRegistry.html#readManifestInfo(java.net.URL)">method in plug-in resgistry</a> and covers the same properties as corresponding <a href="api/org/java/plugin/registry/PluginRegistry.ManifestInfo.html">manifest info interface</a></p>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">manifest</td>
+    		<td valign="top">Plug-in or plug-in fragment file to read data from.</td>
+    		<td valign="top">Yes</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">propertyid</td>
+    		<td valign="top">Name of the property where to put plug-in or plug-in fragment ID.</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">propertyversion</td>
+			<td valign="top">Name of the property where to put plug-in or plug-in fragment version. If no version specified in manifest, the empty string will be used.</td>
+			<td valign="top">No</td>
+		</tr>
+    	<tr>
+    		<td valign="top">propertyvendor</td>
+    		<td valign="top">Name of the property where to put plug-in or plug-in fragment vendor.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">propertypluginid</td>
+    		<td valign="top">Name of the property where to put plug-in ID (applicable for plug-in fragment manifest only).</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">propertypluginversion</td>
+			<td valign="top">Name of the property where to put plug-in version (applicable for plug-in fragment manifest only). If no version specified in manifest, the empty string will be used.</td>
+			<td valign="top">No</td>
+		</tr>
+    	<tr>
+    		<td valign="top">propertymatchingrule</td>
+    		<td valign="top">Name of the property where to put plug-in fragment matchin rule (applicable for plug-in fragment manifest only).</td>
+    		<td valign="top">No</td>
+    	</tr>
+    </table>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-info" task to read plug-in ID into "plugin.id" property
+        and plug-in version into "plugin.version" property --&gt;
+&lt;jpf-info
+	manifest="${basedir}/plugin.xml"
+	propertyid="plugin.id"
+	propertyversion="plugin.version"/&gt;</pre>
+	
+	<h3><a name="versionUpdate">Version Update Tool</a></h3>
+	<p>Task (<strong>jpf-version</strong>) to automatically updade plug-in versions and version references. This task upgrades vesions build number and optionally version name (see <a href="api/org/java/plugin/registry/Version.html">Version class documentation</a>) if plug-in has modified since previous task run. Actual version numbers and timestamps are stored in simple text file in Java properties format.</p>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>. The folder should contain non-ziped plain folders with plug-ins and plug-in fragments. Note that this task will modify manifests in this folder (leaving manifest file timestamps unchanged).</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">versionsfile</td>
+    		<td valign="top">File where to store versions related data. If not exist, will be created automatically.</td>
+    		<td valign="top">Yes</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">alterreferences</td>
+    		<td valign="top">If "true", version references should be upgraded also. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">timestampversion</td>
+    		<td valign="top">If "true", the plug-in timestamp will be included into version name field. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    </table>
+	<h5>Parameters specified as nested elements</h5>
+	<dl>
+		<dt>fileset</dt>
+		<dd>Ant's FileSets can be used to select plug-in manifest files for plug-ins to be processed.</dd>
+	</dl>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-version" task to update versions of modified plug-ins --&gt;
+&lt;jpf-version
+	basedir="${build.home}/plugins"
+	includes="*/plugin.xml,*/plugin-fragment.xml"
+	versionsfile="${basedir}/plugins/versions.properties"
+	timestampversion="true"/&gt;</pre>
+	
+	<h3><a name="path">Classpath Tool</a></h3>
+	<p>Task (<strong>jpf-path</strong>) to compose plug-in(s) classpath according to manifest data (libraries and dependencies declarations).</p>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">pathid</td>
+    		<td valign="top">Composed path-like structure ID.</td>
+    		<td valign="middle" rowspan="2">One of two attriutes should be set.</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">pathidref</td>
+    		<td valign="top">Path-like structure ID reference.</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">pluginid</td>
+    		<td valign="top">Plug-in ID to compose classpath for.</td>
+    		<td valign="middle" rowspan="2">At least one of two attriutes should be set.</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">pluginids</td>
+    		<td valign="top">Comma separated list of plug-in ID's to compose classpath for.</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">followexports</td>
+    		<td valign="top">If "true", libraries export rules will be taken into account. Default is "true".</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    </table>
+	<h5>Parameters specified as nested elements</h5>
+	<dl>
+		<dt>fileset</dt>
+		<dd>Ant's FileSets can be used to select plug-in manifest files for plug-ins to be processed.</dd>
+	</dl>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-path" task to compose classpath for plug-in "my.plugin" and
+  put result in path-like structure with ID "plugin.classpath". --&gt;
+&lt;jpf-path
+	basedir="${build.home}/plugins"
+	includes="*/plugin.xml,*/plugin-fragment.xml"
+	pathid="plugin.classpath"
+	pluginid="my.plugin"/&gt;</pre>
+	
+	<h3><a name="sort">Sorting Tool</a></h3>
+	<p>Task (<strong>jpf-sort</strong>) to sort plug-in(s) in correct build order. Places result into output path-like structure.</p>
+	<table border="1" cellspacing="0" cellpadding="5">
+    	<tr>
+    		<th valign="top">Attribute</th>
+    		<th valign="top">Description</th>
+    		<th valign="top">Required</th>
+    	</tr>
+    	<tr>
+    		<td valign="top">basedir</td>
+    		<td valign="top">Directory to resolve relative links. By default is equal to project base directory <code>${basedir}</code>.</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">pathid</td>
+    		<td valign="top">Composed path-like structure ID.</td>
+    		<td valign="middle" rowspan="2">One of two attriutes should be set.</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">pathidref</td>
+    		<td valign="top">Path-like structure ID reference.</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">pathmode</td>
+    		<td valign="top">
+    			Regulates what to place into output path. Possible values are:
+    			<dl>
+	    			<dt>DIR</dt>
+	    			<dd>put plug-in directory into output path</dd>
+	    			<dt>BUILD</dt>
+	    			<dd>put plug-in's <code>build.xml</code> file into output path</dd>
+	    			<dt>MANIFEST</dt>
+	    			<dd>put original plug-in manifest file into output path</dd>
+    			</dl>
+    			Default value is MANIFEST.
+    		</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">reverse</td>
+    		<td valign="top">If "true", result entries will be placed into output path in reversed order. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+    	<tr>
+    		<td valign="top">verbose</td>
+    		<td valign="top">If "true", more detailed report will be generated. Default is "false".</td>
+    		<td valign="top">No</td>
+    	</tr>
+		<tr>
+			<td valign="top">includes</td>
+			<td valign="top">comma- or space-separated list of patterns of plug-in manifest files that must be included. All files are included when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">includesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an include pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludes</td>
+			<td valign="top">Comma- or space-separated list of patterns of plug-in manifest files that must be excluded. No files (except default excludes) are excluded when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">excludesfile</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an exclude pattern.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">defaultexcludes</td>
+			<td valign="top">Indicates whether default excludes should be used or not (&quot;yes&quot;/&quot;no&quot;). Default excludes are used when omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">whitelist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be included in processing. All plug-ins are included when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+		<tr>
+			<td valign="top">blacklist</td>
+			<td valign="top">The name of a file. Each line of this file is taken to be an ID or UID of plug-in to be excluded from processing. No plug-ins are excluded when file omitted.</td>
+			<td valign="top">No</td>
+		</tr>
+    </table>
+	<h5>Parameters specified as nested elements</h5>
+	<dl>
+		<dt>fileset</dt>
+		<dd>Ant's FileSets can be used to select plug-in manifest files for plug-ins to be processed.</dd>
+	</dl>
+	<h5>Example</h5>
+	<pre>&lt;!-- Define custom JPF specific Ant tasks --&gt;
+&lt;typedef resource="org/java/plugin/tools/ant/jpf-tasks.properties" /&gt;
+&lt;!-- Call "jpf-sort" task to sort all plug-ins in correct build order and
+  put their folders in path-like structure with ID "plugins". --&gt;
+&lt;jpf-sort
+	basedir="${build.home}/plugins"
+	includes="*/plugin.xml,*/plugin-fragment.xml"
+	pathid="plugins"
+	pathmode="DIR"/&gt;</pre>
+	
+    <p>Look at the source code of <a href="http://sourceforge.net/project/showfiles.php?group_id=110394">JPF-Demo application</a> to get working example of tools usage.</p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:59
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

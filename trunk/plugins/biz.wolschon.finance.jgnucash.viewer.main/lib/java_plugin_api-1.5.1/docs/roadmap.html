@@ -1,0 +1,325 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Roadmap</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		Project Roadmap<br />
+		<a href="./todo.html">TODO List</a><br />
+		<a href="./qa.html">Questions &amp; Answers</a><br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+    <h1>JPF Roadmap</h1>
+    <p>Here are some details about our projects progress towards the final 1.0 and 1.5 releases.</p>
+	<h3>Version 0.1</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2004-05-28</strong>
+	</p>
+    
+    <p>Initial public release.</p>
+	<h3>Version 0.2</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2004-09-01</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Implemented extension and extension point validation.</li>
+			<li>Documentation improvements (JavaDoc, DTD elements comments).</li>
+			<li>Introduced public ID for the JPF DTD.</li>
+			<li>Multiple changes to the API aimed at providing support for tools to instrument JPF.</li>
+			<li>Multiple changes to the API aimed at separating the <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> and <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> roles.</li>
+			<li>Introduced the <a href="api/org/java/plugin/PathResolver.html">PathResolver</a> interface which "connects" the <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> and <a href="api/org/java/plugin/PluginManager.html">PluginManager</a>. Now all resource locations are handled via URLs only.</li>
+		</ul>
+    </p>
+	<h3>Version 0.3</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2004-11-05</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Now JPF can use any JAXP compatible XML parser implementation.</li>
+			<li>Initial implementation of JPF Tools ("Integrity Check", "Documentation Generator", "Plug-in archiver") with supporting Ant tasks.</li>
+			<li>Non-significant API changes.</li>
+			<li>Internal code improvements.</li>
+		</ul>
+    </p>
+	<h3>Version 0.4</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2005-02-08</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Added support for extension point "inheritance".</li>
+			<li>Added a new type - "fixed" - to the extension point parameter definition declaration.</li>
+			<li>Added new attribute - "custom-data" - to the extension point parameter definition declaration. It allows additionally customized behavior of some value types.</li>
+			<li>Added static method "lookup" to <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> that allows an application to find instances of <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> that have already been created.</li>
+			<li>Added possibility to disable/enable plug-ins during runtime.</li>
+			<li>Added possibility to deactivate plug-ins during runtime.</li>
+			<li>Added notification system to <a href="api/org/java/plugin/PluginManager.html">PluginManager</a>.</li>
+			<li>Removed internal code dependency on java.net.URI class. Now JPF should be able to run on JRE 1.3</li>
+			<li>Added notification system to <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> that now allows all interested classes to be notified when registry changes are made.</li>
+			<li>Added the ability to register/unregister plug-ins during runtime.</li>
+		</ul>
+    </p>
+	<h3>Version 0.5</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2005-04-03</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Added methods to <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> to retrieve a plug-in registration report separately from the integrity check report.</li>
+			<li>"Documentation generator" tool is now based on <a href="http://jxp.sourceforge.net" target="_new">JXP (Java scripted page) templates</a>.</li>
+			<li>Added methods to RegistryChangeData interface to help filter extensions by corresponding extension points.</li>
+			<li>Implemented possibility to discover Framework configuration.</li>
+			<li>PluginRegistry implementation has been reworked so that it is now uses SAX XML parser to process plug-in manifests. Implementation is compatible with JAXP 1.1 specification and based on the SAX 2 API.</li>
+			<li>Greatly improved "hot deploy" function implementation.</li>
+			<li>Deprecated and removed some unnecessary functions. The deprecated methods will be removed with at the time of the final 1.0 release. This was to greatly simplify some implementation aspects of <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a>.</li>
+			<li>Greatly improved the JPF demo application.</li>
+			<li>Many non-significant internal code improvements.</li>
+		</ul>
+    </p>
+	<h3>Version 0.6</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2005-06-24</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Added utility methods to <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> and PluginDescriptor interfaces that simplify the checking of availability of various plug-in elements. <strong>Thanks to Lukasz Grabski</strong>.</li>
+			<li>Implemented basic Framework localization. All locale sensitive strings are now externalized.</li>
+			<li>Revised API exceptions policy and introduced a number of JPF specific exceptions.</li>
+			<li>Added new type - "resource" - to extension point parameter definition.</li>
+			<li>Added optional "version" attribute into "library" manifest tag and implemented corresponding method in the API.</li>
+			<li>Significantly reworked and improved the plug-ins archive Tool.</li>
+			<li>Now <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> uses the default (or no-arguments) constructor to instantiate the Plugin class. The old two-argument constructor is deprecated and will be removed before the 1.0 release. <strong>Thanks to Lukasz Grabski</strong> for an idea.</li>
+		</ul>
+    </p>
+	<h3>Version 0.7</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2005-09-24</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Introduced the <a href="api/org/java/plugin/PluginManager.PluginLocation.html">PluginLocation</a> interface that encapsulates info about plug-in manifests and plug-in data locations.</li>
+			<li>Introduced the <a href="api/org/java/plugin/ObjectFactory.html">ObjectFactory</a> class that is used to get instances of main Framework objects like <a href="api/org/java/plugin/PluginManager.html">PluginManager</a>, <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> and <a href="api/org/java/plugin/PathResolver.html">PathResolver</a>.</li>
+			<li>The Framework API has been significantly restructured to make it much more flexible, consistent and extendible. To start using version 0.7 existing application should be modified. Most changes are related to moving classes between packages.</li>
+			<li>Improved documentation tool - added printing of documentation notes for extension point parameter definitions. <strong>Thanks to Jeff Brown</strong>.</li>
+		</ul>
+    </p>
+	<h3>Version 0.8</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2005-12-10</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Introduced the <a href="api/org/java/plugin/registry/UniqueIdentity.html">UniqueIdentity</a> interface into the registry API to mark all plug-in elements that may have a unique identifier (<a href="api/org/java/plugin/registry/PluginDescriptor.html">PluginDescriptor</a>, <a href="api/org/java/plugin/registry/PluginFragment.html">PluginFragment</a>, <a href="api/org/java/plugin/registry/PluginPrerequisite.html">PluginPrerequisite<a/>, <a href="api/org/java/plugin/registry/Library.html">Library</a>, <a href="api/org/java/plugin/registry/ExtensionPoint.html">ExtensionPoint</a> and <a href="api/org/java/plugin/registry/Extension.html">Extension</a>).</li>
+			<li>Introduced a special implementation of <a href="api/org/java/plugin/PathResolver.html">PathResolver</a> that transparently makes shadow copies of plug-ins before resolving them to the application. Among other things this helps to avoid locking of JAR files by the application since this prevents "hot updating" of plug-ins. For implementation details and configuration options see the javadoc for the <a href="api/org/java/plugin/standard/ShadingPathResolver.html">org.java.plugin.standard.ShadingPathResolver</a> class.</li>
+			<li>Introduced the "Single File Plug-in" Ant task to package plug-ins as ZIP files that may be run directly without further modification (part of JPF Tools).</li>
+			<li>Introduced the "Plug-in Info" Ant task to read the plug-in ID and version from the manifest file into project properties (part of JPF Tools).</li>
+			<li>Introduced the "JPF Boot" library to simplify running JPF based applications.</li>
+			<li>Added Path and version info elements to jpf*.jar manifests. Version numbers are no longer included in JAR file names.</li>
+			<li>Introduced utility class <a href="api/org/java/plugin/util/IoUtil.html">org.java.plugin.util.IoUtil</a> to handle I/O, File and URL manipulations.</li>
+		</ul>
+    </p>
+	<h3>Version 0.9</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2006-02-23</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Added getMatch() method to <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> interface to get complete access to full information in manifest. <strong>Thanks to Sebastian Kopsan for the idea.</strong></li>
+			<li>Introduced utility method readManifestInfo() to <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> interface to read basic manifest info (plug-in ID, version and such).</li>
+			<li>ShadingPathResolver now uses relative paths whenever that possible. This allows, for example, run JPF based application from different network locations without disturbing shadowed plug-ins.</li>
+			<li>Minor internal improvements in <a href="boot.html">JPF-Boot library</a>.</li>
+			<li>Now <a href="boot.html">JPF-Boot library</a> passes given command-line arguments to the application. To support this function, <a href="api/org/java/plugin/boot/ApplicationPlugin.html">ApplicationPlugin</a> API and JPF-Boot starting up arguments have been changed.</li>
+			<li>JPF documentation was reviewed and updated by <strong>Michael Dawson</strong> (this work is in progress now).</li>
+			<li>Added support for splash window in <a href="boot.html">JPF Boot library</a>. See additional <a href="config.html">configuration</a> parameter in <a href="api/org/java/plugin/boot/Boot.html">Boot</a> class.</li>
+			<li>Fixed bug in StandardPathResolver.resolvePath() method. <strong>Thanks to Sebastian Kopsan.</strong></li>
+			<li>Fixed bug in ExtensionPointImpl.updateConnectedExtensionsList() method. <strong>Thanks to Sebastian Kopsan.</strong></li>
+		</ul>
+    </p>
+	<h3>Version 0.10</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2006-05-03</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Fixed error in StandardPluginClassLoader incorrectly handled optional prerequisites. <strong>Thanks to Peter van der Winkel.</strong></li>
+			<li>Added German translation of some documentation. <strong>Thanks to Frank Gernart.</strong></li>
+			<li>Introduced <a href="api/org/java/plugin/standard/StandardPluginLocation.html">StandardPluginLocation</a> class that implements <a href="api/org/java/plugin/PluginManager.PluginLocation.html">PluginManager.PluginLocation</a> interface and helps handling of plug-in files and folders. <strong>Thanks to Per Cederberg for an idea.</strong></li>
+			<li>Added probeParentLoaderLast configuration parameter to <a href="api/org/java/plugin/standard/StandardPluginLifecycleHandler.html">StandardPluginLifecycleHandler</a>. This allows regulating of plug-in classloader delegation behavior. <strong>Thanks to Richard Bjarne (rjvduijn) for an idea.</strong></li>
+			<li>Improved logging support in plug-in classloader. Debug log statements are now more informative and allow easy find problems with classes and resources loading.</li>
+			<li>Improved extension point / extension API and validating algorithms.</li>
+			<li>Improved handling of plug-ins dependencies loop. This situation now should not raise an exception but simply put warning in log file.</li>
+			<li>Refactored <a href="api/org/java/plugin/PathResolver.html">PathResolver</a> to be interface instead of abstract class. <strong>Thanks to Per Cederberg.</strong></li>
+			<li>Fixed typo in PathResolver.getRegisteredConext() method name. <strong>Thanks to Per Cederberg.</strong></li>
+			<li>Improved handling of "resource" type extension parameters.</li>
+			<li>Improved handling boot errors in JPF-Boot library.</li>
+			<li>Improved handling of ZIP and JAR files to prevent their locking.</li>
+			<li>Improved "Plug-in Info" Ant task to make it consistent with <a href="api/org/java/plugin/registry/PluginRegistry.ManifestInfo.html">PluginRegistry.ManifestInfo</a> interface. This change may break existing Ant scripts that uses jpf-info Ant task.</li>
+		</ul>
+    </p>
+	<h3>Version 0.11</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2006-06-29</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>To the <a href="api/org/java/plugin/boot/DefaultApplicationInitializer.html">DefaultApplicationInitializer</a> class from <a href="boot.html">JPF-Boot library</a> added possibility to provide lists of plug-ins to be included/excluded from application (white and black lists). <strong>Thanks to Jonathan Giles for an idea.</strong></li>
+			<li>All <a href="tools.html">Ant tasks</a> improved to be able to work with single file plug-ins (JAR'ed or ZIP'ed). <strong>Thanks to Prashant M. R.</strong></li>
+			<li>Added possibility of advanced control of application splash screen in <a href="boot.html">JPF-Boot library</a>. See additional <a href="config.html">configuration</a> parameters and new <a href="api/org/java/plugin/boot/SplashHandler.html">org.java.plugin.boot.SplashHandler</a> interface.</li>
+			<li>main() method in <a href="boot.html">JPF-Boot library</a> is now refactored into several separate methods to allow more accurate controlling of application bootstrap procedure. Among other benefits, this allows to write unit tests for plug-ins and JPF based applications.</li>
+			<li>Improved <a href="boot.html">JPF-Boot library</a>. Implemented more flexible boot configuration lookup procedure. <strong>Thanks to Chris Ward.</strong></li>
+			<li>Added "reverse-lookup" attribute to the "import" tag. Setting this attribute to "true" allows imported plug-in to see classes in depending plug-in. This flag helps creating plug-ins that can see classes in other plug-ins not depending on them. This feature is very similar to Eclipse' "buddy class loading" behavior. To make this new function available in your plug-in manifests, refer to new version of <a href="dtd.html">DTD (0.6)</a>.</li>
+			<li>Improved error logging in <a href="api/org/java/plugin/standard/StandardPluginManager.html">StandardPluginManager</a> and <a href="api/org/java/plugin/standard/StandardPluginClassLoader.html">StandardPluginClassLoader</a>. <strong>Thanks to Peter van der Winkel.</strong></li>
+			<li>Fixed handling JAR file URL's in <a href="api/org/java/plugin/standard/StandardPluginClassLoader.html">StandardPluginClassLoader</a> and <a href="api/org/java/plugin/standard/StandardPathResolver.html">StandardPathResolver</a>. <strong>Thanks to Prashant M. R.</strong></li>
+		</ul>
+    </p>
+	<h3>Version 0.12</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2006-09-16</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>To <a href="tools.html">JPF-Tools</a> library added set of mock classes to simplify JPF usage in unit tests.</li>
+			<li>Nice looking 3D-style JPF logo <strong>contributed by Johnny Grattan</strong>.</li>
+			<li>Numerous minor improvements in <a href="boot.html">JPF-Boot library</a>.</li>
+			<li>Added version update Ant task to <a href="tools.html">JPF-Tools</a>. <strong>Thanks to Jonathan Giles for an idea and initial implementation.</strong></li>
+			<li>Fixed error with caching of native libraries in <a href="api/org/java/plugin/standard/StandardPluginClassLoader.html">StandardPluginClassLoader</a>. <strong>Thanks to Sebastian Kopsan.</strong></li>
+			<li>Improvements in <a href="api/org/java/plugin/standard/StandardPluginClassLoader.html">StandardPluginClassLoader</a> preventing several deadlock situations.</li>
+			<li>Added possibility to specify default value in extension point parameter definition.</li>
+			<li>Added build instructions to the source code distribution package.</li>
+			<li>Fixed <a href="http://sourceforge.net/tracker/index.php?func=detail&aid=1538888&group_id=110394&atid=656125">bug #1538888</a>.</li>
+			<li>Splash image related improvements in <a href="boot.html">JPF-Boot</a> library.</li>
+		</ul>
+    </p>
+	<h3>Version 1.0</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2007-01-08</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Plug-in <a href="dtd.html">manifest DTD</a> version number changed to 1.0 All references to previous versions are mapped to this one now.</li>
+			<li>Previously deprecated API has been removed from code.</li>
+			<li>Improved Splash Screen API in <a href="boot.html">JPF-Boot</a> library. It is now allows more flexible handling of splash screen behavior and <a href="config.html">configuration</a>.</li>
+			<li><a href="api/org/java/plugin/standard/ShadingPathResolver.html">ShadingPathResolver</a> may now filter files to be shadowed. This is regulated by includes/excludes <a href="config.html">configuration</a> parameters.</li>
+			<li>Added black/white lists support to all batch plug-ins processing Ant tasks in <a href="tools.html">JPF-Tools</a> library.</li>
+		</ul>
+    </p>
+	<h3>Version 1.0.1</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2007-03-04</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Directory based Ant tasks in <a href="tools.html">JPF-Tools</a> library are now support nested <code>&lt;fileset&gt;</code> tags like many other standard Ant tasks.</li>
+			<li>Fixed problems with file names and URL's that contain non-ASCII characters.</li>
+			<li>Improved handling of "reverse lookup" plug-in dependencies.</li>
+			<li>Improved interpreting of "jpf.boot.config" property in <a href="boot.html">JPF-Boot</a> library. This configuration parameter may now contain FQN of a configuration file. <strong>Thanks to Eduardo M. Costa for an idea suggestion.</strong></li>
+			<li>Added <code>jpf-path</code> Ant task to <a href="tools.html#path">JPF-Tools</a>. It helps to automatically compose plug-in classpath for using in various tasks like java, javac...</li>
+			<li>Fixed potential deadlock situation in <a href="api/org/java/plugin/standard/StandardPluginClassLoader.html">StandardPluginClassLoader</a>. <strong>Thanks to Chris Ward for assistance.</strong></li>
+		</ul>
+    </p>
+	<h3>Version 1.5.0</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2007-03-04</strong>
+	</p>
+	<p>
+		This is port to Java 5 of JPF 1.0.1 <strong>Thanks to <a href="http://sourceforge.net/users/jolkdarr/">Jolkdarr</a> for great help and initial port of JPF to Java 5.</strong>
+	</p>
+	<h3>Versions 1.0.2 and 1.5.1</h3>
+	<p>
+		Status: <strong>done</strong><br />
+		Release date: <strong>2007-05-19</strong>
+	</p>
+    <p>
+		Change log:
+		<ul>
+			<li>Maven POM files are now part of the JPF 1.5 distribution package. <strong>Thanks to <a href="http://sourceforge.net/users/ochnygosch/">Jens K&ouml;cke</a> for contribution.</strong></li>
+			<li>Changed <a href="dtd.html">plug-in DTD</a> to allow arrange of <code>&lt;extension&gt;</code> and <code>&lt;extension-point&gt;</code> tags in mixed order.</li>
+			<li>Added <code>jpf-sort</code> Ant task to <a href="tools.html#sort">JPF-Tools</a>. It helps to sort plug-ins in correct order to automate build process using tasks like <code>&lt;subant&gt;</code>.</li>
+			<li>Added German translation of resources. <strong>Thanks to Stefan Rado for contribution.</strong></li>
+			<li>Significant improvements in classloader performance. See new <a href="config.html">configuration options</a> in <a href="api/org/java/plugin/standard/StandardPluginLifecycleHandler.html">StandardPluginLifecycleHandler</a> class. New performance optimizations are <strong>enabled</strong> by default.</li>
+			<li>JPF version number is now available as system property. See <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> for details.</li>
+		</ul>
+    </p>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:59
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

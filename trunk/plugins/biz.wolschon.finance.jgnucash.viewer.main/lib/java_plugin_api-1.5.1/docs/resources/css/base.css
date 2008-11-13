@@ -1,0 +1,134 @@
+/*
+Java Plug-in Framework (JPF)
+Copyright (C) 2004 - 2005 Dmitry Olshansky
+$Id$
+*/
+BODY  {
+	margin : 0;
+	background-color : White;
+	color : Black;
+    font-size : 100%;
+    font-family : Arial, Helvetica, sans-serif;
+}
+
+H1 {
+	border : 1px outset;
+	background-color : #E0E0E0;
+	width : 94%;
+	margin: 0 0 .5em 0;
+	padding: .3em 1em .3em 1em;
+	font-size : 130%;
+	font-weight: bold;
+}
+
+H2 {
+	border : 1px outset;
+	background-color : #E0E0E0;
+	width : 95%;
+	padding: .3em 1em .3em 1em;
+	font-size : 120%;
+	font-weight: bold;
+}
+
+H3 {
+	border : 1px outset;
+	background-color : #E0E0E0;
+	width : 95%;
+	padding: .2em 1em .2em 1em;
+	font-size : 120%;
+	font-weight: normal;
+}
+
+H4 {
+	font-size : 110%;
+	font-weight: bold;
+	margin: .5em 1em .5em 1em;
+}
+
+H5 {
+	font-size : 110%;
+	font-weight: normal;
+	margin: .5em 1em .5em 1em;
+}
+
+H6 {
+	font-size : 100%;
+	font-weight: bold;
+	margin: .5em 1em .5em 1em;
+}
+
+TABLE {
+	background-color : White;
+	color : Black;
+    font-size : 100%;
+    font-family : Arial, Helvetica, sans-serif;
+}
+
+P {
+    font-size : 100%;
+    font-family : Arial, Helvetica, sans-serif;
+	margin: 0 .7em .7em .7em;
+}
+
+A, A:ACTIVE, A:FOCUS, A:LINK, A:VISITED {
+	color : #0000CC;
+	text-decoration : none;
+}
+
+A:HOVER {
+	color : #0066FF;
+	text-decoration : none;
+}
+
+DIV.menu {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width : 11em;
+	margin: .5em .5em .5em .5em;
+	line-height : 1.5em;
+}
+
+DIV.content {
+	margin: .5em .5em .5em 12em;
+}
+
+DIV.footer {
+	margin: 0;
+	padding : 1em;
+	border-top : 1px solid;
+	font-size : 80%;
+}
+
+DIV.menu P {
+	border : 1px outset;
+	background-color : #E0E0E0;
+	color : Black;
+	padding : .5em;
+	margin : 0 0 2em 0;
+}
+
+DIV.content HR {
+	width : 100%;
+	height : 1px;
+	color : Black;
+	margin: 1em 0 1em 0;
+}
+
+DIV.content PRE {
+	border : 1px outset;
+	background-color : #F5F5F5;
+	color : Black;
+	padding : .5em;
+	margin : .5em;
+	font-size : 90%;
+}
+
+DIV.content DL, UL, OL {
+	font-size : 100%;
+}
+
+DIV.content DT {
+	font-size : 100%;
+	font-weight : bold;
+}

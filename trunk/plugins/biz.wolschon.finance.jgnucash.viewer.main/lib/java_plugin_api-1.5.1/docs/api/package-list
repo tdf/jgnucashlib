@@ -1,0 +1,10 @@
+org.java.plugin
+org.java.plugin.boot
+org.java.plugin.registry
+org.java.plugin.registry.xml
+org.java.plugin.standard
+org.java.plugin.tools
+org.java.plugin.tools.ant
+org.java.plugin.tools.docgen
+org.java.plugin.tools.mocks
+org.java.plugin.util

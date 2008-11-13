@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="biz.wolschon.finance.jgnucash.ComdirectCSVImporter" version="2.0.0"
+	class="biz.wolschon.finance.jgnucash.ComdirectCSVImporter.Main">
+	<requires>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main"/>
+	</requires>
+	<runtime>
+		<library id="core" path="classes/" type="code">
+			<doc caption="API documentation">
+				<doc-ref path="api/index.html" caption="javadoc" />
+			</doc>
+			<export prefix="*" />
+		</library>
+	</runtime>
+	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+	           point-id="Importer" id="ComdirectCSVImporter">
+	   <parameter id="name"
+	           value="Comdirect CSV"/>
+	   <parameter id="description"
+	           value="Example-Importer for CSV-files as exported by the Comdirect-bank."/>
+	   <parameter id="hasFixedAccount"
+	           value="false"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.ComdirectCSVImporter.Main"/>
+     </extension>
+</plugin>

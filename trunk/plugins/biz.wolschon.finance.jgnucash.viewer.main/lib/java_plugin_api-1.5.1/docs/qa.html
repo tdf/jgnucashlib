@@ -1,0 +1,110 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="robots" content="index, follow" />
+		<meta name="description" content="Framework to help development of extensible Java applications or to add plug-in support to existing systems." />
+		<meta name="keywords" content="Java, plugin, plug-in, framework, platform, architecture, engine, runtime, extensible, flexible, reliable, server-side, client-side, development, developer, library, package, open-source, LGPL, free software" />
+		<meta name="revisit-after" content="7 days" />
+        <title>Java Plugin Framework (JPF) - Questions and Answers</title>
+        <link rel="StyleSheet" type="text/css" href="./resources/css/base.css" />
+        <link rel="icon" href="./resources/images/favicon.ico" />
+    </head>
+
+    <body>        
+
+<div class="menu">
+	<p align="center"><a href="http://jpf.sourceforge.net"><img src="./resources/images/jpf-logo.png" width="80" height="60" title="Java Plug-in Framework (JPF)" border="0" alt="JPF" /></a></p>
+	<p>
+		<a href="./index.html">Home</a><br />
+		<a href="./about.html">System Overview</a><br />
+		<a href="./roadmap.html">Project Roadmap</a><br />
+		<a href="./todo.html">TODO List</a><br />
+		Questions &amp; Answers<br />
+		<a href="./stories.html">Success stories</a><br />
+		<a href="./license.html">License</a><br />
+	</p>
+	<p>
+		<a href="./concepts.html">Concepts</a><br />
+		<a href="./boot.html">JPF Boot Library</a><br />
+		<a href="./tutorial.html">Tutorial</a><br />
+		<a href="./ide.html">JPF &amp; Java IDE</a><br />
+		<a href="./api/index.html">API Reference</a><br />
+		<a href="./dtd.html">Plug-in DTD</a><br />
+		<a href="./tools.html">JPF Tools Reference</a><br />
+		<a href="./config.html">Configuration Reference</a><br />
+	</p>
+	<p>
+		<a href="http://sourceforge.net/projects/jpf/">Project Summary</a><br/>
+		<a href="http://sourceforge.net/news/?group_id=110394">Project News</a><br/>
+		<a href="http://sourceforge.net/project/showfiles.php?group_id=110394">Download</a><br/>
+		<a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Forum</a><br/>
+	</p>
+	<p lang="de"><a href="./de/tutorial.html">German (de)</a></p>
+	
+</div>
+
+<div class="content">
+    <h1>JPF Questions & Answers</h1>
+    <h3>Questions</h3>
+    <p>
+		<a href="#q-1">What kind of applications can I develop with JPF?</a><br />
+		<a href="#q-2">Where can I get plug-ins for JPF?</a><br />
+		<a href="#q-3">Why is JPF's plug-in manifest format different from the one used by Eclipse?</a><br />
+		<a href="#q-4">Why isn't there a UI provided for plug-in management?</a><br />
+		<a href="#q-5">What are the system requirements and dependencies for JPF?</a><br />
+		<a href="#q-6">Is there a way of hot-deploying plug-ins?</a><br />
+		<a href="#q-7">Is it possible to package JPF plug-in into a single JAR file?</a><br />
+		<a href="#q-8">What is it useful to know about plug-ins and classloaders?</a>
+	</p>
+	<p><a href="http://sourceforge.net/forum/forum.php?forum_id=378299">Ask a question, not listed here.</a></p>
+	<hr />
+    <h3>Answers</h3>
+	<h5><a name="q-1">What kind of applications can I develop with JPF?</a></h5>
+	<p>The short answer is: ANY type of Java application. We are currently testing JPF with different types of applications and some other projects are helping with this. The first project is a simple GUI application, developed using the Java Swing API. It is available for <a href="http://sourceforge.net/project/showfiles.php?group_id=110394">download</a> as a JPF demo application. The next project is a web site and services platform aimed at providing web developers and site maintainers (administrators, managers, content editors) with powerful tools to run web applications and maintain them from remote sites (with an HTML based UI, for example). This project is currently under serious development and will be publicly released soon (hopefully sometime in 2006). This project especially demonstrates how JPF can be very useful in J2EE applications. The last project is in the early design stages and is an <a href="http://www.eclipse.org/swt" target="_new">SWT library</a> based GUI application. This project is used to test how well JPF deals with native libraries.</p>
+	<h5><a name="q-2">Where can I get plug-ins for JPF?</a></h5>
+    <p>JPF plug-ins are dependent on the main application being developed. While with a few lines of code JPF can be used as an effective tool to dynamically add any Java library to any application, JPF itself does not provide plug-ins. It only provides the FRAMEWORK for developing your own.  That said, you can have a look at the plug-ins that come with the demo application as an example to get you started.</p>
+	<h5><a name="q-3">Why is JPF's plug-in manifest format different from the one used by Eclipse?</a></h5>
+	<p>Your right! Making the JPF plug-in manifest compatible with Eclipse's would be convenient from a developers point of view. But unfortunately it is not so easy to implement :( The Eclipse team is moving very fast and it seems that they are moving to a completely OSGI plug-in model and making "XML based" plug-ins deprecated.</p>
+	<p>We like the original idea as it is simple and easy to understand. JPF has added several things to Eclipse's plug-in concept to make it as open for extensions as possible. All manifest related APIs exist as a set of interfaces and can be implemented by custom code. JPF believes that it is possible to develop an Eclipse-compatible manifest implementation and provide it as an additional module.</p>
+	<h5><a name="q-4">Why isn't there a UI provided for plug-in management?</a></h5>
+	<p>The UI is out of the framework scope. That is up to the applications that use JPF. JPF provides full information about plug-ins and runtime resources, to support application logic. Nevertheless, it may be possible that some functions, related to plug-in management, will be implemented as "tools" and be added to the JPF distribution package.</p>
+	<h5><a name="q-5">What are the system requirements and dependencies for JPF?</a></h5>
+	<p>JPF requires a Java 1.3 compatible VM. It also uses the <a href="http://jakarta.apache.org/commons/logging/" target="_new">Jakarta Commons-logging library</a> (included in the distribution package).</p>
+	<h5><a name="q-6">Is there a way of hot-deploying plug-ins?</a></h5>
+	<p>It is possible from version 0.4 and up! To register/deregister plug-ins while the application is running, use <a href="api/org/java/plugin/PluginManager.html#publishPlugins(org.java.plugin.PluginManager.PluginLocation[])">publishPlugins</a> method in the <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> class or <a href="api/org/java/plugin/registry/PluginRegistry.html#register(java.net.URL[])">register()</a> and <a href="api/org/java/plugin/registry/PluginRegistry.html#unregister(java.lang.String[])">unregister()</a> methods in the <a href="api/org/java/plugin/registry/PluginRegistry.html">PluginRegistry</a> interface. To activate/deactivate registered plug-ins use the <a href="api/org/java/plugin/PluginManager.html#activatePlugin(java.lang.String)">activatePlugin()</a> and <a href="api/org/java/plugin/PluginManager.html#deactivatePlugin(java.lang.String)">deactivatePlugin()</a> methods in <a href="api/org/java/plugin/PluginManager.html">PluginManager</a> class.</p>
+	<p>Note though that correct working of "hot deploy" functionality is dependent on cooperation between JPF and all plug-ins. In general, it is impossible to "unload" any Java class being used by at least one other "active" class. So plug-in developers need to keep in mind this aspect of Java class loading when developing plug-ins. The Framework provides and handles all required "services" to correctly "initialize" and "un-initialize" plug-in classes as well as to inform them about any changes to the plug-in manager and registry.</p>
+	<h5><a name="q-7">Is it possible to package JPF plug-in into a single JAR file?</a></h5>
+	<p>This is possible and not as difficult as it may seem. It can be done using the standard Java feature - "JAR URL" handler. Developers construct URL's that point to resources within a JAR file.</p>
+	<p>Note that not any plug-in can be packaged in such a way if you are using <a href="api/org/java/plugin/standard/StandardPathResolver.html">standard path resolver</a>. The exceptions are plug-ins that contain other JAR's as libraries or native code libraries.</p>
+	<p>Starting from version 0.8 the "single file plug-ins" are fully supported by the various JPF tools. There is also a <a href="tools.html#singleFilePlugin">special Ant task</a> to help building this type of plug-in and the <a href="boot.html">JPF Boot Library</a> was designed to support loading such plug-ins. If you need to load plug-ins manually (not using JPF Boot library) you may find it useful to use <a href="api/org/java/plugin/standard/StandardPluginLocation.html">standard plug-in location</a> implementation, it knows how to handle ZIP file or "plain folder style" plug-ins. Finally the <a href="api/org/java/plugin/standard/ShadingPathResolver.html">special path resolver</a> knows how to handle JAR'ed plug-ins even if they contain other JAR files or native libraries.</p>
+	<h5><a name="q-8">What is it useful to know about plug-ins and classloaders?</a></h5>
+	<p>Generally speaking plug-in developers usually don't care how plug-ins management and classloading work. This might be useful to know for application core developers - those who implement base logic and core plug-ins.</p>
+	<p>JPF introduces concept of plug-ins and main part of this concept is classloaders isolation - each plug-in has it's own associated <a href="api/org/java/plugin/PluginClassLoader.html">classloader</a> that is responsible for managing resources of the plug-in (classes and other files). Plug-in's classloaders are organized in graph hierarchy that reflects dependencies between corresponding plug-ins.</p>
+	<p>The relations in classloaders hierarchy are used to delegate resource lookup requests from descendant classloader to ancestor one: first trying to load resource with current (this) classloader, next with ancestors and next with descendants (see reverse lookup mechanism bellow).</p>
+	<p>Java classloader API introduces another, it's own classloaders hierarchy - every classloader should have parent except <code>bootstrap</code> classloader that is root of this hierarchy. All plug-ins in JPF have <code>system</code> classloader as parent in Java API. This is the classloader that reflect your application CLASSPATH variable. By default, delegation in this hierarchy organized according to Java Language Specification - delegate loading request to parent classloader first and if this fails, try to load resource with this classloader using JPF hierarchy logic as described above. With special configuration parameter (see <code>probeParentLoaderLast</code> parameter on <a href="config.html">configuration reference</a> page) JPF allows to reverse this delegation logic: try to load resource with this classloader first and if fails delegate to parent.</p>
+	<p>Another useful feature of JPF classloading is "reverse lookup". Describing inter plug-ins dependencies in prerequisites section of manifest (see <a href="dtd.html">manifest DTD</a> for details) you may specify that your plug-in "pluginB" depends on "pluginA" allowing "reverse lookup". What this mark will affect on? When classloader of "pluginA" will search for a resource, it will not only delegate loading request to parent classloader as described above but also try classloader of "pluginB" and all "reverse lookup" plug-ins ("children" classloaders). This trick allows creating plug-ins that can see classes not only in it's own libraries but in any depending plug-in also.</p>
+	<p>For those who want to deep into classloading in Java it is recommended to look through the following resources:</p>
+	<ul>
+		<li>Javadocs for <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/ClassLoader.html" target="_new">java.lang.ClassLoader</a></li>
+		<li>Classes lookup, initializing and loading related parts of <a href="http://java.sun.com/docs/books/jls/" target="_new">Java Language Specification</a></li>
+		<li>"Inside Class Loaders" article on <a href="http://www.onjava.com/pub/a/onjava/2003/11/12/classloader.html" target="_new">http://www.onjava.com/pub/a/onjava/2003/11/12/classloader.html</a></li>
+		<li>Source code of <code>org.java.plugin.standard.StandardPluginClassLoader</code> in JPF</li>
+	</ul>
+</div>
+
+        <div class="footer">
+        	<span style="float:left;">&copy; 2004 - 2007 JPF Team</span>
+        	<span style="float:right;">
+        		Direct e-mail: <img src="./resources/images/email.png" width="169" height="20" title="Direct email" style="vertical-align:middle;" />
+        		Last modified: 2007-05-19 18:59
+        	</span>
+        </div>
+        <br />
+
+    </body>
+</html>
+

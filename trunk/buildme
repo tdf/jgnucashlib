@@ -1,0 +1,3 @@
+#!/bin/bash
+export JAVA_HOME=/usr/lib/jvm/jdk1.6.0_07/
+ant -f build.xml  clean dist run

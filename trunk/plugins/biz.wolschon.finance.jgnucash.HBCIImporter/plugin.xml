@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="biz.wolschon.finance.jgnucash.HBCIImporter" version="2.0.8"
+	class="biz.wolschon.finance.jgnucash.HBCIImporter.PluginMain">
+	<requires>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.AbstractScriptableImporter"/>
+	</requires>
+	<runtime>
+		<library id="core" path="classes/" type="code">
+			<doc caption="API documentation">
+				<doc-ref path="api/index.html" caption="javadoc" />
+			</doc>
+			<export prefix="*" />
+		</library>
+	</runtime>
+	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+	           point-id="Importer" id="HBCIImporter">
+	   <parameter id="name"
+	           value="HBCI/FinTS"/>
+	   <parameter id="description"
+	           value="Scriptable importer for transactions via HBCI-online-banking."/>
+	   <parameter id="hasFixedAccount"
+	           value="false"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.HBCIImporter.HBCIImporter"/>
+     </extension>
+</plugin>
