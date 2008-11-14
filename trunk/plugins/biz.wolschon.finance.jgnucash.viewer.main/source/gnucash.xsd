@@ -130,6 +130,7 @@
 <!-- ============================================================== -->
               
               <xs:element ref="gnc_account" minOccurs="0" maxOccurs="unbounded"/>
+              <xs:element name="gnc_budget" type="gnc_budget" minOccurs="0" maxOccurs="unbounded"/>
               <xs:element ref="gnc_transaction" minOccurs="0" maxOccurs="unbounded"/>
               <xs:element name="gnc_template-transactions" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
@@ -836,5 +837,63 @@
     </xs:complexType>
   </xs:element>
   <xs:element name="ts_date" type="xs:string"/>
+
+  <xs:complexType name="gnc_budget">
+  	<xs:sequence>
+
+  		<xs:element name="bgt_id" type="gnc_idType" maxOccurs="1"
+  			minOccurs="1">
+  		</xs:element>
+  		<xs:element name="bgt_name" type="xs:string" maxOccurs="1"
+  			minOccurs="1">
+  		</xs:element>
+  		<xs:element name="bgt_description" type="xs:string"
+  			nillable="true" maxOccurs="1" minOccurs="0">
+  		</xs:element>
+  		<xs:element name="bgt_num-periods" type="xs:int" minOccurs="1"
+  			maxOccurs="1">
+  		</xs:element>
+  		<xs:element name="bgt_recurrence" maxOccurs="1"
+  			minOccurs="1">
+  			<xs:complexType>
+  				<xs:sequence>
+  					<xs:element name="recurrence_mult"
+  						type="xs:int">
+  					</xs:element>
+  					<xs:element name="recurrence_period_type"
+  						type="xs:string">
+  					</xs:element>
+  					<xs:element name="recurrence_start" type="recurrence_startType">
+  					</xs:element>
+  				</xs:sequence>
+  				<xs:attribute name="version" type="xs:string"
+  					use="required">
+  				</xs:attribute>
+  			</xs:complexType>
+  		</xs:element>
+  		<xs:element name="bgt_slots" type="slots_type"></xs:element>
+  	</xs:sequence>
+  	<xs:attribute name="version" type="xs:string" use="required"></xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="gnc_idType">
+  	<xs:simpleContent>
+  		<xs:extension base="xs:string">
+  			<xs:attribute name="type">
+  				<xs:simpleType>
+  					<xs:restriction base="xs:string">
+  						<xs:enumeration value="guid"></xs:enumeration>
+  					</xs:restriction>
+  				</xs:simpleType>
+  			</xs:attribute>
+  		</xs:extension>
+  	</xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="recurrence_startType">
+  	<xs:sequence>
+  		<xs:element name="gdate" type="xs:date" minOccurs="1" maxOccurs="1"></xs:element>
+  	</xs:sequence>
+  </xs:complexType>
 </xs:schema>
 

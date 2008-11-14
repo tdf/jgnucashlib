@@ -10,21 +10,27 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl.generated;
 
 
 /**
- * Java content class for anonymous complex type.
- * 	<p>The following schema fragment specifies the expected 	content contained within this java content object. 	(defined at file:/D:/workspace/jGnucashLib-GPL/plugins/biz.wolschon.finance.jgnucash.viewer.main/source/gnucash.xsd line 795)
+ * Java content class for gnc_idType complex type.
+ * 	<p>The following schema fragment specifies the expected 	content contained within this java content object. 	(defined at file:/D:/workspace/jGnucashLib-GPL/plugins/biz.wolschon.finance.jgnucash.viewer.main/source/gnucash.xsd line 880)
  * <p>
  * <pre>
- * &lt;complexType>
+ * &lt;complexType name="gnc_idType">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="type" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="type">
+ *         &lt;simpleType>
+ *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
+ *             &lt;enumeration value="guid"/>
+ *           &lt;/restriction>
+ *         &lt;/simpleType>
+ *       &lt;/attribute>
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
  * 
  */
-public interface OwnerIdType {
+public interface GncIdType {
 
 
     /**
