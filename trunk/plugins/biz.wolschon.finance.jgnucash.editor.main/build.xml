@@ -37,6 +37,7 @@ Use top-level project build file to build application.
 		       classpathref="plugin.classpath"
 		       excludes=""
 		       target="1.6"
+			   encoding="ISO8859-15"
 		       debug="true"
 		       optimize="false">
 		</javac>
