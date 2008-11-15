@@ -50,6 +50,7 @@ import org.java.plugin.boot.Application;
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl;
+import biz.wolschon.finance.jgnucash.actions.FileBugInBrowserAction;
 import biz.wolschon.finance.jgnucash.panels.DebugLogPanel;
 import biz.wolschon.finance.jgnucash.panels.TaxReportPanel;
 import biz.wolschon.finance.jgnucash.panels.TransactionsPanel;
@@ -65,8 +66,8 @@ import biz.wolschon.finance.jgnucash.swingModels.GnucashAccountsTreeModel;
 public class JGnucashViewer extends JFrame implements Application {
 
 
-	/**
-     * Our logger for debug- and error-ourput.
+    /**
+     * Our logger for debug- and error-output.
      */
     private static final Log LOGGER = LogFactory.getLog(JGnucashViewer.class);
 
@@ -84,9 +85,19 @@ public class JGnucashViewer extends JFrame implements Application {
      */
     private GnucashAccount selectedAccount = null;
 
-    private static final String title = "JGnucash";
+    /**
+     * The title of the frame.
+     */
+    private static final String TITLE = "JGnucash";
 
+    /**
+     * The split-pane between account-tree and transactions-table.
+     */
     protected JSplitPane jSplitPane = null;
+
+    /**
+     * The tree showing all accounts.
+     */
     private JTree accountsTree = null;
     /**
      * The {@link JTabbedPane} containing {@link #transactionsPanel}
@@ -116,7 +127,12 @@ public class JGnucashViewer extends JFrame implements Application {
     /**
      * The MenuItem to show the current log.
      */
-	private JMenuItem myDebugLogMenu;
+    private JMenuItem myDebugLogMenu;
+
+    /**
+     * The MenuItem to file a bug in the system's web-browser.
+     */
+    private JMenuItem myFileBugMenuItem;
 
     /**
      * This method initializes
@@ -263,26 +279,26 @@ public class JGnucashViewer extends JFrame implements Application {
 
     /**
      * The currently selected account.
-	 * @return the selectedAccount
-	 */
-	public GnucashAccount getSelectedAccount() {
-		return selectedAccount;
-	}
+     * @return the selectedAccount
+     */
+    public GnucashAccount getSelectedAccount() {
+        return selectedAccount;
+    }
 
-	/**
-	 * The currently selected account.
-	 * @param selectedAccount the selectedAccount to set (may be null)
-	 */
-	public void setSelectedAccount(final GnucashAccount aSelectedAccount) {
-		selectedAccount = aSelectedAccount;
+    /**
+     * The currently selected account.
+     * @param aSelectedAccount the selectedAccount to set (may be null)
+     */
+    public void setSelectedAccount(final GnucashAccount aSelectedAccount) {
+        selectedAccount = aSelectedAccount;
 
-    	getTransactionsPanel().setAccount(selectedAccount);
+        getTransactionsPanel().setAccount(selectedAccount);
         if (selectedAccount != null) {
-        	LOGGER.debug("accoun " + selectedAccount.getId()
-        			+ " = " + selectedAccount.getQualifiedName()
-        			+ " selected");
+            LOGGER.debug("accoun " + selectedAccount.getId()
+                    + " = " + selectedAccount.getQualifiedName()
+                    + " selected");
         }
-	}
+    }
 
     /**
      * This method initializes jJMenuBar.
@@ -323,10 +339,11 @@ public class JGnucashViewer extends JFrame implements Application {
      */
     protected JMenu getHelpMenu() {
         if (myHelpMenu == null) {
-        	myHelpMenu = new JMenu();
-        	myHelpMenu.setText("Help");
-        	myHelpMenu.setMnemonic('h');
-        	myHelpMenu.add(getDebugLogMenuItem());
+            myHelpMenu = new JMenu();
+            myHelpMenu.setText("Help");
+            myHelpMenu.setMnemonic('h');
+            myHelpMenu.add(getDebugLogMenuItem());
+            myHelpMenu.add(getOpenBugMenuItem());
         }
         return myHelpMenu;
     }
@@ -366,6 +383,19 @@ public class JGnucashViewer extends JFrame implements Application {
             });
         }
         return myFileExitMenuItem;
+    }
+
+    /**
+     * @return The MenuItem to file a bug in the system's web-browser.
+     */
+    private JMenuItem getOpenBugMenuItem() {
+        if (myFileBugMenuItem == null) {
+            myFileBugMenuItem = new JMenuItem();
+            myFileBugMenuItem.setName("fileBug");
+            myFileBugMenuItem.setText("file bug-report");
+            myFileBugMenuItem.addActionListener(new FileBugInBrowserAction());
+        }
+        return myFileBugMenuItem;
     }
 
     /**
@@ -429,7 +459,7 @@ public class JGnucashViewer extends JFrame implements Application {
         this.setJMenuBar(getJMenuBar());
         this.setContentPane(getJContentPane());
         this.setSize(defaultWidth, defaultHeight);
-        this.setTitle(title);
+        this.setTitle(TITLE);
         this.setDefaultCloseOperation(
                 javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -530,7 +560,7 @@ public class JGnucashViewer extends JFrame implements Application {
                     new GnucashAccountsTreeModel(getModel()));
             getTaxReportPanel().setBooks(getModel());
             setSelectedAccount(null);
-            setTitle(title);
+            setTitle(TITLE);
             jSplitPane.setDividerLocation(0.5);
             return true;
         } catch (IOException e1) {
