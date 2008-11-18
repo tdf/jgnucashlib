@@ -50,6 +50,8 @@ test  - runs some tests
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporter" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.PaypalImporter" target="${target}" />
+<!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->
+		<ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
 	</target>
 
 	<target name="build" depends="-init" description="Builds entire project">

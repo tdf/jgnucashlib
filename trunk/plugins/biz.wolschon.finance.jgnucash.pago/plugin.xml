@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="biz.wolschon.finance.jgnucash.pago" version="2.0.3"
+	class="biz.wolschon.finance.jgnucash.pago.PluginMain">
+	<requires>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main"/>
+<!--	       <import plugin-id="biz.wolschon.finance.jgnucash.common"/> -->
+	</requires>
+	<runtime>
+		<library id="core" path="classes/" type="code">
+			<doc caption="API documentation">
+				<doc-ref path="api/index.html" caption="javadoc" />
+			</doc>
+			<export prefix="*" />
+		</library>
+	</runtime>
+	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+	           point-id="Importer" id="PagoWeb">
+	   <parameter id="name"
+	           value="Pago-Web"/>
+	   <parameter id="description"
+	           value="Import PAGO account-statements directly from the web.."/>
+	   <parameter id="hasFixedAccount"
+	           value="true"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.pago.WebImport"/>
+     </extension>
+     	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+	           point-id="Importer" id="PagoFile">
+	   <parameter id="name"
+	           value="Pago-File..."/>
+	   <parameter id="description"
+	           value="Import PAGO account-statements directly from a file.."/>
+	   <parameter id="hasFixedAccount"
+	           value="true"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.pago.FileImport"/>
+     </extension>
+</plugin>
