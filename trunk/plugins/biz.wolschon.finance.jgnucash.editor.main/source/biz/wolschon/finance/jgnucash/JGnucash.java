@@ -54,6 +54,7 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileWritingImpl;
 import biz.wolschon.finance.jgnucash.actions.ImportPluginMenuAction;
 import biz.wolschon.finance.jgnucash.actions.OpenFilePluginMenuAction;
+import biz.wolschon.finance.jgnucash.actions.ToolPluginMenuAction;
 import biz.wolschon.finance.jgnucash.panels.TransactionsPanel;
 import biz.wolschon.finance.jgnucash.panels.WritableTransactionsPanel;
 
@@ -135,6 +136,11 @@ public class JGnucash extends JGnucashViewer {
      * The Import-Menu.
      */
     private JMenu importMenu = null;
+
+    /**
+     * The Import-Menu.
+     */
+    private JMenu toolMenu = null;
 
     /**
      * The main-entry-point to our plugin-api.
@@ -287,6 +293,7 @@ public class JGnucash extends JGnucashViewer {
             menuBar = super.getJMenuBar();
             // insert the "Import"-menu before the help-menu.
             menuBar.add(getImportMenu(), menuBar.getMenuCount() - 1);
+            menuBar.add(getToolMenu(), menuBar.getMenuCount() - 1);
         }
         return menuBar;
     }
@@ -409,6 +416,62 @@ public class JGnucash extends JGnucashViewer {
         return importMenu;
     }
 
+    /**
+     * This method initializes import-menu..
+     *
+     * @return javax.swing.JMenu
+     */
+    protected JMenu getToolMenu() {
+        if (toolMenu == null) {
+            toolMenu = new JMenu();
+            toolMenu.setText("Tools");
+            toolMenu.setMnemonic('t');
+            //importMenu.setEnabled(false);// first we need to load a file
+
+            PluginManager manager = getPluginManager();
+            // if we are configured for the plugin-api
+            if (manager != null) {
+                ExtensionPoint toolExtPoint = manager.getRegistry().getExtensionPoint(
+                                              getPluginDescriptor().getId(), "Tool");
+                for (Iterator<Extension> it = toolExtPoint.getConnectedExtensions().iterator(); it.hasNext();) {
+                    Extension ext = it.next();
+                    String pluginName = "unknown";
+
+                    try {
+                        pluginName = ext.getParameter("name").valueAsString();
+                        JMenuItem newMenuItem = new JMenuItem();
+                        newMenuItem.putClientProperty("extension", ext);
+                        Parameter descrParam = ext.getParameter("description");
+                        Parameter iconParam = ext.getParameter("icon");
+                        URL iconUrl = null;
+                        if (iconParam != null) {
+                            try {
+                                iconUrl = getPluginManager().getPluginClassLoader(
+                                        ext.getDeclaringPluginDescriptor()).getResource(iconParam.valueAsString());
+                                if (iconUrl != null) {
+                                    newMenuItem.setIcon(new ImageIcon(iconUrl));
+                                }
+                            } catch (Exception e) {
+                                LOGGER.error("cannot load icon for Importer-Plugin '" + pluginName + "'", e);
+                            }
+                        }
+                        newMenuItem.setText(pluginName);
+                        if (descrParam != null) {
+                            newMenuItem.setToolTipText(descrParam.valueAsString());
+                        }
+                        newMenuItem.addActionListener(new ToolPluginMenuAction(this, ext, pluginName));
+                        importMenu.add(newMenuItem);
+                    } catch (Exception e) {
+                        LOGGER.error("cannot load Tool-Plugin '" + pluginName + "'", e);
+                        JOptionPane.showMessageDialog(this, "Error",
+                                "Cannot load Tool-Plugin '" + pluginName + "'",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        }
+        return toolMenu;
+    }
     /**
      * This method initializes fileSaveMenuItem.
      *
