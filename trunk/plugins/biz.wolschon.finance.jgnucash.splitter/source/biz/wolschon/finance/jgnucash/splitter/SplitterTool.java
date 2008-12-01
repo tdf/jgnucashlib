@@ -20,14 +20,25 @@ package biz.wolschon.finance.jgnucash.splitter;
 
 //automatically created logger for debug and error -output
 import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import biz.wolschon.fileformats.gnucash.GnucashAccount;
+import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
+import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
+import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileWritingImpl;
 import biz.wolschon.finance.jgnucash.plugin.ToolPlugin;
+import biz.wolschon.numbers.FixedPointNumber;
 
 
 /**
@@ -81,6 +92,63 @@ public class SplitterTool implements ToolPlugin {
                 return "OSCommerce-XML-file";
             }
         });
+        int returnCode = fc.showSaveDialog(null);
+        if (returnCode != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        
+        File newFile = fc.getSelectedFile();
+        if (newFile.exists()) {
+            JOptionPane.showMessageDialog(null, "File must not yet exist.");
+            return;
+        }
+        DateFormat localDateFormat = DateFormat.getDateInstance();
+        GregorianCalendar lastFirstJanuary = new GregorianCalendar();
+        lastFirstJanuary.set(Calendar.MONTH, Calendar.JANUARY);
+        lastFirstJanuary.set(Calendar.DAY_OF_YEAR, 0);
+        lastFirstJanuary.add(Calendar.DAY_OF_YEAR, -1);
+        Date splitDate = null;
+        while (true) {
+            try {
+                String inputDate = JOptionPane.showInputDialog(null, "Please enter the date to split at", localDateFormat.format(lastFirstJanuary.getTime()));
+                splitDate = localDateFormat.parse(inputDate);
+                if (splitDate != null) {
+                    break;
+                }
+            } catch (ParseException x) {
+                JOptionPane.showMessageDialog(null, "unparsable date.");
+            }
+        }
+        // we cannot clone in memory, thus create a 1:1-copy first
+        // and then remove transactions.
+        aWritableModel.writeFile(newFile);
+        GnucashWritableFile newModel = new GnucashFileWritingImpl(newFile);
+        for (GnucashTransaction transaction : newModel.getTransactions()) {
+            if (transaction.getDatePosted().after(splitDate)) {
+                newModel.removeTransaction(transaction);
+            }
+        }
+        newModel.writeFile(newFile);
+        
+        // get Balance for all accounts in newModel
+        // and insert a split in the current model to get these balances
+        GnucashWritableTransaction balanceTransaction = aWritableModel.createWritableTransaction();
+        for (GnucashAccount newAccount : newModel.getAccounts()) {
+            FixedPointNumber balance = newAccount.getBalance();
+            GnucashAccount account = aWritableModel.getAccountByID(account.getId());
+            GnucashWritableTransactionSplit split = balanceTransaction.createWritingSplit(account);
+            split.setQuantity(balance);
+        }
+        // balance the transaction
+        FixedPointNumber balance = balanceTransaction.getNegatedBalance();
+        GnucashWritableTransactionSplit split = balanceTransaction.createWritingSplit(aCurrentAccount);
+        split.setValue(balance);
+    
+        // remove all old Transactions from the existing file
+        for (GnucashTransaction transaction : newModel.getTransactions()) {
+            GnucashTransaction removeMe = aWritableModel.getTransactionByID(transaction.getId());
+            aWritableModel.removeTransaction(removeMe);
+        }
 
         return "";
     }
