@@ -452,7 +452,7 @@ public class JGnucash extends JGnucashViewer {
                                     newMenuItem.setIcon(new ImageIcon(iconUrl));
                                 }
                             } catch (Exception e) {
-                                LOGGER.error("cannot load icon for Importer-Plugin '" + pluginName + "'", e);
+                                LOGGER.error("cannot load icon for Tool-Plugin '" + pluginName + "'", e);
                             }
                         }
                         newMenuItem.setText(pluginName);

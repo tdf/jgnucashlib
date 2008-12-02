@@ -23,6 +23,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.logging.Logger;
 
@@ -94,13 +95,13 @@ public class SplitterTool implements ToolPlugin {
         });
         int returnCode = fc.showSaveDialog(null);
         if (returnCode != JFileChooser.APPROVE_OPTION) {
-            return;
+            return "";
         }
-        
+
         File newFile = fc.getSelectedFile();
         if (newFile.exists()) {
             JOptionPane.showMessageDialog(null, "File must not yet exist.");
-            return;
+            return "";
         }
         DateFormat localDateFormat = DateFormat.getDateInstance();
         GregorianCalendar lastFirstJanuary = new GregorianCalendar();
@@ -125,17 +126,17 @@ public class SplitterTool implements ToolPlugin {
         GnucashWritableFile newModel = new GnucashFileWritingImpl(newFile);
         for (GnucashTransaction transaction : newModel.getTransactions()) {
             if (transaction.getDatePosted().after(splitDate)) {
-                newModel.removeTransaction(transaction);
+                newModel.removeTransaction((GnucashWritableTransaction) transaction);
             }
         }
         newModel.writeFile(newFile);
-        
+
         // get Balance for all accounts in newModel
         // and insert a split in the current model to get these balances
         GnucashWritableTransaction balanceTransaction = aWritableModel.createWritableTransaction();
         for (GnucashAccount newAccount : newModel.getAccounts()) {
             FixedPointNumber balance = newAccount.getBalance();
-            GnucashAccount account = aWritableModel.getAccountByID(account.getId());
+            GnucashAccount account = aWritableModel.getAccountByID(newAccount.getId());
             GnucashWritableTransactionSplit split = balanceTransaction.createWritingSplit(account);
             split.setQuantity(balance);
         }
@@ -143,11 +144,11 @@ public class SplitterTool implements ToolPlugin {
         FixedPointNumber balance = balanceTransaction.getNegatedBalance();
         GnucashWritableTransactionSplit split = balanceTransaction.createWritingSplit(aCurrentAccount);
         split.setValue(balance);
-    
+
         // remove all old Transactions from the existing file
         for (GnucashTransaction transaction : newModel.getTransactions()) {
             GnucashTransaction removeMe = aWritableModel.getTransactionByID(transaction.getId());
-            aWritableModel.removeTransaction(removeMe);
+            aWritableModel.removeTransaction((GnucashWritableTransaction) removeMe);
         }
 
         return "";

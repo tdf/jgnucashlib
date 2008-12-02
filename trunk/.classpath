@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/source"/>
+	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.splitter/source"/>
+	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.pago/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.PaypalImporter/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.AbstractScriptablePlugin/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.AbstractScriptableImporter/source"/>
