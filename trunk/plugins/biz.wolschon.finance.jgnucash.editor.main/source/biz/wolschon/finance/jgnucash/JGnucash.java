@@ -460,7 +460,7 @@ public class JGnucash extends JGnucashViewer {
                             newMenuItem.setToolTipText(descrParam.valueAsString());
                         }
                         newMenuItem.addActionListener(new ToolPluginMenuAction(this, ext, pluginName));
-                        importMenu.add(newMenuItem);
+                        toolMenu.add(newMenuItem);
                     } catch (Exception e) {
                         LOGGER.error("cannot load Tool-Plugin '" + pluginName + "'", e);
                         JOptionPane.showMessageDialog(this, "Error",
