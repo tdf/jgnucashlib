@@ -22,6 +22,7 @@ package biz.wolschon.finance.jgnucash.splitter;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -107,7 +108,7 @@ public class SplitterTool implements ToolPlugin {
         GregorianCalendar lastFirstJanuary = new GregorianCalendar();
         lastFirstJanuary.set(Calendar.MONTH, Calendar.JANUARY);
         lastFirstJanuary.set(Calendar.DAY_OF_YEAR, 0);
-        lastFirstJanuary.add(Calendar.DAY_OF_YEAR, -1);
+        //lastFirstJanuary.add(Calendar.DAY_OF_YEAR, -1);
         Date splitDate = null;
         while (true) {
             try {
@@ -122,9 +123,12 @@ public class SplitterTool implements ToolPlugin {
         }
         // we cannot clone in memory, thus create a 1:1-copy first
         // and then remove transactions.
-        aWritableModel.writeFile(newFile);
-        GnucashWritableFile newModel = new GnucashFileWritingImpl(newFile);
-        for (GnucashTransaction transaction : newModel.getTransactions()) {
+        File tempfile = File.createTempFile("jgnucasheditor_splittool", ".xml.gz");
+        tempfile.deleteOnExit();
+        aWritableModel.writeFile(tempfile);
+        GnucashWritableFile newModel = new GnucashFileWritingImpl(tempfile);
+        tempfile.delete();
+        for (GnucashTransaction transaction : new ArrayList<GnucashTransaction>(newModel.getTransactions())) {
             if (transaction.getDatePosted().after(splitDate)) {
                 newModel.removeTransaction((GnucashWritableTransaction) transaction);
             }
@@ -146,7 +150,7 @@ public class SplitterTool implements ToolPlugin {
         split.setValue(balance);
 
         // remove all old Transactions from the existing file
-        for (GnucashTransaction transaction : newModel.getTransactions()) {
+        for (GnucashTransaction transaction : new ArrayList<GnucashTransaction>(newModel.getTransactions())) {
             GnucashTransaction removeMe = aWritableModel.getTransactionByID(transaction.getId());
             aWritableModel.removeTransaction((GnucashWritableTransaction) removeMe);
         }
