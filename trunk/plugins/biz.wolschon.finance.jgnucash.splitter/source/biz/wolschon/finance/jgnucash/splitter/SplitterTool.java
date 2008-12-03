@@ -86,7 +86,7 @@ public class SplitterTool implements ToolPlugin {
                 if (f.isDirectory()) {
                     return true;
                 }
-                return f.isFile() && !f.exists();
+                return f.isFile();
             }
 
             @Override
@@ -125,6 +125,7 @@ public class SplitterTool implements ToolPlugin {
         // and then remove transactions.
         File tempfile = File.createTempFile("jgnucasheditor_splittool", ".xml.gz");
         tempfile.deleteOnExit();
+        tempfile.delete();
         aWritableModel.writeFile(tempfile);
         GnucashWritableFile newModel = new GnucashFileWritingImpl(tempfile);
         tempfile.delete();
@@ -138,6 +139,8 @@ public class SplitterTool implements ToolPlugin {
         // get Balance for all accounts in newModel
         // and insert a split in the current model to get these balances
         GnucashWritableTransaction balanceTransaction = aWritableModel.createWritableTransaction();
+        balanceTransaction.setDatePosted(splitDate);
+        balanceTransaction.setDescription("Balance as of " + DateFormat.getDateInstance().format(splitDate));
         for (GnucashAccount newAccount : newModel.getAccounts()) {
             FixedPointNumber balance = newAccount.getBalance();
             GnucashAccount account = aWritableModel.getAccountByID(newAccount.getId());
@@ -146,7 +149,12 @@ public class SplitterTool implements ToolPlugin {
         }
         // balance the transaction
         FixedPointNumber balance = balanceTransaction.getNegatedBalance();
-        GnucashWritableTransactionSplit split = balanceTransaction.createWritingSplit(aCurrentAccount);
+        GnucashWritableAccount balanceAccount = aWritableModel.getAccountByName("Ausgleichskonto");
+        if (balanceAccount == null) {
+            balanceAccount = aWritableModel.createWritableAccount();
+            balanceAccount.setName("Ausgleichskonto");
+        }
+        GnucashWritableTransactionSplit split = balanceTransaction.createWritingSplit(balanceAccount);
         split.setValue(balance);
 
         // remove all old Transactions from the existing file
