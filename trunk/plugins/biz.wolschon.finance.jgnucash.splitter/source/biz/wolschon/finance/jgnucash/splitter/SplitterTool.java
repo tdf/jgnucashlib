@@ -20,6 +20,7 @@ package biz.wolschon.finance.jgnucash.splitter;
 
 //automatically created logger for debug and error -output
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
+import javax.xml.bind.JAXBException;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
@@ -100,6 +102,19 @@ public class SplitterTool implements ToolPlugin {
         }
 
         File newFile = fc.getSelectedFile();
+        return runTool(aWritableModel, aCurrentAccount, newFile);
+    }
+
+    /**
+     * @param aWritableModel
+     * @param newFile
+     * @return
+     * @throws IOException
+     * @throws JAXBException
+     */
+    private String runTool(final GnucashWritableFile aWritableModel,
+                           final GnucashWritableAccount aCurrentAccount,
+                           final File newFile) throws IOException, JAXBException {
         if (newFile.exists()) {
             JOptionPane.showMessageDialog(null, "File must not yet exist.");
             return "";
@@ -129,7 +144,8 @@ public class SplitterTool implements ToolPlugin {
         aWritableModel.writeFile(tempfile);
         GnucashWritableFile newModel = new GnucashFileWritingImpl(tempfile);
         tempfile.delete();
-        for (GnucashTransaction transaction : new ArrayList<GnucashTransaction>(newModel.getTransactions())) {
+        ArrayList<GnucashTransaction> allTransaction = new ArrayList<GnucashTransaction>(newModel.getTransactions());
+        for (GnucashTransaction transaction : allTransaction) {
             if (transaction.getDatePosted().after(splitDate)) {
                 newModel.removeTransaction((GnucashWritableTransaction) transaction);
             }
@@ -158,7 +174,7 @@ public class SplitterTool implements ToolPlugin {
         split.setValue(balance);
 
         // remove all old Transactions from the existing file
-        for (GnucashTransaction transaction : new ArrayList<GnucashTransaction>(newModel.getTransactions())) {
+        for (GnucashTransaction transaction : allTransaction) {
             GnucashTransaction removeMe = aWritableModel.getTransactionByID(transaction.getId());
             aWritableModel.removeTransaction((GnucashWritableTransaction) removeMe);
         }
@@ -166,6 +182,36 @@ public class SplitterTool implements ToolPlugin {
         return "";
     }
 
+    /**
+     * Run the tool manually.
+     * @param args
+     */
+    public static void main(final String[] args) {
+        if (args.length != 3) {
+            System.out.println("usage: SplitterTool (infile) (outfile-older) (outfile-newer)\n");
+            System.out.println("       This tool will ask graphically for a date and then split infile into\n");
+            System.out.println("       This 2 new files that contain all transactions that are newer or older/as old as the date\n");
+            return;
+        }
+        try {
+            File file = new File(args[0]);
+            File archiveFile = new File(args[1]);
+            File newFile = new File(args[2]);
+            if (archiveFile.exists()) {
+                archiveFile.delete();
+            }
+            if (newFile.exists()) {
+                newFile.delete();
+            }
+            GnucashWritableFile testdata = new GnucashFileWritingImpl(file);
+            SplitterTool subject = new SplitterTool();
+            subject.runTool(testdata, null, archiveFile);
+            testdata.writeFile(newFile);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }
 
 
