@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jGnucashLib-Viewer" default="help" basedir=".">
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.10" />
+	<property name="app.version" value="2.0.11" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -50,9 +50,9 @@ test  - runs some tests
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporter" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.PaypalImporter" target="${target}" />
-<!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
-	    <ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
+<!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->
+		<ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
 	</target>
 
 	<target name="build" depends="-init" description="Builds entire project">
