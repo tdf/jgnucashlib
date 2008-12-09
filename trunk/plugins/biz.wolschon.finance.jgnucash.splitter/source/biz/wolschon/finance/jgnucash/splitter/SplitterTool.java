@@ -184,10 +184,11 @@ public class SplitterTool implements ToolPlugin {
 
     /**
      * Run the tool manually.
-     * @param args
+     * @param args the arguments
      */
     public static void main(final String[] args) {
-        if (args.length != 3) {
+        final int argscount = 3;
+        if (args.length != argscount) {
             System.out.println("usage: SplitterTool (infile) (outfile-older) (outfile-newer)\n");
             System.out.println("       This tool will ask graphically for a date and then split infile into\n");
             System.out.println("       This 2 new files that contain all transactions that are newer or older/as old as the date\n");
