@@ -17,9 +17,9 @@
 	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
 	           point-id="DataSource" id="SSH">
 	   <parameter id="name"
-	           value="split at date..."/>
+	           value="open via SSH..."/>
 	   <parameter id="description"
-	           value="Split the gnucash-file at a given date."/>
+	           value="Open a remote file via SSH."/>
 	   <parameter id="supportsWriting"
 	           value="true"/>
 	   <parameter id="supportsWritingTo"
