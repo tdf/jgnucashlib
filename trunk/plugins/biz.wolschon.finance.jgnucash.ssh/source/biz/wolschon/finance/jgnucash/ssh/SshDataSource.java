@@ -95,9 +95,16 @@ public class SshDataSource implements DataSourcePlugin {
      */
     @Override
     public GnucashWritableFile loadFile() throws IOException, JAXBException {
-        String input = JOptionPane.showInputDialog("Please enter the file to load.", "user@host:path/file");
+
+        SSHDialog dialog = new SSHDialog();
+        dialog.setVisible(true);
+        String input = dialog.getRemoteUser() + "@"
+                     + dialog.getRemoteHost() + ":"
+                     + dialog.getRemotePort()
+                     + dialog.getRemotePath();
+        //String input = JOptionPane.showInputDialog("Please enter the file to load.", "user@host:path/file");
         File tempFile = File.createTempFile("jGnucaashEditor_SSH_", ".xml.gz");
-        if (loadFileeViaSSH(input, tempFile)) {
+        if (loadFileeViaSSH(input, tempFile, dialog.getRemotePassword())) {
             myLastLoadedFile = input;
             return new GnucashFileWritingImpl(tempFile);
         }
@@ -107,9 +114,10 @@ public class SshDataSource implements DataSourcePlugin {
     /**
      * @param aInput "user@host:/path/file"
      * @param aTempFile a gnucash-file stored on disk.
+     * @param aDs
      * @return true if it worked
      */
-    private boolean loadFileeViaSSH(final String anInput, final File aTempFile) {
+    private boolean loadFileeViaSSH(final String anInput, final File aTempFile, final char[] aDs) {
 
         FileOutputStream fos = null;
         try {
