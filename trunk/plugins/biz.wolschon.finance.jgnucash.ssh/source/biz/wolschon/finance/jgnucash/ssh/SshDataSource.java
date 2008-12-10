@@ -74,6 +74,11 @@ import com.jcraft.jsch.UserInfo;
  */
 public class SshDataSource implements DataSourcePlugin {
     /**
+     * The port SSH works on.
+     */
+    private static final int SSHPORT = 22;
+
+    /**
      * Automatically created logger for debug and error-output.
      */
     private static final Logger LOG = Logger.getLogger(SshDataSource.class
@@ -100,9 +105,9 @@ public class SshDataSource implements DataSourcePlugin {
     }
 
     /**
-     * @param aInput
-     * @param aTempFile
-     * @return
+     * @param aInput "user@host:/path/file"
+     * @param aTempFile a gnucash-file stored on disk.
+     * @return true if it worked
      */
     private boolean loadFileeViaSSH(final String anInput, final File aTempFile) {
 
@@ -115,7 +120,7 @@ public class SshDataSource implements DataSourcePlugin {
             String rfile = input.substring(input.indexOf(':') + 1);
 
             JSch jsch = new JSch();
-            Session session = jsch.getSession(user, host, 22);
+            Session session = jsch.getSession(user, host, SSHPORT);
 
             // username and password will be given via UserInfo interface.
             UserInfo ui = new MyUserInfo();
@@ -351,69 +356,72 @@ public class SshDataSource implements DataSourcePlugin {
     @Override
     public void write(final GnucashWritableFile aFile) throws IOException,
     JAXBException {
-        FileInputStream fis=null;
-        try{
+        if (myLastLoadedFile == null) {
+            return;
+        }
+        FileInputStream fis = null;
+        try {
             File tempFile = File.createTempFile("jGnucasEditor_sshto_", ".xml.gz");
 
-            String user=myLastLoadedFile.substring(0, myLastLoadedFile.indexOf('@'));
+            String user  = myLastLoadedFile.substring(0, myLastLoadedFile.indexOf('@'));
             String arg   = myLastLoadedFile.substring(myLastLoadedFile.indexOf('@')+1);
             String host  = arg.substring(0, arg.indexOf(':'));
-            String rfile = arg.substring(arg.indexOf(':')+1);
+            String rfile = arg.substring(arg.indexOf(':') + 1);
 
-            JSch jsch=new JSch();
-            Session session=jsch.getSession(user, host, 22);
+            JSch    jsch    = new JSch();
+            Session session = jsch.getSession(user, host, SSHPORT);
 
             // username and password will be given via UserInfo interface.
-            UserInfo ui=new MyUserInfo();
+            UserInfo ui = new MyUserInfo();
             session.setUserInfo(ui);
             session.connect();
 
 
             // exec 'scp -t rfile' remotely
-            String command="scp -p -t "+rfile;
-            Channel channel=session.openChannel("exec");
-            ((ChannelExec)channel).setCommand(command);
+            String command  = "scp -p -t " + rfile;
+            Channel channel = session.openChannel("exec");
+            ((ChannelExec) channel).setCommand(command);
 
             // get I/O streams for remote scp
-            OutputStream out=channel.getOutputStream();
-            InputStream in=channel.getInputStream();
+            OutputStream out = channel.getOutputStream();
+            InputStream in   = channel.getInputStream();
 
             channel.connect();
 
-            if(checkAck(in)!=0){
+            if (checkAck(in) != 0) {
                 System.exit(0);
             }
 
             // send "C0644 filesize filename", where filename should not include '/'
-            long filesize=(tempFile).length();
-            command="C0644 "+filesize+" ";
+            long filesize = (tempFile).length();
+            command = "C0644 " + filesize + " ";
             String tempFilePath = tempFile.getAbsolutePath();
             if (tempFilePath.lastIndexOf('/')>0) {
                 command += tempFilePath.substring(tempFilePath.lastIndexOf('/')+1);
             } else {
                 command += tempFilePath;
             }
-            command+="\n";
+            command += "\n";
             out.write(command.getBytes()); out.flush();
-            if(checkAck(in)!=0){
+            if (checkAck(in) != 0) {
                 System.exit(0);
             }
 
             // send a content of lfile
-            fis=new FileInputStream(tempFile);
-            byte[] buf=new byte[1024];
-            while(true){
-                int len=fis.read(buf, 0, buf.length);
-                if(len<=0) {
+            fis = new FileInputStream(tempFile);
+            byte[] buf = new byte[1024];
+            while (true) {
+                int len = fis.read(buf, 0, buf.length);
+                if (len <= 0) {
                     break;
                 }
                 out.write(buf, 0, len); //out.flush();
             }
             fis.close();
-            fis=null;
+            fis = null;
             // send '\0'
-            buf[0]=0; out.write(buf, 0, 1); out.flush();
-            if(checkAck(in)!=0){
+            buf[0] = 0; out.write(buf, 0, 1); out.flush();
+            if (checkAck(in) != 0) {
                 System.exit(0);
             }
             out.close();
@@ -422,12 +430,15 @@ public class SshDataSource implements DataSourcePlugin {
             session.disconnect();
 
             System.exit(0);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             LOG.log(Level.SEVERE, "Cannot store file via SSH", e);
-            try{if(fis!=null) {
-                fis.close();
-            }}catch(Exception ee){}
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (Exception ee) {
+                LOG.log(Level.SEVERE, "Cannot close SSH-connection", ee);
+            }
         }
 
     }
@@ -436,9 +447,9 @@ public class SshDataSource implements DataSourcePlugin {
      * @see biz.wolschon.finance.jgnucash.plugin.DataSourcePlugin#writeTo(biz.wolschon.fileformats.gnucash.GnucashWritableFile)
      */
     @Override
-    public void writeTo(final GnucashWritableFile aFile) throws IOException,
-    JAXBException {
-        // TODO ask for target
+    public void writeTo(final GnucashWritableFile aFile) throws IOException, JAXBException {
+        String input = JOptionPane.showInputDialog("Please enter the file to load.", "user@host:path/file");
+        myLastLoadedFile = input;
         write(aFile);
     }
 
