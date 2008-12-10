@@ -144,6 +144,7 @@ public class SSHDialog extends JDialog {
         //TODO: SSHTunnelPanel
         //TODO: HttpTunnelPanel
         this.getContentPane().add(getButtonsPanel(), BorderLayout.SOUTH);
+        this.pack();
     }
 
     /**
@@ -152,7 +153,7 @@ public class SSHDialog extends JDialog {
     private JPanel getRemoteSystemPanel() {
         if (myRemoteSystemPanel == null) {
             myRemoteSystemPanel = new JPanel();
-            myRemoteSystemPanel.setLayout(new GridLayout(2, 5));
+            myRemoteSystemPanel.setLayout(new GridLayout(5, 2));
             myRemoteHostLabel = new JLabel("Host:");
             myRemoteSystemPanel.add(myRemoteHostLabel);
             myRemoteHost = new JTextField("somehost");
