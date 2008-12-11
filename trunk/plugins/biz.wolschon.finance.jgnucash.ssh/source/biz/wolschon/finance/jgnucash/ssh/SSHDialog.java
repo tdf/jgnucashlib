@@ -38,12 +38,14 @@ import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.border.EtchedBorder;
 
 /**
  * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
@@ -66,6 +68,16 @@ public class SSHDialog extends JDialog {
      * The panel containing the data of the host to conect to.
      */
     private JPanel myRemoteSystemPanel;
+
+    /**
+     * The panel containing the data for an optional SSH-tunnel.
+     */
+    private JPanel mySSHTunnelPanel;
+
+    /**
+     * The panel containing the panels.
+     */
+    private JPanel mySystemPanel;
 
     /**
      * The panel containing the buttons.
@@ -127,6 +139,26 @@ public class SSHDialog extends JDialog {
      */
     private JLabel myRemotePathLabel;
 
+    private JCheckBox mySSHTunnelEnabled;
+
+    private JLabel mySSHTunnelEnabledLabel;
+
+    private JLabel mySSHTunnelHostLabel;
+
+    private JTextField mySSHTunnelHost;
+
+    private JLabel mySSHTunnelPortLabel;
+
+    private JTextField mySSHTunnelPort;
+
+    private JLabel mySSHTunnelUserLabel;
+
+    private JTextField mySSHTunnelUser;
+
+    private JLabel mySSHTunnelPasswordLabel;
+
+    private JPasswordField mySSHTunnelPassword;
+
     /**
      * Show a new SSH-dialog.
      */
@@ -140,13 +172,10 @@ public class SSHDialog extends JDialog {
     private void initGUI() {
 
         this.getContentPane().setLayout(new BorderLayout());
-        this.getContentPane().add(getRemoteSystemPanel(), BorderLayout.CENTER);
-        //TODO: SSHTunnelPanel
-        //TODO: HttpTunnelPanel
+        this.getContentPane().add(getSystemPanel(), BorderLayout.CENTER);
         this.getContentPane().add(getButtonsPanel(), BorderLayout.SOUTH);
         this.pack();
     }
-
     /**
      * @return The panel containing the data of the host to conect to.
      */
@@ -174,12 +203,84 @@ public class SSHDialog extends JDialog {
             myRemotePassword = new JPasswordField();
             myRemoteSystemPanel.add(myRemotePassword);
 
-            myRemotePathLabel = new JLabel("Password:");
+            myRemotePathLabel = new JLabel("Path:");
             myRemoteSystemPanel.add(myRemotePathLabel);
             myRemotePath = new JTextField();
             myRemoteSystemPanel.add(myRemotePath);
         }
         return myRemoteSystemPanel;
+    }
+
+    /**
+     * @return The panel containing the panels.
+     */
+
+    private JPanel getSSHTunnelPanel() {
+        if (mySSHTunnelPanel == null) {
+            mySSHTunnelPanel = new JPanel();
+            mySSHTunnelPanel.setLayout(new GridLayout(5, 1));
+            mySSHTunnelPanel.setBorder(new EtchedBorder());
+
+            mySSHTunnelEnabledLabel = new JLabel("connect through SSH-tunnel?");
+            mySSHTunnelEnabled =  new JCheckBox();
+            mySSHTunnelPanel.add(mySSHTunnelEnabled);
+            mySSHTunnelPanel.add(mySSHTunnelEnabledLabel);
+
+            mySSHTunnelHostLabel = new JLabel("Tunnel-Host:");
+            mySSHTunnelPanel.add(mySSHTunnelHostLabel);
+            mySSHTunnelHost = new JTextField("somehost");
+            mySSHTunnelPanel.add(mySSHTunnelHost);
+
+            mySSHTunnelPortLabel = new JLabel("Port:");
+            mySSHTunnelPanel.add(mySSHTunnelPortLabel);
+            mySSHTunnelPort = new JTextField("22");
+            mySSHTunnelPanel.add(mySSHTunnelPort);
+
+            mySSHTunnelUserLabel = new JLabel("User:");
+            mySSHTunnelPanel.add(mySSHTunnelUserLabel);
+            mySSHTunnelUser = new JTextField(System.getProperty("user.name"));
+            mySSHTunnelPanel.add(mySSHTunnelUser);
+
+            mySSHTunnelPasswordLabel = new JLabel("Password:");
+            mySSHTunnelPanel.add(mySSHTunnelPasswordLabel);
+            mySSHTunnelPassword = new JPasswordField();
+            mySSHTunnelPanel.add(mySSHTunnelPassword);
+
+            mySSHTunnelEnabled.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(final ActionEvent aE) {
+                    checkSSHTunnelPanelEnabled();
+                }
+            });
+            mySSHTunnelEnabled.setSelected(false);
+            checkSSHTunnelPanelEnabled();
+        }
+        return mySSHTunnelPanel;
+    }
+
+    /**
+     * Check the state of {@link SSHDialog#mySSHTunnelEnabledLabel} and
+     * set the enabled-status if the text-fields in the SSHTunnelPanel.
+     */
+    private void checkSSHTunnelPanelEnabled() {
+        mySSHTunnelPassword.setEnabled(mySSHTunnelEnabled.isSelected());
+        mySSHTunnelHost.setEnabled(mySSHTunnelEnabled.isSelected());
+        mySSHTunnelPort.setEnabled(mySSHTunnelEnabled.isSelected());
+        mySSHTunnelUser.setEnabled(mySSHTunnelEnabled.isSelected());
+    }
+
+    /**
+     * @return The panel containing the panels.
+     */
+    private JPanel getSystemPanel() {
+        if (mySystemPanel == null) {
+            mySystemPanel = new JPanel();
+            mySystemPanel.setLayout(new GridLayout(3, 1));
+            mySystemPanel.add(getRemoteSystemPanel());
+            mySystemPanel.add(getSSHTunnelPanel());
+            //TODO: HttpTunnelPanel
+        }
+        return mySystemPanel;
     }
 
     /**

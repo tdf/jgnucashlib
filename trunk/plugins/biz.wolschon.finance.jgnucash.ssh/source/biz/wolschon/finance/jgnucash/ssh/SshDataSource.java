@@ -88,7 +88,7 @@ public class SshDataSource implements DataSourcePlugin {
      * The last file we loaded.
      * exmple: "user@host:path/file"
      */
-    private String myLastLoadedFile = null;
+    private SSHDialog myLastLoadedFile = null;
 
     /* (non-Javadoc)
      * @see biz.wolschon.finance.jgnucash.plugin.DataSourcePlugin#loadFile()
@@ -98,14 +98,10 @@ public class SshDataSource implements DataSourcePlugin {
 
         SSHDialog dialog = new SSHDialog();
         dialog.setVisible(true);
-        String input = dialog.getRemoteUser() + "@"
-                     + dialog.getRemoteHost() + ":"
-                     + dialog.getRemotePort()
-                     + dialog.getRemotePath();
         //String input = JOptionPane.showInputDialog("Please enter the file to load.", "user@host:path/file");
         File tempFile = File.createTempFile("jGnucaashEditor_SSH_", ".xml.gz");
-        if (loadFileeViaSSH(input, tempFile, dialog.getRemotePassword())) {
-            myLastLoadedFile = input;
+        if (loadFileeViaSSH(dialog.getRemoteUser(), dialog.getRemoteHost(), dialog.getRemotePath(), tempFile, dialog.getRemotePassword())) {
+            myLastLoadedFile = dialog;
             return new GnucashFileWritingImpl(tempFile);
         }
         return null;
@@ -117,15 +113,11 @@ public class SshDataSource implements DataSourcePlugin {
      * @param aDs
      * @return true if it worked
      */
-    private boolean loadFileeViaSSH(final String anInput, final File aTempFile, final char[] aDs) {
+    private boolean loadFileeViaSSH(final String user, final String host, final String rfile, final File aTempFile, final char[] aDs) {
 
         FileOutputStream fos = null;
         try {
 
-            String user = anInput.substring(0, anInput.indexOf('@'));
-            String input = anInput.substring(anInput.indexOf('@') + 1);
-            String host  = input.substring(0, input.indexOf(':'));
-            String rfile = input.substring(input.indexOf(':') + 1);
 
             JSch jsch = new JSch();
             Session session = jsch.getSession(user, host, SSHPORT);
@@ -367,14 +359,21 @@ public class SshDataSource implements DataSourcePlugin {
         if (myLastLoadedFile == null) {
             return;
         }
+        SSHDialog dialog = myLastLoadedFile;
+        saveFileViaSSH(dialog.getRemoteUser(), dialog.getRemoteHost(), dialog.getRemotePath(), aFile, dialog.getRemotePassword());
+
+    }
+
+    /**
+     * @param aFile
+     *
+     */
+    private void saveFileViaSSH(final String user, final String host, final String rfile, final GnucashWritableFile aFile, final char[] password) {
         FileInputStream fis = null;
         try {
             File tempFile = File.createTempFile("jGnucasEditor_sshto_", ".xml.gz");
+            aFile.writeFile(tempFile);
 
-            String user  = myLastLoadedFile.substring(0, myLastLoadedFile.indexOf('@'));
-            String arg   = myLastLoadedFile.substring(myLastLoadedFile.indexOf('@')+1);
-            String host  = arg.substring(0, arg.indexOf(':'));
-            String rfile = arg.substring(arg.indexOf(':') + 1);
 
             JSch    jsch    = new JSch();
             Session session = jsch.getSession(user, host, SSHPORT);
@@ -448,7 +447,6 @@ public class SshDataSource implements DataSourcePlugin {
                 LOG.log(Level.SEVERE, "Cannot close SSH-connection", ee);
             }
         }
-
     }
 
     /* (non-Javadoc)
@@ -456,8 +454,10 @@ public class SshDataSource implements DataSourcePlugin {
      */
     @Override
     public void writeTo(final GnucashWritableFile aFile) throws IOException, JAXBException {
-        String input = JOptionPane.showInputDialog("Please enter the file to load.", "user@host:path/file");
-        myLastLoadedFile = input;
+        SSHDialog dialog = new SSHDialog();
+        dialog.setVisible(true);
+
+        myLastLoadedFile = dialog;
         write(aFile);
     }
 
