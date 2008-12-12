@@ -100,7 +100,7 @@ public class SshDataSource implements DataSourcePlugin {
         dialog.setVisible(true);
         //String input = JOptionPane.showInputDialog("Please enter the file to load.", "user@host:path/file");
         File tempFile = File.createTempFile("jGnucaashEditor_SSH_", ".xml.gz");
-        if (loadFileeViaSSH(dialog.getRemoteUser(), dialog.getRemoteHost(), dialog.getRemotePath(), tempFile, dialog.getRemotePassword())) {
+        if (loadFileeViaSSH(dialog.getRemoteHostUserInfo(), dialog.getSSHTunnelUserInfo(), dialog.getRemotePath(), tempFile)) {
             myLastLoadedFile = dialog;
             return new GnucashFileWritingImpl(tempFile);
         }
@@ -108,22 +108,37 @@ public class SshDataSource implements DataSourcePlugin {
     }
 
     /**
-     * @param aInput "user@host:/path/file"
      * @param aTempFile a gnucash-file stored on disk.
-     * @param aDs
+     * @param aPassword
      * @return true if it worked
      */
-    private boolean loadFileeViaSSH(final String user, final String host, final String rfile, final File aTempFile, final char[] aDs) {
+    private boolean loadFileeViaSSH(final ConnectInfo remoteSystem, final ConnectInfo sshTunnelSystem, final String rfile, final File aTempFile) {
 
         FileOutputStream fos = null;
         try {
 
-
             JSch jsch = new JSch();
-            Session session = jsch.getSession(user, host, SSHPORT);
+            //TODO: SSH-tunnel
+            Session session = null;
+            if (sshTunnelSystem != null) {
+                Session tunnelSession = jsch.getSession(sshTunnelSystem.getUserName(), sshTunnelSystem.getHostName(), sshTunnelSystem.getHostPost());
+                SSHUserInfo ui = new SSHUserInfo();
+                ui.setPassword(sshTunnelSystem.getPassword());
+                tunnelSession.setUserInfo(ui);
+                tunnelSession.connect();
+                int assingedPort = tunnelSession.setPortForwardingL(8764, sshTunnelSystem.getHostName(), remoteSystem.getHostPost());
+                // connect through tunnel
+                // TODO: try ::1 for IPv6 if there is no 127.0.0.1
+                session = jsch.getSession(remoteSystem.getUserName(), "127.0.0.1", assingedPort);
+            } else {
+                // connect directly
+                session = jsch.getSession(remoteSystem.getUserName(), remoteSystem.getHostName(), remoteSystem.getHostPost());
+            }
+
 
             // username and password will be given via UserInfo interface.
-            UserInfo ui = new MyUserInfo();
+            SSHUserInfo ui = new SSHUserInfo();
+            ui.setPassword(remoteSystem.getPassword());
             session.setUserInfo(ui);
             session.connect();
 
@@ -258,8 +273,7 @@ public class SshDataSource implements DataSourcePlugin {
         return b;
     }
 
-    public static class MyUserInfo implements UserInfo, UIKeyboardInteractive{
-        public String getPassword(){ return passwd; }
+    public static class SSHUserInfo implements UserInfo, UIKeyboardInteractive{
         public boolean promptYesNo(String str){
             Object[] options={ "yes", "no" };
             int foo=JOptionPane.showOptionDialog(null,
@@ -271,7 +285,7 @@ public class SshDataSource implements DataSourcePlugin {
             return foo==0;
         }
 
-        String passwd;
+        private String myPassword;
         JTextField passwordField=new JPasswordField(20);
 
         public String getPassphrase(){ return null; }
@@ -282,7 +296,7 @@ public class SshDataSource implements DataSourcePlugin {
                 JOptionPane.showConfirmDialog(null, ob, message,
                         JOptionPane.OK_CANCEL_OPTION);
             if(result==JOptionPane.OK_OPTION){
-                passwd=passwordField.getText();
+                myPassword=passwordField.getText();
                 return true;
             }
             else{ return false; }
@@ -347,6 +361,22 @@ public class SshDataSource implements DataSourcePlugin {
                 return null;  // cancel
             }
         }
+        public String getPassword() {
+            return myPassword;
+        }
+
+        /**
+         * @param aPassword the password to set
+         */
+        private void setPassword(final String aPassword) {
+            myPassword = aPassword;
+        }
+        /**
+         * @param aPassword the password to set
+         */
+        private void setPassword(final char[] aPassword) {
+            myPassword = new String(aPassword);
+        }
     }
 
 
@@ -360,7 +390,7 @@ public class SshDataSource implements DataSourcePlugin {
             return;
         }
         SSHDialog dialog = myLastLoadedFile;
-        saveFileViaSSH(dialog.getRemoteUser(), dialog.getRemoteHost(), dialog.getRemotePath(), aFile, dialog.getRemotePassword());
+        saveFileViaSSH(dialog.getRemoteHostUserInfo(), dialog.getSSHTunnelUserInfo(), dialog.getRemotePath(), aFile);
 
     }
 
@@ -368,7 +398,7 @@ public class SshDataSource implements DataSourcePlugin {
      * @param aFile
      *
      */
-    private void saveFileViaSSH(final String user, final String host, final String rfile, final GnucashWritableFile aFile, final char[] password) {
+    private void saveFileViaSSH(final ConnectInfo remoteSystem, final ConnectInfo sshTunnelSystem, final String rfile, final GnucashWritableFile aFile) {
         FileInputStream fis = null;
         try {
             File tempFile = File.createTempFile("jGnucasEditor_sshto_", ".xml.gz");
@@ -376,10 +406,11 @@ public class SshDataSource implements DataSourcePlugin {
 
 
             JSch    jsch    = new JSch();
-            Session session = jsch.getSession(user, host, SSHPORT);
+            Session session = jsch.getSession(remoteSystem.getUserName(), remoteSystem.getHostName(), remoteSystem.getHostPost());
 
             // username and password will be given via UserInfo interface.
-            UserInfo ui = new MyUserInfo();
+            SSHUserInfo ui = new SSHUserInfo();
+            ui.setPassword(remoteSystem.getPassword());
             session.setUserInfo(ui);
             session.connect();
 

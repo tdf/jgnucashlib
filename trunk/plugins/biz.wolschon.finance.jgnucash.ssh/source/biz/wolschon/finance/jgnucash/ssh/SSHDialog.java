@@ -303,35 +303,17 @@ public class SSHDialog extends JDialog {
     }
 
     /**
-     * @return the host to connect to.
-     * @see #getRemotePort()
+     * @return the host, user and password to connect through or null
+     * @see #getRemotePath()
      */
-    public String getRemoteHost() {
-        return myRemoteHost.getText();
-    }
-
-    /**
-     * @return the port to connect to.
-     * @see #getRemoteHost()
-     */
-    public String getRemotePort() {
-        return myRemotePort.getText();
-    }
-
-    /**
-     * @return the user to connect with.
-     * @see #getRemotePassword()
-     */
-    public String getRemoteUser() {
-        return myRemoteUser.getText();
-    }
-
-    /**
-     * @return the password to connect with.
-     * @see #getRemoteUser()
-     */
-    public char[] getRemotePassword() {
-        return myRemotePassword.getPassword();
+    public ConnectInfo getRemoteHostUserInfo() {
+        if (!isSHHTunneling()) {
+            return null;
+        }
+        return new ConnectInfo(myRemoteUser.getText(),
+                new String(myRemotePassword.getPassword()),
+                myRemoteHost.getText(),
+                Integer.parseInt(myRemotePort.getText()));
     }
 
     /**
@@ -340,4 +322,23 @@ public class SSHDialog extends JDialog {
     public String getRemotePath() {
         return myRemotePath.getText();
     }
+
+    /**
+     * @return true if the user wants to ssh-tunnel into a system behind  router
+     */
+    public boolean isSHHTunneling() {
+        return mySSHTunnelEnabled.isSelected();
+    }
+
+    /**
+     * @return the host, user and password an SSH-tunnel
+     * @see #isSHHTunneling()
+     */
+    public ConnectInfo getSSHTunnelUserInfo() {
+        return new ConnectInfo(mySSHTunnelUser.getText(),
+                new String(mySSHTunnelPassword.getPassword()),
+                mySSHTunnelHost.getText(),
+                Integer.parseInt(mySSHTunnelPort.getText()));
+    }
+
 }
