@@ -25,6 +25,8 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.java.plugin.registry.Extension;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
@@ -91,6 +93,9 @@ public final class OpenFilePluginMenuAction implements ActionListener {
             DataSourcePlugin importer = (DataSourcePlugin) o;
             try {
                 myJGnucashEditor.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                //workaround because of a deadlock in log4j-consoleAppender in the JPf-classloader
+                Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").removeAllAppenders();
+                Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").setLevel(Level.FATAL);
                 GnucashWritableFile loadedFile = importer.loadFile();
                 if (loadedFile != null) {
                     myJGnucashEditor.setWritableModel(loadedFile);

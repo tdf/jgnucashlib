@@ -102,8 +102,9 @@ public class JGnucash extends JGnucashViewer {
     @Override
     protected final GnucashFile createModelFromFile(final File f)
     throws IOException, JAXBException {
-        Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").removeAllAppenders();//test-code because of a deadlock in log4j-consoleAppender in the JPf-classloader
-        Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").setLevel(Level.FATAL);//test-code because of a deadlock in log4j-consoleAppender in the JPf-classloader
+        //workaround because of a deadlock in log4j-consoleAppender in the JPf-classloader
+        Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").removeAllAppenders();
+        Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").setLevel(Level.FATAL);
         return new GnucashFileWritingImpl(f);
     }
 
