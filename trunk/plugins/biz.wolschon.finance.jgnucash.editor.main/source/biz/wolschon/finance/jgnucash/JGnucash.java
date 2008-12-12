@@ -42,6 +42,8 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
@@ -100,6 +102,8 @@ public class JGnucash extends JGnucashViewer {
     @Override
     protected final GnucashFile createModelFromFile(final File f)
     throws IOException, JAXBException {
+        Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").removeAllAppenders();//test-code because of a deadlock in log4j-consoleAppender in the JPf-classloader
+        Logger.getLogger("org.java.plugin.standard.StandardPluginClassLoader").setLevel(Level.FATAL);//test-code because of a deadlock in log4j-consoleAppender in the JPf-classloader
         return new GnucashFileWritingImpl(f);
     }
 
@@ -345,7 +349,7 @@ public class JGnucash extends JGnucashViewer {
                             newMenuItem.setToolTipText(descrParam.valueAsString());
                         }
                         newMenuItem.addActionListener(new OpenFilePluginMenuAction(this, ext, pluginName));
-                        fileMenu.add(newMenuItem);
+                        fileMenu.add(newMenuItem, 1); // Open
                     } catch (Exception e) {
                         LOGGER.error("cannot load Loader-Plugin '" + pluginName + "'", e);
                         JOptionPane.showMessageDialog(this, "Error",

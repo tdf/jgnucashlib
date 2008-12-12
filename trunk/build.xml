@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jGnucashLib-Viewer" default="help" basedir=".">
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.11" />
+	<property name="app.version" value="2.0.12" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -47,12 +47,16 @@ test  - runs some tests
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.editor.main" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.AbstractScriptablePlugin" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.AbstractScriptableImporter" target="${target}" />
-		<ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
-		<ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporter" target="${target}" />
-		<ant dir="plugins/biz.wolschon.finance.jgnucash.PaypalImporter" target="${target}" />
-		<ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
+		<parallel  threadsperprocessor="1">
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporter" target="${target}" />
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.PaypalImporter" target="${target}" />
+	      <ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ssh" target="${target}" />
+	
 <!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->
-		<ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
+	      <ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
+		</parallel>
 	</target>
 
 	<target name="build" depends="-init" description="Builds entire project">
@@ -72,9 +76,18 @@ test  - runs some tests
 	</target>
 
 	<target name="run" depends="build" description="Runs application">
+		<echo message="For debugging, please connect to port 1044"></echo>
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
-		      fork="true" />
+		      fork="true"
+		      jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"/>
+	</target>
+	<target name="runonly"  description="Runs application without building it">
+		<echo message="For debugging, please connect to port 1044"></echo>
+		<java jar="${build.home}/lib/jpf-boot.jar"
+		      dir="${build.home}"
+		      fork="true" 
+			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"/>
 	</target>
 
 	<target name="check"

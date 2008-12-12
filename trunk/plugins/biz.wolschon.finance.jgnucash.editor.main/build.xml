@@ -28,8 +28,16 @@ Use top-level project build file to build application.
 ]]>
 		</echo>
 	</target>
-	
-	<target name="build">
+
+	<target name="prepare_build">
+		<uptodate property="uptoodate.source"
+			      targetfile="${plugin.home}/classes/timestamp.editor">
+			<srcfiles dir="${basedir}/source"></srcfiles>
+			<srcfiles dir="${basedir}/lib" includes="**/*.jar" />
+			<srcfiles dir="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
+	    </uptodate>
+	</target>
+	<target name="build" depends="prepare_build" unless="uptoodate.source">
 		<echo>Building plug-in ${plugin.id} to folder ${plugin.home}</echo>
 		<mkdir dir="${plugin.home}/classes" />
 		<javac destdir="${plugin.home}/classes"
@@ -59,6 +67,7 @@ Use top-level project build file to build application.
 			<fileset dir="${basedir}"
 			         excludes="classes/,lib/,nbproject/,.*,*build*,source/" />
 		</copy>
+		<touch file="${plugin.home}/classes/timestamp.editor"/>
 	</target>
 
 	<target name="docs">

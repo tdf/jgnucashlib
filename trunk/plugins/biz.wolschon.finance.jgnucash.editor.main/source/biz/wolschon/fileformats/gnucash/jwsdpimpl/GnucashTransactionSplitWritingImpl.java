@@ -17,26 +17,16 @@
  */
 package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
-
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
-import biz.wolschon.fileformats.gnucash.GnucashTransaction;
-import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotsType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType.TrnSplitsType.TrnSplitType;
 import biz.wolschon.numbers.FixedPointNumber;
@@ -53,7 +43,7 @@ public class GnucashTransactionSplitWritingImpl extends
     /**
      * Our helper to implement the GnucashWritableObject-interface.
      */
-    private GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
+    private final GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#setUserDefinedAttribute(java.lang.String, java.lang.String)
@@ -61,7 +51,7 @@ public class GnucashTransactionSplitWritingImpl extends
     public void setUserDefinedAttribute(final String name, final String value) throws JAXBException {
         helper.setUserDefinedAttribute(name, value);
     }
-    
+
 
     /**
      * @see biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashTransactionSplitImpl#getTransaction()
@@ -86,19 +76,19 @@ public class GnucashTransactionSplitWritingImpl extends
      * create a new split and and add it to the given transaction.
      * @param transaction transaction the transaction we will belong to
      * @param account the account we take money (or other things) from or give it to
-     * @param pSplitID 
+     * @param pSplitID
      * @throws JAXBException
      */
     public GnucashTransactionSplitWritingImpl(final GnucashTransactionWritingImpl transaction,
                                               final GnucashAccount account) throws JAXBException {
         this(transaction, account, transaction.getWritingFile().createGUID());
     }
-    
+
     /**
      * create a new split and and add it to the given transaction.
      * @param transaction transaction the transaction we will belong to
      * @param account the account we take money (or other things) from or give it to
-     * @param pSplitID 
+     * @param pSplitID
      * @throws JAXBException
      */
     public GnucashTransactionSplitWritingImpl(final GnucashTransactionWritingImpl transaction,
@@ -117,27 +107,27 @@ public class GnucashTransactionSplitWritingImpl extends
     /**
      * Creates a new Transaction and add's it to the given gnucash-file
      * Don't modify the ID of the new transaction!
-     * @param pSplitID 
+     * @param pSplitID
      *
      * @param file
      * @return
      * @throws JAXBException
      */
     protected static GncTransactionType.TrnSplitsType.TrnSplitType createTransactionSplit(final GnucashTransactionWritingImpl transaction,
-    		                                                                              final GnucashAccount account,
-    		                                                                              final String pSplitID) throws JAXBException {
-    	
-    	if (transaction == null) {
-    		throw new IllegalArgumentException("null transaction given");
-    	}
-    	
-    	if (account == null) {
-    		throw new IllegalArgumentException("null account given");
-    	}
-    	
-    	if (pSplitID == null || pSplitID.trim().length() == 0) {
-    		throw new IllegalArgumentException("null or empty pSplitID given");
-    	}
+                                                                                          final GnucashAccount account,
+                                                                                          final String pSplitID) throws JAXBException {
+
+        if (transaction == null) {
+            throw new IllegalArgumentException("null transaction given");
+        }
+
+        if (account == null) {
+            throw new IllegalArgumentException("null account given");
+        }
+
+        if (pSplitID == null || pSplitID.trim().length() == 0) {
+            throw new IllegalArgumentException("null or empty pSplitID given");
+        }
 
         // this is needed because transaction.addSplit() later
         // must have an already build List of splits.
@@ -196,8 +186,9 @@ public class GnucashTransactionSplitWritingImpl extends
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit#setAccount(biz.wolschon.fileformats.gnucash.GnucashAccount)
      */
     public void setAccount(final GnucashAccount account) {
-        if (account == null)
+        if (account == null) {
             throw new NullPointerException("null account given");
+        }
         String old = (getJwsdpPeer().getSplitAccount() == null ? null
                         :
                         getJwsdpPeer().getSplitAccount().getValue());
@@ -236,17 +227,21 @@ public class GnucashTransactionSplitWritingImpl extends
      */
     private boolean isCurrencyMatching() {
         GnucashAccount account = getAccount();
-        if (account == null)
+        if (account == null) {
             return false;
+        }
         GnucashWritableTransaction transaction = getTransaction();
-        if (transaction == null)
+        if (transaction == null) {
             return false;
+        }
         String actCID = account.getCurrencyID();
-        if (actCID == null)
+        if (actCID == null) {
             return false;
+        }
         String actCNS = account.getCurrencyNameSpace();
-        if (actCNS == null)
+        if (actCNS == null) {
             return false;
+        }
         return (actCID.equals(transaction.getCurrencyID())
                 &&
             actCNS.equals(transaction.getCurrencyNameSpace())
@@ -305,8 +300,9 @@ public class GnucashTransactionSplitWritingImpl extends
      * @see GnucashWritableTransactionSplit#setValue(FixedPointNumber)
      */
     public void setValue(final FixedPointNumber n) {
-        if (n == null)
+        if (n == null) {
             throw new NullPointerException("null value given");
+        }
         String old = getJwsdpPeer().getSplitValue();
         getJwsdpPeer().setSplitValue(n.toGnucashString());
         ((GnucashWritableFile) getFile()).setModified(true);
@@ -427,7 +423,7 @@ public class GnucashTransactionSplitWritingImpl extends
 
 
     /**
-     * 
+     *
      * ${@inheritDoc}.
      */
     public GnucashWritableFile getWritableFile() {

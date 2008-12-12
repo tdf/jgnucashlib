@@ -13,6 +13,7 @@
 		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
 		<fileset dir="${basedir}/../../lib" includes="*.jar" />
 		<fileset dir="${basedir}/lib" includes="**/*.jar" />
+		<fileset dir="${basedir}/lib" includes="**/*.jar" />
 	</path>
 	<jpf-path pathidref="plugin.classpath" pluginid="${plugin.id}">
 		<fileset dir="${plugin.home}/.."
@@ -30,7 +31,31 @@ Use top-level project build file to build application.
 		</echo>
 	</target>
 	
-	<target name="build">
+
+	<target name="prepare_build">
+		<uptodate property="uptoodate.source"
+			      targetfile="${plugin.home}/classes/timestamp.paypal">
+			<srcfiles dir="${basedir}/source"></srcfiles>
+			<srcfiles dir="${basedir}/lib" includes="**/*.jar" />
+			<srcfiles dir="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
+			<srcfiles dir="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
+		</uptodate>
+		<uptodate property="uptoodate.libs"
+					      targetfile="${plugin.home}/classes/timestamp.paypal">
+					<srcfiles dir="${basedir}/source"></srcfiles>
+					<srcfiles dir="${basedir}/lib" includes="**/*.jar" />
+					<srcfiles dir="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
+					<srcfiles dir="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
+		</uptodate>
+	</target>
+	<target name="build.libs" depends="prepare_build" unless="uptoodate.libs">
+		<mkdir dir="${plugin.home}/classes" />
+		<unjar dest="${plugin.home}/classes">
+					<fileset dir="${basedir}/lib"
+					         includes="**/*.jar"/>
+		</unjar>
+	</target>
+	<target name="build" depends="build.libs" unless="uptoodate.source">
 		<echo>Building plug-in ${plugin.id} to folder ${plugin.home}</echo>
 		<mkdir dir="${plugin.home}/classes" />
 		<javac destdir="${plugin.home}/classes"
@@ -47,10 +72,6 @@ Use top-level project build file to build application.
 			         includes="**/*"
 			         excludes="**/.*,**/*.java" />
 		</copy>
-		<unjar dest="${plugin.home}/classes">
-			<fileset dir="${basedir}/lib"
-			         includes="**/*.jar"/>
-		</unjar>
 		<copy todir="${plugin.home}/classes">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
@@ -60,6 +81,7 @@ Use top-level project build file to build application.
 			<fileset dir="${basedir}"
 			         excludes="classes/,lib/,nbproject/,.*,*build*,source/" />
 		</copy>
+		<touch file="${plugin.home}/classes/timestamp.paypal"/>
 	</target>
 
 	<target name="docs">

@@ -51,7 +51,9 @@ Use top-level project build file to build application.
                                 </fileset>
                         </classpath>
                 </taskdef>
-                <xjc schema="${basedir}/source/gnucash.xsd" target="${basedir}/source" package="biz.wolschon.fileformats.gnucash.jwsdpimpl.generated" removeOldOutput="yes" />
+                <xjc schema="${basedir}/source/gnucash.xsd" target="${basedir}/source" package="biz.wolschon.fileformats.gnucash.jwsdpimpl.generated" removeOldOutput="yes" >
+                <produces dir="${basedir}/source/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated"/>
+                </xjc>
 
 
 
@@ -146,8 +148,27 @@ Use top-level project build file to build application.
 
 
 
-        </target>
-	<target name="build" depends="generate_jwsdp">
+    </target>
+	<target name="prepare_build" depends="generate_jwsdp">
+		<uptodate property="uptoodate.source"
+			      targetfile="${plugin.home}/classes/timestamp.viewer">
+			<srcfiles dir="${basedir}/source"></srcfiles>
+			<srcfiles dir="${basedir}/lib" includes="**/*.jar" />
+			<srcfiles dir="${basedir}/../../lib" includes="*.jar" />
+		</uptodate>
+		<uptodate property="uptoodate.libs"
+					      targetfile="${plugin.home}/classes/timestamp.viewer">
+					<srcfiles dir="${basedir}/lib" includes="**/*.jar" />
+		</uptodate>
+	</target>
+	<target name="build.libs" depends="prepare_build" unless="uptoodate.libs">
+		<mkdir dir="${plugin.home}/classes" />
+		<unjar dest="${plugin.home}/classes">
+			<fileset dir="${basedir}/lib"
+			         includes="**/*.jar"/>
+		</unjar>
+	</target>
+	<target name="build" depends="build.libs" unless="uptoodate.source">
 		<echo>Building plug-in ${plugin.id} to folder ${plugin.home}</echo>
 		<mkdir dir="${plugin.home}/classes" />
 		<javac destdir="${plugin.home}/classes"
@@ -164,10 +185,6 @@ Use top-level project build file to build application.
 			         includes="**/*"
 			         excludes="**/.*,**/*.java" />
 		</copy>
-		<unjar dest="${plugin.home}/classes">
-			<fileset dir="${basedir}/lib"
-			         includes="**/*.jar"/>
-		</unjar>
 		<copy todir="${plugin.home}/classes">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
@@ -177,6 +194,7 @@ Use top-level project build file to build application.
 			<fileset dir="${basedir}"
 			         excludes="classes/,lib/,nbproject/,.*,*build*,source/" />
 		</copy>
+		<touch file="${plugin.home}/classes/timestamp.viewer"/>
 	</target>
 
 	<target name="docs">
