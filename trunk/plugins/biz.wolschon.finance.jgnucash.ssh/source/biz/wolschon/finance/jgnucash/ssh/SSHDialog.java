@@ -35,6 +35,11 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -43,7 +48,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
@@ -109,10 +113,10 @@ public class SSHDialog extends JDialog {
      */
     private JTextField myRemotePath;
 
-    /**
-     * The password to connect with.
-     */
-    private JPasswordField myRemotePassword;
+//    /**
+//     * The password to connect with.
+//     */
+//    private JPasswordField myRemotePassword;
 
     /**
      * Label for {@link SSHDialog#myRemoteUser}.
@@ -129,10 +133,10 @@ public class SSHDialog extends JDialog {
      */
     private JLabel myRemoteHostLabel;
 
-    /**
-     * Label for {@link SSHDialog#myRemotePassword}.
-     */
-    private JLabel myRemotePasswordLabel;
+//    /**
+//     * Label for {@link SSHDialog#myRemotePassword}.
+//     */
+//    private JLabel myRemotePasswordLabel;
 
     /**
      * Label for {@link SSHDialog#myRemotePath}.
@@ -155,9 +159,9 @@ public class SSHDialog extends JDialog {
 
     private JTextField mySSHTunnelUser;
 
-    private JLabel mySSHTunnelPasswordLabel;
+    //private JLabel mySSHTunnelPasswordLabel;
 
-    private JPasswordField mySSHTunnelPassword;
+    //private JPasswordField mySSHTunnelPassword;
 
     /**
      * Show a new SSH-dialog.
@@ -165,7 +169,40 @@ public class SSHDialog extends JDialog {
     public SSHDialog() {
         super((JFrame) null, true);
         initGUI();
+        File configFile = getConfigFile();
+        if (configFile.exists()) {
+            try {
+                Properties prop = new Properties();
+                prop.loadFromXML(new FileInputStream(configFile));
+                myRemoteHost.setText(prop.getProperty("remoteHost", "somehost"));
+                myRemotePort.setText(prop.getProperty("remotePort", "22"));
+                myRemoteUser.setText(prop.getProperty("remoteUser", System.getProperty("user.name")));
+                myRemotePath.setText(prop.getProperty("remotePath", "/data"));
+                mySSHTunnelEnabled.setSelected(prop.getProperty("sshTunnelEnabled", "false").equalsIgnoreCase("true"));
+                mySSHTunnelHost.setText(prop.getProperty("sshTunnelHost", "somehost"));
+                mySSHTunnelPort.setText(prop.getProperty("sshTunnelPort", "22"));
+                mySSHTunnelUser.setText(prop.getProperty("sshTunnelUser", System.getProperty("user.name")));
+                checkSSHTunnelPanelEnabled();
+            } catch (Exception e) {
+                LOG.log(Level.WARNING, "Cannot read properties-file with the last used SSH-settings", e);
+            }
+        }
     }
+
+    /**
+     * @return the configuration-file (need not exist yet)
+     */
+    protected File getConfigFile() {
+        return new File(getConfigFileDirectory(), "ssh.xml");
+    }
+
+    /**
+     * @return The directory where we store config-files.
+     */
+    protected File getConfigFileDirectory() {
+        return new File(System.getProperty("user.home", "~"), ".jgnucash");
+    }
+
     /**
      * Create the graphical input-components.
      */
@@ -182,7 +219,7 @@ public class SSHDialog extends JDialog {
     private JPanel getRemoteSystemPanel() {
         if (myRemoteSystemPanel == null) {
             myRemoteSystemPanel = new JPanel();
-            myRemoteSystemPanel.setLayout(new GridLayout(5, 2));
+            myRemoteSystemPanel.setLayout(new GridLayout(4, 2));
             myRemoteHostLabel = new JLabel("Host:");
             myRemoteSystemPanel.add(myRemoteHostLabel);
             myRemoteHost = new JTextField("somehost");
@@ -198,10 +235,10 @@ public class SSHDialog extends JDialog {
             myRemoteUser = new JTextField(System.getProperty("user.name"));
             myRemoteSystemPanel.add(myRemoteUser);
 
-            myRemotePasswordLabel = new JLabel("Password:");
-            myRemoteSystemPanel.add(myRemotePasswordLabel);
-            myRemotePassword = new JPasswordField();
-            myRemoteSystemPanel.add(myRemotePassword);
+//            myRemotePasswordLabel = new JLabel("Password:");
+//            myRemoteSystemPanel.add(myRemotePasswordLabel);
+//            myRemotePassword = new JPasswordField();
+//            myRemoteSystemPanel.add(myRemotePassword);
 
             myRemotePathLabel = new JLabel("Path:");
             myRemoteSystemPanel.add(myRemotePathLabel);
@@ -218,7 +255,7 @@ public class SSHDialog extends JDialog {
     private JPanel getSSHTunnelPanel() {
         if (mySSHTunnelPanel == null) {
             mySSHTunnelPanel = new JPanel();
-            mySSHTunnelPanel.setLayout(new GridLayout(5, 1));
+            mySSHTunnelPanel.setLayout(new GridLayout(4, 1));
             mySSHTunnelPanel.setBorder(new EtchedBorder());
 
             mySSHTunnelEnabledLabel = new JLabel("connect through SSH-tunnel?");
@@ -241,10 +278,10 @@ public class SSHDialog extends JDialog {
             mySSHTunnelUser = new JTextField(System.getProperty("user.name"));
             mySSHTunnelPanel.add(mySSHTunnelUser);
 
-            mySSHTunnelPasswordLabel = new JLabel("Password:");
-            mySSHTunnelPanel.add(mySSHTunnelPasswordLabel);
-            mySSHTunnelPassword = new JPasswordField();
-            mySSHTunnelPanel.add(mySSHTunnelPassword);
+//            mySSHTunnelPasswordLabel = new JLabel("Password:");
+//            mySSHTunnelPanel.add(mySSHTunnelPasswordLabel);
+//            mySSHTunnelPassword = new JPasswordField();
+//            mySSHTunnelPanel.add(mySSHTunnelPassword);
 
             mySSHTunnelEnabled.addActionListener(new ActionListener() {
                 @Override
@@ -263,7 +300,7 @@ public class SSHDialog extends JDialog {
      * set the enabled-status if the text-fields in the SSHTunnelPanel.
      */
     private void checkSSHTunnelPanelEnabled() {
-        mySSHTunnelPassword.setEnabled(mySSHTunnelEnabled.isSelected());
+        //mySSHTunnelPassword.setEnabled(mySSHTunnelEnabled.isSelected());
         mySSHTunnelHost.setEnabled(mySSHTunnelEnabled.isSelected());
         mySSHTunnelPort.setEnabled(mySSHTunnelEnabled.isSelected());
         mySSHTunnelUser.setEnabled(mySSHTunnelEnabled.isSelected());
@@ -296,6 +333,21 @@ public class SSHDialog extends JDialog {
                 @Override
                 public void actionPerformed(final ActionEvent aE) {
                     SSHDialog.this.setVisible(false);
+                    try {
+                        Properties prop = new Properties();
+                        prop.setProperty("remoteHost", myRemoteHost.getText());
+                        prop.setProperty("remotePort", myRemotePort.getText());
+                        prop.setProperty("remoteUser", myRemoteUser.getText());
+                        prop.setProperty("remotePath", myRemotePath.getText());
+                        prop.setProperty("sshTunnelEnabled", mySSHTunnelEnabled.isSelected()?"true":"false");
+                        prop.setProperty("sshTunnelHost", mySSHTunnelHost.getText());
+                        prop.setProperty("sshTunnelPort", mySSHTunnelPort.getText());
+                        prop.setProperty("sshTunnelUser", mySSHTunnelUser.getText());
+                        getConfigFileDirectory().mkdirs();
+                        prop.storeToXML(new FileOutputStream(getConfigFile()), "");
+                    } catch (Exception e) {
+                        LOG.log(Level.WARNING, "Cannot write properties-file with the last used SSH-settings", e);
+                    }
                 }
             });
         }
@@ -311,7 +363,7 @@ public class SSHDialog extends JDialog {
             return null;
         }
         return new ConnectInfo(myRemoteUser.getText(),
-                new String(myRemotePassword.getPassword()),
+                null, //new String(myRemotePassword.getPassword()),
                 myRemoteHost.getText(),
                 Integer.parseInt(myRemotePort.getText()));
     }
@@ -336,7 +388,7 @@ public class SSHDialog extends JDialog {
      */
     public ConnectInfo getSSHTunnelUserInfo() {
         return new ConnectInfo(mySSHTunnelUser.getText(),
-                new String(mySSHTunnelPassword.getPassword()),
+                null,//new String(mySSHTunnelPassword.getPassword()),
                 mySSHTunnelHost.getText(),
                 Integer.parseInt(mySSHTunnelPort.getText()));
     }

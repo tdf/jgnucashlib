@@ -58,6 +58,7 @@ import biz.wolschon.finance.jgnucash.plugin.DataSourcePlugin;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
@@ -117,30 +118,9 @@ public class SshDataSource implements DataSourcePlugin {
         FileOutputStream fos = null;
         try {
 
-            JSch jsch = new JSch();
-            //TODO: SSH-tunnel
-            Session session = null;
-            if (sshTunnelSystem != null) {
-                Session tunnelSession = jsch.getSession(sshTunnelSystem.getUserName(), sshTunnelSystem.getHostName(), sshTunnelSystem.getHostPost());
-                SSHUserInfo ui = new SSHUserInfo();
-                ui.setPassword(sshTunnelSystem.getPassword());
-                tunnelSession.setUserInfo(ui);
-                tunnelSession.connect();
-                int assingedPort = tunnelSession.setPortForwardingL(8764, sshTunnelSystem.getHostName(), remoteSystem.getHostPost());
-                // connect through tunnel
-                // TODO: try ::1 for IPv6 if there is no 127.0.0.1
-                session = jsch.getSession(remoteSystem.getUserName(), "127.0.0.1", assingedPort);
-            } else {
-                // connect directly
-                session = jsch.getSession(remoteSystem.getUserName(), remoteSystem.getHostName(), remoteSystem.getHostPost());
-            }
+            Session session = createConnection(remoteSystem, sshTunnelSystem);
 
 
-            // username and password will be given via UserInfo interface.
-            SSHUserInfo ui = new SSHUserInfo();
-            ui.setPassword(remoteSystem.getPassword());
-            session.setUserInfo(ui);
-            session.connect();
 
             // exec 'scp -f rfile' remotely
             String command = "scp -f " + rfile;
@@ -160,7 +140,7 @@ public class SshDataSource implements DataSourcePlugin {
 
             while (true) {
                 int c = checkAck(in);
-                if (c != 'C'){
+                if (c != 'C') {
                     break;
                 }
 
@@ -169,7 +149,7 @@ public class SshDataSource implements DataSourcePlugin {
 
                 long filesize = 0;
                 while (true) {
-                    if (in.read(buf, 0, 1) < 0){
+                    if (in.read(buf, 0, 1) < 0) {
                         // error
                         break;
                     }
@@ -180,7 +160,7 @@ public class SshDataSource implements DataSourcePlugin {
                 }
 
                 String file = null;
-                for (int i = 0; ; i++){
+                for (int i = 0;; i++) {
                     in.read(buf, i, 1);
                     if (buf[i] == (byte) 0x0a) {
                         file = new String(buf, 0, i);
@@ -241,6 +221,40 @@ public class SshDataSource implements DataSourcePlugin {
 
     }
 
+    /**
+     * @param remoteSystem
+     * @param sshTunnelSystem
+     * @return
+     * @throws JSchException
+     */
+    private Session createConnection(final ConnectInfo remoteSystem,
+                                     final ConnectInfo sshTunnelSystem)
+                                                                       throws JSchException {
+        JSch jsch = new JSch();
+        Session session = null;
+        if (sshTunnelSystem != null) {
+            Session tunnelSession = jsch.getSession(sshTunnelSystem.getUserName(), sshTunnelSystem.getHostName(), sshTunnelSystem.getHostPost());
+            SSHUserInfo ui = new SSHUserInfo();
+            ui.setPassword(sshTunnelSystem.getPassword());
+            tunnelSession.setUserInfo(ui);
+            tunnelSession.connect();
+            int assingedPort = tunnelSession.setPortForwardingL(8764, remoteSystem.getHostName(), remoteSystem.getHostPost());
+            // connect through tunnel
+            // TODO: try ::1 for IPv6 if there is no 127.0.0.1
+            session = jsch.getSession(remoteSystem.getUserName(), "127.0.0.1", assingedPort);
+        } else {
+            // connect directly
+            session = jsch.getSession(remoteSystem.getUserName(), remoteSystem.getHostName(), remoteSystem.getHostPost());
+        }
+        // username and password will be given via UserInfo interface.
+        SSHUserInfo ui = new SSHUserInfo();
+        ui.setPassword(remoteSystem.getPassword());
+        session.setUserInfo(ui);
+        session.connect();
+
+        return session;
+    }
+
 
     static int checkAck(final InputStream in) throws IOException{
         int b = in.read();
@@ -298,8 +312,9 @@ public class SshDataSource implements DataSourcePlugin {
             if(result==JOptionPane.OK_OPTION){
                 myPassword=passwordField.getText();
                 return true;
+            } else {
+                return false;
             }
-            else{ return false; }
         }
         public void showMessage(String message){
             JOptionPane.showMessageDialog(null, message);
@@ -326,41 +341,40 @@ public class SshDataSource implements DataSourcePlugin {
 
             gbc.gridwidth = GridBagConstraints.RELATIVE;
 
-            JTextField[] texts=new JTextField[prompt.length];
-            for(int i=0; i<prompt.length; i++){
+            JTextField[] texts = new JTextField[prompt.length];
+            for (int i = 0; i < prompt.length; i++){
                 gbc.fill = GridBagConstraints.NONE;
                 gbc.gridx = 0;
                 gbc.weightx = 1;
-                panel.add(new JLabel(prompt[i]),gbc);
+                panel.add(new JLabel(prompt[i]), gbc);
 
                 gbc.gridx = 1;
                 gbc.fill = GridBagConstraints.HORIZONTAL;
                 gbc.weighty = 1;
-                if(echo[i]){
-                    texts[i]=new JTextField(20);
-                }
-                else{
-                    texts[i]=new JPasswordField(20);
+                if (echo[i]) {
+                    texts[i] = new JTextField(20);
+                } else {
+                    texts[i] = new JPasswordField(20);
                 }
                 panel.add(texts[i], gbc);
                 gbc.gridy++;
             }
 
-            if(JOptionPane.showConfirmDialog(null, panel,
-                    destination+": "+name,
+            if (JOptionPane.showConfirmDialog(null, panel,
+                    destination + ": " + name,
                     JOptionPane.OK_CANCEL_OPTION,
                     JOptionPane.QUESTION_MESSAGE)
-                    ==JOptionPane.OK_OPTION){
-                String[] response=new String[prompt.length];
-                for(int i=0; i<prompt.length; i++){
-                    response[i]=texts[i].getText();
+                    == JOptionPane.OK_OPTION) {
+                String[] response = new String[prompt.length];
+                for (int i = 0; i < prompt.length; i++) {
+                    response[i] = texts[i].getText();
                 }
                 return response;
-            }
-            else{
+            } else {
                 return null;  // cancel
             }
         }
+
         public String getPassword() {
             return myPassword;
         }
@@ -405,14 +419,7 @@ public class SshDataSource implements DataSourcePlugin {
             aFile.writeFile(tempFile);
 
 
-            JSch    jsch    = new JSch();
-            Session session = jsch.getSession(remoteSystem.getUserName(), remoteSystem.getHostName(), remoteSystem.getHostPost());
-
-            // username and password will be given via UserInfo interface.
-            SSHUserInfo ui = new SSHUserInfo();
-            ui.setPassword(remoteSystem.getPassword());
-            session.setUserInfo(ui);
-            session.connect();
+            Session session = createConnection(remoteSystem, sshTunnelSystem);
 
 
             // exec 'scp -t rfile' remotely
