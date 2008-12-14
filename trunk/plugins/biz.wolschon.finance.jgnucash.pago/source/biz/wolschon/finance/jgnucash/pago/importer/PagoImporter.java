@@ -275,7 +275,7 @@ public class PagoImporter {
             final int newHeaderLine = 10;
             if (splits.length != newHeaderLine) { // they changed the first line
                 throw new IllegalArgumentException("first line is not in format "
-                        + "'Köln, [date]' - wrong number of splits '"
+                        + "'KÃ¶ln, [date]' - wrong number of splits '"
                         + line + "'");
             }
         }
