@@ -194,6 +194,8 @@
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
+                    <xs:element name="sx_num-occur" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="sx_rem-occur" type="xs:int" minOccurs="0" maxOccurs="1"/>
                     <xs:element name="sx_templ-acct">
                       <xs:complexType>
                         <xs:simpleContent>
