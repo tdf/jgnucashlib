@@ -253,11 +253,11 @@
                     <xs:element name="sx_schedule" minOccurs="0" maxOccurs="1">
                       <xs:complexType>
                         <xs:sequence>
-                          <xs:element name="gnc_recurrence">
+                          <xs:element name="gnc_recurrence" minOccurs="1" maxOccurs="unbounded">
                             <xs:complexType>
                               <xs:sequence>
                                 <xs:element name="recurrence_mult"        type="xs:int"/>
-                                <xs:element name="recurrence_period_type" type="xs:string"/> <!-- e.g. "2007-09-19" -->
+                                <xs:element name="recurrence_period_type" type="xs:string"/> <!-- e.g. "2007-09-19" or "month" -->
                                 <xs:element name="recurrence_start">
                                   <xs:complexType>
                                     <xs:sequence>
