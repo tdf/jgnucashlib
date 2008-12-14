@@ -187,6 +187,13 @@
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
+                    <xs:element name="sx_end" minOccurs="0" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element ref="gdate"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
                     <xs:element name="sx_last" minOccurs="0" maxOccurs="1">
                       <xs:complexType>
                         <xs:sequence>
