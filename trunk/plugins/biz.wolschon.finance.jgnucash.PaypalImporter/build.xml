@@ -43,8 +43,6 @@ Use top-level project build file to build application.
 		<uptodate property="uptoodate.libs"
 					      targetfile="${plugin.home}/classes/timestamp.paypal.libs">
 					<srcfiles dir="${basedir}/lib" includes="**/*.jar" />
-					<srcfiles dir="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
-					<srcfiles dir="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
 		</uptodate>
 	</target>
 	<target name="build.libs" depends="prepare_build" unless="uptoodate.libs">
