@@ -56,6 +56,7 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileWritingImpl;
 import biz.wolschon.finance.jgnucash.actions.ImportPluginMenuAction;
 import biz.wolschon.finance.jgnucash.actions.OpenFilePluginMenuAction;
+import biz.wolschon.finance.jgnucash.actions.SaveAsFilePluginMenuAction;
 import biz.wolschon.finance.jgnucash.actions.ToolPluginMenuAction;
 import biz.wolschon.finance.jgnucash.panels.TransactionsPanel;
 import biz.wolschon.finance.jgnucash.panels.WritableTransactionsPanel;
@@ -330,13 +331,17 @@ public class JGnucash extends JGnucashViewer {
 
                     try {
                         pluginName = ext.getParameter("name").valueAsString();
+
+                        LOGGER.debug("adding menu-item for DataSource-plugin " + pluginName
+                                + " - support for writeTo=" + ext.getParameter("supportsWritingTo"));
                         JMenuItem newMenuItem = new JMenuItem();
                         newMenuItem.putClientProperty("extension", ext);
                         Parameter descrParam = ext.getParameter("description");
                         Parameter iconParam = ext.getParameter("icon");
+                        URL iconUrl = null;
                         if (iconParam != null) {
                             try {
-                                URL iconUrl = getPluginManager().getPluginClassLoader(
+                                iconUrl = getPluginManager().getPluginClassLoader(
                                         ext.getDeclaringPluginDescriptor()).getResource(iconParam.valueAsString());
                                 if (iconUrl != null) {
                                     newMenuItem.setIcon(new ImageIcon(iconUrl));
@@ -345,12 +350,24 @@ public class JGnucash extends JGnucashViewer {
                                 LOGGER.error("cannot load icon for Loader-Plugin '" + pluginName + "'", e);
                             }
                         }
-                        newMenuItem.setText(pluginName);
+                        newMenuItem.setText("open via " + pluginName + "...");
                         if (descrParam != null) {
                             newMenuItem.setToolTipText(descrParam.valueAsString());
                         }
                         newMenuItem.addActionListener(new OpenFilePluginMenuAction(this, ext, pluginName));
                         fileMenu.add(newMenuItem, 1); // Open
+                        if (ext.getParameter("supportsWritingTo").valueAsString().equalsIgnoreCase("true")) {
+                            LOGGER.debug("Plugin " + pluginName + " also supportes 'write to', adding menu-item");
+                            JMenuItem newSaveAsMenuItem = new JMenuItem();
+                            newSaveAsMenuItem.putClientProperty("extension", ext);
+                            newSaveAsMenuItem.setText("Save to via " + pluginName + "...");
+                            if (iconUrl != null) {
+                                newMenuItem.setIcon(new ImageIcon(iconUrl));
+                            }
+                            newSaveAsMenuItem.addActionListener(new SaveAsFilePluginMenuAction(this, ext, pluginName));
+                            fileMenu.add(newSaveAsMenuItem, 2); // Open
+
+                        }
                     } catch (Exception e) {
                         LOGGER.error("cannot load Loader-Plugin '" + pluginName + "'", e);
                         JOptionPane.showMessageDialog(this, "Error",
