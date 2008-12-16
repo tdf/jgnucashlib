@@ -40,6 +40,9 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -86,12 +89,12 @@ public class TaxReportPanel extends JPanel {
     /**
      * The sums we show.
      */
-    private List<TransactionSum> mySums = new LinkedList<TransactionSum>();
+    private final List<TransactionSum> mySums = new LinkedList<TransactionSum>();
 
     /**
      * The panel to contain the created {@link TransactionSum}s.
      */
-    private JPanel mySumsPanel = new JPanel();
+    private final JPanel mySumsPanel = new JPanel();
 
     /**
      * @param books The financial data we operate on.
@@ -108,20 +111,46 @@ public class TaxReportPanel extends JPanel {
     private void initializeUI(final GnucashFile books) {
         this.setLayout(new BorderLayout());
         Properties props = new Properties();
-        try {
-            props.loadFromXML(getClass().getResourceAsStream(
-                    "TaxReportPanel.xml"));
-        } catch (Exception e) {
-            LOGGER.error("Problem loading TaxReportPanel.xml", e);
-            JLabel errorLabel = new JLabel(e.getMessage());
-            this.add(errorLabel, BorderLayout.CENTER);
-            return;
+        File configFile = new File(new File(System.getProperty("user.home"), ".jgnucash"), "TaxReportPanel.xml");
+        if (configFile.exists()) {
+            try {
+                props.loadFromXML(new FileInputStream(configFile));
+            } catch (Exception e) {
+                LOGGER.error("Problem loading " + configFile.getAbsolutePath(), e);
+                JLabel errorLabel = new JLabel(e.getMessage());
+                this.add(errorLabel, BorderLayout.CENTER);
+                return;
+            }
+        } else {
+            try {
+                props.loadFromXML(getClass().getResourceAsStream(
+                        "TaxReportPanel.xml"));
+                props.storeToXML(new FileOutputStream(configFile),
+                        "UTF-8\n"
+                        + "sum.([0-9]*).name - name of the entry\n"
+                        + "sum.([0-9]*).target.([0-9]*) - (may be ommited) "
+                        + "Look at all transactions containing these accounts You can specify qualified names, unqualified names or ids\n"
+                        + "sum.([0-9]*).source.([0-9]*) - of these accounts add all splits that refer to these accounts\n"
+                        + "sum.([0-9]*).type = ONLYTO        - sum only the ones that increase the balance of the account (other values: ONLYFROM, ALL)\n"
+                        + "sum.([0-9]*).type = ONLYFROM      - sum only the ones that decrease the balance of the account (other values: ONLYFROM, ALL)\n"
+                        + "sum.([0-9]*).type = ALL           - sum all the ones that increase or decreas the balance of the account (other values: ONLYFROM, ALL)\n"
+                        + "sum.([0-9]*).type = ALLRECURSIVE  - ignore targets and build the recursive balance\n");
+                LOGGER.info("demo-config-file for TaxReportPanel has been stored in "
+                        + configFile.getAbsolutePath());
+            } catch (Exception e) {
+                LOGGER.error("Problem loading or storing default-TaxReportPanel.xml", e);
+                JLabel errorLabel = new JLabel(e.getMessage());
+                this.add(errorLabel, BorderLayout.CENTER);
+                return;
+            }
         }
+
+        LOGGER.info("calculating tax-panel...");
         for (int i = 0; props.containsKey("sum." + i + ".name"); i++) {
             try {
                 createSum(books, props, i);
-            } catch (JAXBException e) {
-                LOGGER.error("[JAXBException] Problem in "
+            } catch (Exception e) {
+                LOGGER.error("[Exception] Problem in "
                            + getClass().getName(),
                              e);
             }
@@ -133,6 +162,8 @@ public class TaxReportPanel extends JPanel {
         }
 
         this.add(mySumsPanel, BorderLayout.CENTER);
+
+        LOGGER.info("calculating tax-panel...DONE");
     }
 
     /**
@@ -211,7 +242,7 @@ public class TaxReportPanel extends JPanel {
      */
     private Date getMinDate() {
         //TODO: provide an input-field for the year.
-        return new Date ((new GregorianCalendar(2007, 01, 01))
+        return new Date ((new GregorianCalendar(1970, 01, 01))
                 .getTimeInMillis());
     }
     /**
@@ -219,7 +250,7 @@ public class TaxReportPanel extends JPanel {
      */
     private Date getMaxDate() {
 //      TODO: provide an input-field for the year.
-        return new Date ((new GregorianCalendar(2007, 12, 31)
+        return new Date ((new GregorianCalendar(2100, 12, 31)
         ).getTimeInMillis());
     }
 
@@ -245,6 +276,7 @@ public class TaxReportPanel extends JPanel {
      *
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(
             final PropertyChangeListener listener) {
         if (myPropertyChange == null) {
@@ -261,6 +293,7 @@ public class TaxReportPanel extends JPanel {
      * @param propertyName  The name of the property to listen on.
      * @param listener  The PropertyChangeListener to be added
      */
+    @Override
     public final void addPropertyChangeListener(final String propertyName,
             final PropertyChangeListener listener) {
         if (myPropertyChange == null) {
@@ -275,6 +308,7 @@ public class TaxReportPanel extends JPanel {
      * @param propertyName  The name of the property that was listened on.
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public final void removePropertyChangeListener(final String propertyName,
             final PropertyChangeListener listener) {
         if (myPropertyChange != null) {
@@ -290,6 +324,7 @@ public class TaxReportPanel extends JPanel {
      *
      * @param listener  The PropertyChangeListener to be removed
      */
+    @Override
     public final synchronized void removePropertyChangeListener(
             final PropertyChangeListener listener) {
         if (myPropertyChange != null) {

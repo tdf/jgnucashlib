@@ -57,6 +57,7 @@ import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
+import biz.wolschon.finance.ComplexCurrencyTable;
 import biz.wolschon.numbers.FixedPointNumber;
 
 
@@ -170,6 +171,9 @@ public class TransactionSum extends JPanel {
             if (aProperty.equalsIgnoreCase("onlyfrom")) {
                 return ONLYFROM;
             }
+            if (aProperty.equalsIgnoreCase("allrecursive")) {
+                return ALL;
+            }
 
             return ALL;
         }
@@ -236,10 +240,10 @@ public class TransactionSum extends JPanel {
         }
 
         Set<GnucashAccount> sourceAccounts = new HashSet<GnucashAccount>(
-                                   buildTransitiveClosure(getSourceAccounts()));
+                                   getSourceAccounts());
         Set<GnucashAccount> targetAccounts = new HashSet<GnucashAccount>(
                 buildTransitiveClosure(getTargetAccounts()));
-        Set<String> targetAccountsIDs =new HashSet<String>();
+        Set<String> targetAccountsIDs = new HashSet<String>();
         for (GnucashAccount targetAccount : targetAccounts) {
             targetAccountsIDs.add(targetAccount.getId());
         }
@@ -249,55 +253,165 @@ public class TransactionSum extends JPanel {
         Set<GnucashTransactionSplit> transactions
                                        = new HashSet<GnucashTransactionSplit>();
         FixedPointNumber sum = new FixedPointNumber(0);
+        if (sourceAccounts.size() == 0) {
+            LOGGER.warn("There are no source-accounts given for this transaction-sum");
+        }
         for (GnucashAccount sourceAccount : sourceAccounts) {
-            List<GnucashTransaction> sourceAccountTransactions
-                                              = sourceAccount.getTransactions();
-            for (GnucashTransaction trans : sourceAccountTransactions) {
-                if (trans.getDatePosted().before(getMinDate())
-                   || trans.getDatePosted().after(getMaxDate())) {
-                    continue;
-                }
-
-                Collection<? extends GnucashTransactionSplit> splits
-                                                            = trans.getSplits();
-                for (GnucashTransactionSplit split : splits) {
-                    if (targetAccountsIDs.contains(split.getAccountID())) {
-
-                        //don't add a split twice
-                        if (transactions.contains(split)) {
-                            continue;
-                        }
-                        transactions.add(split);
-                      //TODO: change to the currency of the first sourceAccount.
-
-                        switch (getSummationType()) {
-                        case ONLYFROM : if (split.getQuantity().isPositive()) {
-                            continue;
-                        }
-                        case ONLYTO : if (!split.getQuantity().isPositive()) {
-                            continue;
-                        }
-                        case ALL: //do nothing
-                        default: //do nothing
-                        }
-
-                        sum = sum.add(split.getQuantity());
-                        // do not break here. There may be more then one split
-                        // that matches
-                    }
-                }
+            FixedPointNumber addMe = buildSum(sourceAccount, targetAccountsIDs, sourceAccount.getCurrencyNameSpace(), sourceAccount.getCurrencyID(), transactions);
+            if (addMe == null) {
+                mySumLabel.setText("   cannot determine sum");
+                sum = null;
+                break;
             }
+            sum = sum.add(addMe);
         }
 
         ////////////////////////////////////
         // set output
         Iterator<GnucashAccount> iterator = targetAccounts.iterator();
         if (iterator.hasNext()) {
-            mySumLabel.setText(sum.toString() + ""
+            mySumLabel.setText("   " + sum.toString() + ""
                     + iterator.next().getCurrencyID());
         } else {
-            mySumLabel.setText("no account");
+            Iterator<GnucashAccount> iterator2 = sourceAccounts.iterator();
+            if (iterator2.hasNext()) {
+                mySumLabel.setText("   " + sum.toString() + ""
+                        + iterator2.next().getCurrencyID());
+            } else {
+                mySumLabel.setText("   no account");
+            }
         }
+    }
+
+    /**
+     * @param aSourceAccount
+     * @param aTargetAccountsIDs
+     * @param alreadyHandled all transactions we have already visited (if multiple target-accounts are involved)
+     * @return
+     * @throws JAXBException
+     */
+    private FixedPointNumber buildSum(final GnucashAccount aSourceAccount,
+                                      final Set<String> aTargetAccountsIDs,
+                                      final String currencyNameSpace,
+                                      final String currencyID,
+                                      final Set<GnucashTransactionSplit> alreadyHandled) throws JAXBException {
+
+        FixedPointNumber sum = new FixedPointNumber();
+        for (Object element : aSourceAccount.getChildren()) {
+            GnucashAccount child = (GnucashAccount) element;
+            sum = sum.add(buildSum(child, aTargetAccountsIDs, currencyNameSpace, currencyID, alreadyHandled));
+        }
+
+        List<GnucashTransactionSplit> splits
+                                          = aSourceAccount.getTransactionSplits();
+        for (GnucashTransactionSplit split : splits) {
+            GnucashTransaction transaction = split.getTransaction();
+            if (getMinDate() != null && transaction.getDatePosted().before(getMinDate())) {
+                continue;
+            }
+            if (getMaxDate() != null && transaction.getDatePosted().after(getMaxDate())) {
+                continue;
+            }
+            if (aTargetAccountsIDs.size() > 0 && !hasSplitWithAccount(transaction, aTargetAccountsIDs)) {
+                continue;
+            }
+            if (alreadyHandled.contains(split)) {
+                continue ;
+            }
+            alreadyHandled.add(split);
+
+
+            if (getSummationType().equals(SUMMATIONTYPE.ONLYFROM) && split.getQuantity().isPositive()) {
+                continue;
+            } else if (getSummationType().equals(SUMMATIONTYPE.ONLYTO) && !split.getQuantity().isPositive()) {
+                continue;
+            }
+            if (aSourceAccount.getCurrencyNameSpace().equals(currencyNameSpace)
+                    && aSourceAccount.getCurrencyID().equals(currencyID)) {
+
+                sum = sum.add(split.getQuantity());
+            } else {
+                FixedPointNumber addMe = new FixedPointNumber(split.getQuantity());
+                // do not convert 0
+                if (!addMe.equals(new FixedPointNumber())) {
+                    addMe = convert(aSourceAccount.getCurrencyNameSpace(), aSourceAccount.getCurrencyID(), addMe, currencyNameSpace, currencyID);
+                }
+                if (addMe == null) {
+                    return null;
+                }
+                sum = sum.add(addMe);
+            }
+
+        }
+        return sum;
+    }
+
+    /**
+     * @param aTransaction
+     * @param aTargetAccountsIDs
+     * @return
+     * @throws JAXBException
+     */
+    private boolean hasSplitWithAccount(GnucashTransaction aTransaction,
+                                        Set<String> aTargetAccountsIDs) throws JAXBException {
+        List<? extends GnucashTransactionSplit> splits = aTransaction.getSplits();
+        for (GnucashTransactionSplit split : splits) {
+            if (aTargetAccountsIDs.contains(split.getAccountID())) {
+                return true;
+            }
+         }
+        return false;
+    }
+
+    /**
+     * @param aCurrencyNameSpace
+     * @param aCurrencyID
+     * @param aSum
+     * @param aCurrencyNameSpace2
+     * @param aCurrencyName
+     * @return
+     */
+    private FixedPointNumber convert(final String aCurrencyNameSpaceFrom,
+                                     final String aCurrencyIDFrom,
+                                     final FixedPointNumber aSum,
+                                     final String aCurrencyNameSpaceTo,
+                                     final String aCurrencyIDTo) {
+        ComplexCurrencyTable currencyTable = getBooks().getCurrencyTable();
+
+        if (currencyTable == null) {
+            LOGGER.warn("SimpleAccount.getBalance() - cannot transfer "
+                    + "to given currency because we have no currency-table!");
+            return null;
+        }
+        FixedPointNumber sum = new FixedPointNumber(aSum);
+
+        if (!currencyTable.convertToBaseCurrency(aCurrencyNameSpaceFrom,
+                 sum,
+                 aCurrencyIDFrom)) {
+            Collection<String> currencies = getBooks().getCurrencyTable().getCurrencies(
+                    aCurrencyNameSpaceFrom);
+         LOGGER.warn("SimpleAccount.getBalance() - cannot transfer "
+                    + "from our currency '"
+                    + aCurrencyNameSpaceFrom + "'-'"
+                    + aCurrencyIDFrom
+                    + "' to the base-currency!"
+                    + " \n(we know " + getBooks().getCurrencyTable().getNameSpaces().size()
+                    + " currency-namespaces and "
+                    + (currencies==null?"no":""+currencies.size())
+                    + " currencies in our namespace)");
+            return null;
+        }
+
+        if (!currencyTable.convertFromBaseCurrency(aCurrencyNameSpaceTo, sum, aCurrencyIDTo)) {
+            LOGGER.warn("SimpleAccount.getBalance() - cannot transfer "
+                    + "from base-currenty to given currency '"
+                    + aCurrencyNameSpaceTo
+                    + "-"
+                    + aCurrencyIDTo
+                    + "'!");
+            return null;
+        }
+        return sum;
     }
 
     /**

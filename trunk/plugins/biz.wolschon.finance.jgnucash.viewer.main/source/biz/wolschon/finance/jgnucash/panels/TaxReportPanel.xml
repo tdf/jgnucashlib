@@ -3,9 +3,11 @@
 <properties>
 <comment>UTF-8
 sum.([0-9]*).name - name of the entry 
-sum.([0-9]*).target.([0-9]*) - Look at all transactions containing these accounts You can specify qualified names, unqualified names or ids
+sum.([0-9]*).target.([0-9]*) - (may be ommited) Look at all transactions containing these accounts You can specify qualified names, unqualified names or ids
 sum.([0-9]*).source.([0-9]*) - of these accounts add all splits that refer to these accounts
-sum.([0-9]*).type = ONLYTO   - sum only the ones that increase the balance of the account (other values: ONLYFROM, ALL)
+sum.([0-9]*).type = ONLYTO        - sum only the ones that increase the balance of the account (other values: ONLYFROM, ALL)
+sum.([0-9]*).type = ONLYFROM      - sum only the ones that decrease the balance of the account (other values: ONLYFROM, ALL)
+sum.([0-9]*).type = ALL           - sum all the ones that increase or decreas the balance of the account (other values: ONLYFROM, ALL)
 
 </comment>
 <entry key="sum.0.name">abgeführte Umsatzteuer(alle)</entry>
