@@ -159,9 +159,7 @@ test  - runs some tests
 				<exclude name="*.zip" />
 			</fileset>
 		</delete>
-		<tar compression="bzip2" destfile="${dist.home}/${app.name}-bin-${app.version}.tar.bz2"
-		     duplicate="fail"
-		     update="false">
+		<tar compression="bzip2" destfile="${dist.home}/${app.name}-bin-${app.version}.tar.bz2">
 			<fileset dir="${build.home}" includes="**/*" />
 			<fileset dir="lib" includes="run.*" />
 		</tar>
