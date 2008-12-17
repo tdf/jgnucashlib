@@ -303,9 +303,9 @@ public class TaxReportPanel extends JPanel {
             //NumberFormat numberFormat = NumberFormat.getInstance();
             // we do NOT use getCurrencyInstance because it
             // contains a locale-specific currency-symbol
-            for (int i = 0; i < 100; i++) { //TODO: do not hardcode these 100
+            for (int i = 0; i < 100; i++) {
                 Date maxDate = cal.getTime();
-                //TODO
+
                 fw.write(dateFormat.format(maxDate));
                 int transactionsCounted = 0;
                 for (TransactionSum transactionSum : sums) {
