@@ -196,6 +196,16 @@ public class TransactionSum extends JPanel {
     private final JLabel myDrilldownLabel = new JLabel();
 
     /**
+     * The latest value calculated by {@link #reCalculate()}.
+     */
+    private FixedPointNumber myValue = null;
+
+    /**
+     * The count of transactions we counted n the last {@link #reCalculate()}.
+     */
+    private int myTransactionsCounted = -1;
+
+    /**
      * @param books The financial data we operate on.
      * @param summationType The type of summations we are to calculate.
      * @param targetAccounts We sum all transaction-splits that are to
@@ -215,6 +225,7 @@ public class TransactionSum extends JPanel {
             final Date minDate,
             final Date maxDate) throws JAXBException {
         initializeUI(name);
+        setName(name);
         setBooks(books);
         setSummationType(summationType);
         setSourceAccounts(sourceAccounts);
@@ -232,12 +243,13 @@ public class TransactionSum extends JPanel {
           || getSourceAccounts() == null
           || getTargetAccounts() == null
           || getSummationType() == null
-          || getMinDate() == null
-          || getMaxDate() == null
+          //|| getMinDate() == null
+          //|| getMaxDate() == null
           || getBooks() == null) {
             mySumLabel.setText("---");
             return;
         }
+        myTransactionsCounted = 0;
 
         Set<GnucashAccount> sourceAccounts = new HashSet<GnucashAccount>(
                                    getSourceAccounts());
@@ -266,6 +278,7 @@ public class TransactionSum extends JPanel {
             sum = sum.add(addMe);
         }
 
+        setValue(sum);
         ////////////////////////////////////
         // set output
         Iterator<GnucashAccount> iterator = targetAccounts.iterator();
@@ -341,6 +354,7 @@ public class TransactionSum extends JPanel {
                 }
                 sum = sum.add(addMe);
             }
+            myTransactionsCounted++;
 
         }
         return sum;
@@ -672,9 +686,9 @@ public class TransactionSum extends JPanel {
      * @see #myMinDate
      */
     public void setMinDate(final Date aMinDate) throws JAXBException {
-        if (aMinDate == null) {
-            throw new IllegalArgumentException("null 'aMinDate' given!");
-        }
+//        if (aMinDate == null) {
+//            throw new IllegalArgumentException("null 'aMinDate' given!");
+//        }
 
         Object old = myMinDate;
         if (old == aMinDate) {
@@ -703,9 +717,9 @@ public class TransactionSum extends JPanel {
      * @see #myMaxDate
      */
     public void setMaxDate(final Date aMaxDate) throws JAXBException {
-        if (aMaxDate == null) {
-            throw new IllegalArgumentException("null 'aMaxDate' given!");
-        }
+//        if (aMaxDate == null) {
+//            throw new IllegalArgumentException("null 'aMaxDate' given!");
+//        }
 
         Object old = myMaxDate;
         if (old == aMaxDate) {
@@ -718,6 +732,27 @@ public class TransactionSum extends JPanel {
         if (propertyChangeFirer != null) {
             propertyChangeFirer.firePropertyChange("aMaxDate", old, aMaxDate);
         }
+    }
+
+    /**
+     * @return the value
+     */
+    public FixedPointNumber getValue() {
+        return myValue;
+    }
+
+    /**
+     * @param aValue the value to set
+     */
+    private void setValue(final FixedPointNumber aValue) {
+        myValue = aValue;
+    }
+
+    /**
+     * @return the transactionsCounted
+     */
+    public int getTransactionsCounted() {
+        return myTransactionsCounted;
     }
 }
 

@@ -37,12 +37,18 @@ package biz.wolschon.finance.jgnucash.panels;
 
 //automatically created propertyChangeListener-Support
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -51,8 +57,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
@@ -62,6 +73,7 @@ import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.finance.jgnucash.widgets.TransactionSum;
 import biz.wolschon.finance.jgnucash.widgets.TransactionSum.SUMMATIONTYPE;
+import biz.wolschon.numbers.FixedPointNumber;
 
 
 /**
@@ -95,6 +107,53 @@ public class TaxReportPanel extends JPanel {
      * The panel to contain the created {@link TransactionSum}s.
      */
     private final JPanel mySumsPanel = new JPanel();
+    /**
+     * The panel to contain the buttons to export a CSV.
+     */
+    private final JPanel myExportPanel = new JPanel();
+
+
+    /**
+     * Button in the {@link #myExportPanel} to export
+     * a CSV.
+     */
+    private final JButton myExportButton = new JButton("Export...");
+
+    private enum ExportGranularities {
+        Month {
+            @Override
+            public int getCalendarConstant() {
+                return GregorianCalendar.MONTH;
+            }
+        },
+        Year {
+            @Override
+            public int getCalendarConstant() {
+                return GregorianCalendar.YEAR;
+            }
+        },
+        Day {
+            @Override
+            public int getCalendarConstant() {
+                return GregorianCalendar.DAY_OF_MONTH;
+            }
+        };
+    @Override
+    public String toString() {
+        return "per " + super.toString();
+    }
+
+    /**
+     * @return a GregorianCalendar-constant to add 1 of;
+     */
+    public abstract int getCalendarConstant();
+    };
+
+    /**
+     * Combobox to select a yearly, monthly or dayly export
+     * with the {@link #myExportButton}.
+     */
+    private final JComboBox myExportGranularityCombobox = new JComboBox(ExportGranularities.values());
 
     /**
      * @param books The financial data we operate on.
@@ -163,7 +222,156 @@ public class TaxReportPanel extends JPanel {
 
         this.add(mySumsPanel, BorderLayout.CENTER);
 
+        myExportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent aE) {
+                showExportCSVDialog();
+            }
+        });
+        myExportPanel.add(myExportButton);
+        myExportGranularityCombobox.setSelectedItem(ExportGranularities.Month);
+        myExportGranularityCombobox.setEditable(false);
+        myExportPanel.add(myExportGranularityCombobox);
+        this.add(myExportPanel, BorderLayout.SOUTH);
         LOGGER.info("calculating tax-panel...DONE");
+    }
+
+    /**
+     * Show a dialog to export
+     * a CSV-file that contains the
+     * shown {@link TransactionSum}s
+     * for each month, year or day.
+     */
+    protected void showExportCSVDialog() {
+        JFileChooser fc = new JFileChooser();
+        fc.setAcceptAllFileFilterUsed(true);
+        fc.addChoosableFileFilter(new FileFilter(){
+
+            @Override
+            public boolean accept(final File aF) {
+                return aF.isDirectory() || aF.getName().endsWith(".csv");
+            }
+
+            @Override
+            public String getDescription() {
+                return "CSV-file";
+            }});
+        int dialogResult = fc.showSaveDialog(this);
+        if (dialogResult != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        File file = fc.getSelectedFile();
+        if (file.exists()) {
+            int confirmation = JOptionPane.showConfirmDialog(this, "File exists. Replace file?");
+            if (confirmation != JOptionPane.YES_OPTION) {
+                showExportCSVDialog();
+                return;
+            }
+        }
+        ExportGranularities gran = (ExportGranularities) myExportGranularityCombobox.getSelectedItem();
+        try {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            exportCSV(file, gran);
+        } finally {
+            setCursor(Cursor.getDefaultCursor());
+        }
+    }
+
+    /**
+     * @param aFile the file to write to
+     * @param aGran the granularity
+     */
+    private void exportCSV(final File aFile, final ExportGranularities aGran) {
+        //TODO: implement CSV-export
+
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(aFile);
+            // write headers
+            List<TransactionSum> sums = mySums;
+            fw.write("day");
+            for (TransactionSum transactionSum : sums) {
+                fw.write(",");
+                fw.write(transactionSum.getName());
+            }
+            fw.write("\n");
+
+            // write data
+            GregorianCalendar cal = new GregorianCalendar();
+            int add = aGran.getCalendarConstant();
+            DateFormat dateFormat = DateFormat.getDateInstance();
+            //NumberFormat numberFormat = NumberFormat.getInstance();
+            // we do NOT use getCurrencyInstance because it
+            // contains a locale-specific currency-symbol
+            for (int i = 0; i < 100; i++) { //TODO: do not hardcode these 100
+                Date maxDate = cal.getTime();
+                //TODO
+                fw.write(dateFormat.format(maxDate));
+                int transactionsCounted = 0;
+                for (TransactionSum transactionSum : sums) {
+                    fw.write(",");
+                    try {
+                        transactionSum.setMaxDate(maxDate);
+                        FixedPointNumber value = transactionSum.getValue();
+                        if (value != null) {
+                            //fw.write(numberFormat.format(value));
+                            fw.write(value.toString());
+                        }
+                        transactionsCounted += transactionSum.getTransactionsCounted();
+                    } catch (JAXBException e) {
+                        LOGGER.error("Error calculating one of the TransactionSums", e);
+                        fw.write("ERROR");
+                    }
+                }
+                fw.write("\n");
+                if (transactionsCounted == 0) {
+                    break;
+                    // we are walking back in time,
+                    // when there are no matching transactions,
+                    // all future runs will we a waste of time.
+                    // This happens often when add==YEAR
+                }
+
+                long old = cal.getTimeInMillis();
+                if (add == GregorianCalendar.MONTH) {
+                    cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
+                }
+                if (add == GregorianCalendar.YEAR) {
+                    cal.set(GregorianCalendar.DAY_OF_MONTH, 1);
+                    cal.set(GregorianCalendar.MONTH, 1);
+                }
+                // usually we are in the middle of a month,
+                // so do not skip the first day of the current
+                // month
+                if (i != 0
+                        || old == cal.getTimeInMillis()
+                        || add == GregorianCalendar.DAY_OF_MONTH) {
+                    cal.add(add, -1);
+                }
+            }
+
+            fw.close();
+            fw = null;
+        } catch (IOException e) {
+            LOGGER.error("cannot write csv-file", e);
+            JOptionPane.showMessageDialog(this, "Cannot write CSV-file\n"
+                    + e.getMessage());
+        } finally {
+            if (fw != null) {
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    LOGGER.error("cannot close csv-file", e);
+                }
+            }
+            for (TransactionSum transactionSum : mySums) {
+                try {
+                    transactionSum.setMaxDate(null);
+                } catch (JAXBException e) {
+                    LOGGER.error("cannot set maxDate back to it's original value", e);
+                }
+            }
+        }
     }
 
     /**
@@ -242,16 +450,16 @@ public class TaxReportPanel extends JPanel {
      */
     private Date getMinDate() {
         //TODO: provide an input-field for the year.
-        return new Date ((new GregorianCalendar(1970, 01, 01))
-                .getTimeInMillis());
+        return null;/*new Date ((new GregorianCalendar(1970, 01, 01))
+                .getTimeInMillis())*/
     }
     /**
      * @return the maximum date for the {@link TransactionSum}.
      */
     private Date getMaxDate() {
 //      TODO: provide an input-field for the year.
-        return new Date ((new GregorianCalendar(2100, 12, 31)
-        ).getTimeInMillis());
+        return null/*new Date ((new GregorianCalendar(2100, 12, 31)
+        ).getTimeInMillis())*/;
     }
 
     //------------------------ support for propertyChangeListeners -------------
