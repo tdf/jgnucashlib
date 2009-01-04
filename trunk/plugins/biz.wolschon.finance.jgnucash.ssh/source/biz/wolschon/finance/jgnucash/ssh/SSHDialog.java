@@ -327,6 +327,7 @@ public class SSHDialog extends JDialog {
         if (myButtonsPanel == null) {
             myButtonsPanel = new JPanel();
             myConnectButton = new JButton("Connect");
+            myConnectButton.setDefaultCapable(true);
             myButtonsPanel.add(myConnectButton);
             myConnectButton.addActionListener(new ActionListener() {
 
