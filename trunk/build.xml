@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jGnucashLib-Viewer" default="help" basedir=".">
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.12" />
+	<property name="app.version" value="2.0.13" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -159,10 +159,12 @@ test  - runs some tests
 				<exclude name="*.zip" />
 			</fileset>
 		</delete>
-		<tar compression="bzip2" destfile="${dist.home}/${app.name}-bin-${app.version}.tar.bz2">
+		<zip destfile="${dist.home}/${app.name}-bin-${app.version}.zip"
+		     duplicate="fail"
+		     update="false">
 			<fileset dir="${build.home}" includes="**/*" />
 			<fileset dir="lib" includes="run.*" />
-		</tar>
+		</zip>
 		<zip destfile="${dist.home}/${app.name}-src-${app.version}.zip"
 		     duplicate="fail"
 		     update="false">
@@ -173,7 +175,6 @@ test  - runs some tests
 			<fileset dir="${build.home}">
 				<include name="**/*" />
 				<exclude name="${app.name}-???-${app.version}.zip" />
-				<exclude name="${app.name}-???-${app.version}.tar.bz2" />
 			</fileset>
 		</delete>
 	</target>
