@@ -142,7 +142,7 @@
               </xs:element>
               <xs:element name="gnc_schedxaction" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
-                  <xs:sequence>
+                  <xs:all>
                     <xs:element name="sx_id">
                       <xs:complexType>
                         <xs:simpleContent>
@@ -272,7 +272,7 @@
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
-                  </xs:sequence>
+                  </xs:all>
                   <xs:attribute name="version" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
