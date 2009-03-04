@@ -619,7 +619,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="act_commodity-scu">
+        <xs:element name="act_commodity-scu" minOccurs="0" maxOccurs="1"> <!-- root-account has no comodity -->
           <xs:simpleType>
             <xs:restriction base="xs:int">
               <xs:enumeration value="1"/>

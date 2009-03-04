@@ -536,6 +536,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      * @return the configuration-file (need not exist yet)
      */
     protected File getConfigFile() {
+        getConfigFileDirectory().mkdirs();
         return new File(getConfigFileDirectory(), "." + getPluginName() + ".properties");
     }
 

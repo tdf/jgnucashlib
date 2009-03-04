@@ -41,22 +41,22 @@ public class JPFEditorMain extends ApplicationPlugin {
             ste.loadFile(new File(args[0]));
         }
         return ste;
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see org.java.plugin.Plugin#doStart()
-	 */
-	@Override
-	protected void doStart() throws Exception {
-		// do nothing
-	}
+    /* (non-Javadoc)
+     * @see org.java.plugin.Plugin#doStart()
+     */
+    @Override
+    protected void doStart() throws Exception {
+        // do nothing
+    }
 
-	/* (non-Javadoc)
-	 * @see org.java.plugin.Plugin#doStop()
-	 */
-	@Override
-	protected void doStop() throws Exception {
-		// do nothing
-	}
+    /* (non-Javadoc)
+     * @see org.java.plugin.Plugin#doStop()
+     */
+    @Override
+    protected void doStop() throws Exception {
+        // do nothing
+    }
 
 }
