@@ -1,3 +1,2 @@
 #!/bin/bash
-java -jar lib/jpf-boot.jar
-
+java -jar lib/jpf-boot.jar 
