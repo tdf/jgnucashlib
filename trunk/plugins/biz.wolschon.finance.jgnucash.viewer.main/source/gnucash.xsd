@@ -560,7 +560,7 @@
                     <xs:element name="entry_i-disc-how" type="xs:string"/>
                     <xs:element name="entry_i-taxable" type="xs:int"/>
                     <xs:element name="entry_i-taxincluded" type="xs:int"/>
-                    <xs:element name="entry_i-taxtable">
+                    <xs:element name="entry_i-taxtable"  minOccurs="0" maxOccurs="1">
                       <xs:complexType>
                         <xs:simpleContent>
                           <xs:extension base="xs:string">
