@@ -133,13 +133,14 @@ public class GnucashFileImpl implements GnucashFile {
      * @return all TaxTables defined in the book
      * @see ${@link GnucashTaxTable}
      */
+    @SuppressWarnings("unchecked")
     public Collection<GnucashTaxTable> getTaxTables() {
         if (taxTablesById == null) {
 
             taxTablesById = new HashMap<String, GnucashTaxTable>();
 
-            for (Iterator iter = this.getRootElement().getGncBook().getGncGncTaxTable().iterator(); iter.hasNext();) {
-                GncV2Type.GncBookType.GncGncTaxTableType jwsdpPeer = (GncV2Type.GncBookType.GncGncTaxTableType) iter.next();
+            List<GncV2Type.GncBookType.GncGncTaxTableType> gncGncTaxTables = this.getRootElement().getGncBook().getGncGncTaxTable();
+            for (GncV2Type.GncBookType.GncGncTaxTableType jwsdpPeer : gncGncTaxTables) {
                 GnucashTaxTableImpl gnucashTaxTable = new GnucashTaxTableImpl(jwsdpPeer, this);
                 taxTablesById.put(gnucashTaxTable.getId(), gnucashTaxTable);
             }
