@@ -64,20 +64,20 @@ public class TransactionsPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * A scrollpane for ${@link #transactionTable}}.
-	 */
-	private JScrollPane transactionTableScrollPane = null;
+    /**
+     * A scrollpane for ${@link #transactionTable}}.
+     */
+    private JScrollPane transactionTableScrollPane = null;
 
-	/**
-	 * A table showing the transactions.
-	 */
-	private JTable transactionTable;
+    /**
+     * A table showing the transactions.
+     */
+    private JTable transactionTable;
 
-	/**
-	 * A panel holding ${@link #selectionSummaryLabel}}.
-	 */
-	private JPanel selectionSummaryPanel = null;  //  @jve:decl-index=0:visual-constraint="159,213"
+    /**
+     * A panel holding ${@link #selectionSummaryLabel}}.
+     */
+    private JPanel selectionSummaryPanel = null;  //  @jve:decl-index=0:visual-constraint="159,213"
 
 	/**
 	 * A label showing summary-information about the selected transactions.
@@ -105,7 +105,7 @@ public class TransactionsPanel extends JPanel {
      */
     private JPanel mySummaryPanel;
 
-	/**
+    /**
      * @return Returns the model.
      * @see #model
      */
@@ -133,14 +133,14 @@ public class TransactionsPanel extends JPanel {
         // set column-width
         FontMetrics metrics = Toolkit.getDefaultToolkit().getFontMetrics(transactionTable.getFont());
         getTransactionTable().getColumn("date").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.dateFormat.format(new Date())) + 5);
-        getTransactionTable().getColumn("+").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(10000)));
-        getTransactionTable().getColumn("-").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-10000)));
-        getTransactionTable().getColumn("balance").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-10000)));
+        getTransactionTable().getColumn("+").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(10000)));
+        getTransactionTable().getColumn("-").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-10000)));
+        getTransactionTable().getColumn("balance").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-10000)));
 
         getTransactionTable().getColumn("date").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.dateFormat.format(new Date())) + 5);
-        getTransactionTable().getColumn("+").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(1000000)));
-        getTransactionTable().getColumn("-").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-1000000)));
-        getTransactionTable().getColumn("balance").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.currencyFormat.format(-1000000)));
+        getTransactionTable().getColumn("+").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(1000000)));
+        getTransactionTable().getColumn("-").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-1000000)));
+        getTransactionTable().getColumn("balance").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-1000000)));
 
         getTransactionTable().getColumn("transaction").setCellRenderer(new DesriptionCellRenderer());
         getTransactionTable().getColumn("description").setCellRenderer(new DesriptionCellRenderer());

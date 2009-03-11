@@ -16,6 +16,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Currency;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     private final String[] defaultColumnNames = new String[] {"date", "transaction", "description", "+", "-", "balance"};
 
     /**
-     * @param account
+     * @param account the account whos splits to display.
      */
     public GnucashSimpleAccountTransactionsTableModel(final GnucashAccount account) {
         super();
@@ -56,7 +57,7 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     }
 
     /**
-     * the Table will be empty
+     * the Table will be empty.
      *
      */
     public GnucashSimpleAccountTransactionsTableModel() {
@@ -65,28 +66,26 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     }
 
     /**
-     *
-     * @see javax.swing.table.TableModel#getColumnCount()
+     * {@inheritDoc}
      */
     public int getColumnCount() {
         return defaultColumnNames.length;
     }
 
     /**
-     *
-     * @see javax.swing.table.TableModel#getRowCount()
+     * {@inheritDoc}
      */
     public int getRowCount() {
 
         List<GnucashTransactionSplit> transactionSplits = getTransactionSplits();
-        if(transactionSplits == null) {
+        if (transactionSplits == null) {
             return 0;
         }
         return transactionSplits.size();
     }
 
     /**
-     * @return
+     * @return the splits that affect this account.
      */
     public List<GnucashTransactionSplit> getTransactionSplits() {
         if (account == null) {
@@ -96,20 +95,16 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     }
 
     /**
-     *
-     * @see javax.swing.table.TableModel#isCellEditable(int, int)
+     * {@inheritDoc}
      */
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        // TODO Auto-generated method stub
+    public boolean isCellEditable(final int rowIndex, final int columnIndex) {
         return false;
     }
 
     /**
-     *
-     * @see javax.swing.table.TableModel#getColumnClass(int)
+     * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
-    public Class getColumnClass(int columnIndex) {
+    public Class getColumnClass(final int columnIndex) {
         return String.class;
     }
 
@@ -121,7 +116,11 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     /**
      * How to format currencies.
      */
-    public static final  NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+    private  NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+    /**
+     * How to format currencies.
+     */
+    public static final NumberFormat defaultCurrencyFormat = NumberFormat.getCurrencyInstance();
 
 
     /**
@@ -131,18 +130,18 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
      * @return the split
      */
     public GnucashTransactionSplit getTransactionSplit(final int rowIndex) {
-    	GnucashTransactionSplit split = getTransactionSplits().get(rowIndex);
-    	return split;
+        GnucashTransactionSplit split = getTransactionSplits().get(rowIndex);
+        return split;
     }
 
     /**
-     *
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
+     * {@inheritDoc}
      */
-    public Object getValueAt(int rowIndex, int columnIndex) {
+    public Object getValueAt(final int rowIndex, final int columnIndex) {
         try {
-
             GnucashTransactionSplit split = getTransactionSplit(rowIndex);
+
+            updateCurrencyFormat(split);
 
             switch(columnIndex) {
             case 0: { //DATE
@@ -150,24 +149,24 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
             }
             case 1: { //transaction
                 String desc = split.getTransaction().getDescription();
-                if(desc== null || desc.trim().length()==0) {
+                if (desc == null || desc.trim().length() == 0) {
                     return "";
                 }
                 return desc;
             }
             case 2: { //description
                 String desc = split.getDescription();
-                if(desc== null || desc.trim().length()==0) {
+                if (desc == null || desc.trim().length() == 0) {
                     return "";
                 }
                 return desc;
             }
             case 3: { // +
               if (split.getValue().isPositive()) {
-                  //TODO: use default-currency here
-                  if (account != null && !account.getCurrencyID().equals("EUR")) {
-                      return split.getValueFormatet();
-                  }
+//                  //T O D O: use default-currency here
+//                  if (account != null && !account.getCurrencyID().equals("EUR")) {
+//                      return split.getValueFormatet();
+//                  }
                return currencyFormat.format(split.getValue());
               } else {
                 return "";
@@ -175,9 +174,9 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
             }
             case 4: { // -
                 if (!split.getValue().isPositive()) {
-                    if (account != null && !account.getCurrencyID().equals("EUR")) {
-                        return split.getValueFormatet();
-                    }
+//                    if (account != null && !account.getCurrencyID().equals("EUR")) {
+//                        return split.getValueFormatet();
+//                    }
                  return currencyFormat.format(split.getValue());
                 } else {
                     return "";
@@ -191,46 +190,60 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
                 }
               }
             default:
-                throw new IllegalArgumentException("illegal columnIndex "+columnIndex);
+                throw new IllegalArgumentException("illegal columnIndex " + columnIndex);
             }
 
 
-        } catch(Exception x) {
+        } catch (Exception x) {
 
-        	String message = "Internal Error in "
-    			+ getClass().getName() + ":getValueAt(int rowIndex="+
-    			+ rowIndex
-    			+ ", int columnIndex="
-    			+ columnIndex
-    			+ ")!\n"
-    			+ "Exception of Type [" + x.getClass().getName() + "]\n"
-    			+ "\"" + x.getMessage() + "\"";
-        	StringWriter trace = new StringWriter();
-        	PrintWriter pw = new PrintWriter(trace);
-        	x.printStackTrace(pw);
-        	pw.close();
-        	message += trace.getBuffer();
+            String message = "Internal Error in "
+                + getClass().getName() + ":getValueAt(int rowIndex="
+                + rowIndex
+                + ", int columnIndex="
+                + columnIndex
+                + ")!\n"
+                + "Exception of Type [" + x.getClass().getName() + "]\n"
+                + "\"" + x.getMessage() + "\"";
+            StringWriter trace = new StringWriter();
+            PrintWriter pw = new PrintWriter(trace);
+            x.printStackTrace(pw);
+            pw.close();
+            message += trace.getBuffer();
 
-        	System.err.println(message);
-        	JOptionPane.showMessageDialog(null, message);
-        	return "ERROR";
+            System.err.println(message);
+            JOptionPane.showMessageDialog(null, message);
+            return "ERROR";
         }
     }
 
     /**
-     *
-     * @see javax.swing.table.TableModel#setValueAt(java.lang.Object, int, int)
+     * @param split the split whos account to use for the currency
      */
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        // TODO Auto-generated method stub
+    private void updateCurrencyFormat(final GnucashTransactionSplit split) {
+        currencyFormat = NumberFormat.getNumberInstance();
+        try {
+            if (split.getAccount().getCurrencyNameSpace().equalsIgnoreCase("ISO4217")) {
+                Currency currency = Currency.getInstance(split.getAccount().getCurrencyID());
+                currencyFormat = NumberFormat.getCurrencyInstance();
+                currencyFormat.setCurrency(currency);
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
 
     }
 
     /**
-     *
-     * @see javax.swing.table.TableModel#getColumnName(int)
+     * {@inheritDoc}
      */
-    public String getColumnName(int columnIndex) {
+    public String getColumnName(final int columnIndex) {
         return defaultColumnNames[columnIndex]; //TODO: l10n
     }
 
