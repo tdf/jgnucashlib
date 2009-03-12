@@ -19,23 +19,23 @@ import org.java.plugin.boot.ApplicationPlugin;
 import org.java.plugin.util.ExtendedProperties;
 
 /**
-*
-* created: 27.09.2008 <br/>
-*
-* Entry-Point for the JPF-Library we are using to support
-* plugins..
-* @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
-*/
+ *
+ * created: 27.09.2008 <br/>
+ *
+ * Entry-Point for the JPF-Library we are using to support
+ * plugins..
+ * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
+ */
 public class JPFEditorMain extends ApplicationPlugin {
 
-	/* (non-Javadoc)
-	 * @see org.java.plugin.boot.ApplicationPlugin#initApplication(org.java.plugin.util.ExtendedProperties, java.lang.String[])
-	 */
-	@Override
-	protected Application initApplication(final ExtendedProperties arg0, final String[] args)
-			throws Exception {
-		org.apache.log4j.BasicConfigurator.configure();
-		JGnucash ste = new JGnucash(getManager(), getDescriptor());
+    /* (non-Javadoc)
+     * @see org.java.plugin.boot.ApplicationPlugin#initApplication(org.java.plugin.util.ExtendedProperties, java.lang.String[])
+     */
+    @Override
+    protected Application initApplication(final ExtendedProperties arg0, final String[] args)
+            throws Exception {
+        org.apache.log4j.BasicConfigurator.configure();
+        JGnucash ste = new JGnucash(getManager(), getDescriptor());
         ste.setVisible(true);
         if (args.length > 0) {
             ste.loadFile(new File(args[0]));

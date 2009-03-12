@@ -254,6 +254,7 @@ public class WritableTransactionsPanel extends TransactionsPanel {
     protected ShowTransactionPanel getSingleWritableTransactionPanel() {
         if (mySingleWritableTransactionPanel == null) {
             mySingleWritableTransactionPanel = new ShowWritableTransactionPanel();
+            mySingleWritableTransactionPanel.setSplitActions(getSplitActions());
         }
         return mySingleWritableTransactionPanel;
     }

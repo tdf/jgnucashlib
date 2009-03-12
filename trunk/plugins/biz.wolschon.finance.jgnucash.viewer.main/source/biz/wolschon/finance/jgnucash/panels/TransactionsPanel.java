@@ -26,6 +26,7 @@ import javax.swing.JTable;
 import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableModel;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
@@ -34,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
+import biz.wolschon.finance.jgnucash.actions.TransactionSplitAction;
 import biz.wolschon.finance.jgnucash.swingModels.GnucashSimpleAccountTransactionsTableModel;
 import biz.wolschon.finance.jgnucash.swingModels.GnucashTransactionsSplitsTableModel;
 import biz.wolschon.finance.jgnucash.widgets.MultiLineToolTip;
@@ -54,15 +56,15 @@ import biz.wolschon.numbers.FixedPointNumber;
 public class TransactionsPanel extends JPanel {
 
 
-	/**
-	 * Automatically created logger for debug and error-output.
-	 */
-	private static final Log LOGGER = LogFactory.getLog(TransactionsPanel.class);
+    /**
+     * Automatically created logger for debug and error-output.
+     */
+    private static final Log LOGGER = LogFactory.getLog(TransactionsPanel.class);
 
-	/**
-	 * for serializing.
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * for serializing.
+     */
+    private static final long serialVersionUID = 1L;
 
     /**
      * A scrollpane for ${@link #transactionTable}}.
@@ -79,31 +81,36 @@ public class TransactionsPanel extends JPanel {
      */
     private JPanel selectionSummaryPanel = null;  //  @jve:decl-index=0:visual-constraint="159,213"
 
-	/**
-	 * A label showing summary-information about the selected transactions.
-	 */
-	private JLabel selectionSummaryLabel = null;
+    /**
+     * A label showing summary-information about the selected transactions.
+     */
+    private JLabel selectionSummaryLabel = null;
 
-	/**
-	 * A drop-down List to select the account the numbers
-	 * in ${@link #selectionSummaryLabel}} shall refer to.
-	 */
-	private JComboBox selectionSummaryAccountComboBox = null;
+    /**
+     * A drop-down List to select the account the numbers
+     * in ${@link #selectionSummaryLabel}} shall refer to.
+     */
+    private JComboBox selectionSummaryAccountComboBox = null;
 
-	/**
-	 * The model of our ${@link #transactionTable}.
-	 */
-	private GnucashTransactionsSplitsTableModel model;
+    /**
+     * The model of our ${@link #transactionTable}.
+     */
+    private GnucashTransactionsSplitsTableModel model;
 
-	/**
-	 * The panel to show a single transaction.
-	 */
+    /**
+     * The panel to show a single transaction.
+     */
     private ShowTransactionPanel mySingleTransactionPanel;
 
     /**
      * A JPanel showing either {@link #getSelectionSummaryPanel()} or {@link #getSingleTransactionPanel()}.
      */
     private JPanel mySummaryPanel;
+
+    /**
+     * The actions we have on Splits.
+     */
+    private Collection<TransactionSplitAction> mySplitActions;
 
     /**
      * @return Returns the model.
@@ -304,8 +311,9 @@ public class TransactionsPanel extends JPanel {
                            updateSelectionSummaryAccountList();
                            updateSelectionSummary();
                            if (getTransactionTable().getSelectedRowCount() == 1) {
-
                                GnucashTransactionSplit transactionSplit = model.getTransactionSplit(getTransactionTable().getSelectedRow());
+//                               setTransaction(transactionSplit.getTransaction());
+
                                getSingleTransactionPanel().setTransaction(transactionSplit.getTransaction());
                                getSingleTransactionPanel().setVisible(true);
                                getSelectionSummaryPanel().setVisible(false);
@@ -381,6 +389,7 @@ public class TransactionsPanel extends JPanel {
    protected ShowTransactionPanel getSingleTransactionPanel() {
        if (mySingleTransactionPanel == null) {
            mySingleTransactionPanel = new ShowTransactionPanel();
+           mySingleTransactionPanel.setSplitActions(getSplitActions());
        }
        return mySingleTransactionPanel;
    }
@@ -579,5 +588,42 @@ public class TransactionsPanel extends JPanel {
                    + "=" + currencyFormat.format(valueSumBalance));
        }
 
+   }
+
+   /**
+    * @param aTransaction the transactions to show in detail
+    */
+   public void setTransaction(final GnucashTransaction aTransaction) {
+       TableModel temp = getTransactionTable().getModel();
+       if (temp != null && temp instanceof GnucashTransactionsSplitsTableModel) {
+           GnucashTransactionsSplitsTableModel tblModel = (GnucashTransactionsSplitsTableModel) temp;
+           int max = tblModel.getRowCount();
+           for (int i = 0; i < max; i++) {
+               if (tblModel.getTransactionSplit(i).getTransaction().getId() == aTransaction.getId()) {
+                   getTransactionTable().getSelectionModel().setSelectionInterval(i, i);
+                   return;
+               }
+           }
+       }
+       getSingleTransactionPanel().setTransaction(aTransaction);
+       getSingleTransactionPanel().setVisible(true);
+       getSelectionSummaryPanel().setVisible(false);
+       getSummaryPanel().setPreferredSize(getSingleTransactionPanel().getPreferredSize());
+   }
+
+   /**
+    * @param aSplitActions the actions we shall offer on splits.
+    */
+   public void setSplitActions(final Collection<TransactionSplitAction> aSplitActions) {
+       LOGGER.info("TransactionsPanel is given " + (mySplitActions == null ? "no" : mySplitActions.size()) + " split-actions");
+       mySplitActions = aSplitActions;
+       getSingleTransactionPanel().setSplitActions(mySplitActions);
+   }
+
+   /**
+    * @return the actions we shall offer on splits.
+    */
+   protected Collection<TransactionSplitAction> getSplitActions() {
+       return mySplitActions;
    }
 }

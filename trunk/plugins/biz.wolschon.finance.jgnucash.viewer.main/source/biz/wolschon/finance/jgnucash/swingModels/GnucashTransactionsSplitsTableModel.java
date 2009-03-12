@@ -6,10 +6,9 @@ package biz.wolschon.finance.jgnucash.swingModels;
 
 
 
-import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
-
-
 import javax.swing.table.TableModel;
+
+import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 
 
 /**
@@ -23,19 +22,20 @@ import javax.swing.table.TableModel;
  * @author <a href="Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public interface GnucashTransactionsSplitsTableModel extends TableModel {
-	
-	/**
-	 * Get the number of transactons.
-	 * @return an integer >=0
-	 */
-	public int getRowCount();
-	
-	/**
+
+    /**
+     * Get the number of transactons.
+     * @return an integer >=0
+     */
+    int getRowCount();
+
+    /**
      * Get the TransactionsSplit at the given index.
      * Throws an exception if the index is invalid.
      * @param rowIndex the split to get
      * @return the split
      */
-    public GnucashTransactionSplit getTransactionSplit(final int rowIndex);
+    GnucashTransactionSplit getTransactionSplit(final int rowIndex);
+
 
 }

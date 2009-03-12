@@ -14,24 +14,37 @@
 package biz.wolschon.finance.jgnucash;
 
 
+import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -50,7 +63,11 @@ import org.java.plugin.boot.Application;
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl;
+import biz.wolschon.finance.jgnucash.actions.AccountAction;
 import biz.wolschon.finance.jgnucash.actions.FileBugInBrowserAction;
+import biz.wolschon.finance.jgnucash.actions.OpenAccountInNewTab;
+import biz.wolschon.finance.jgnucash.actions.OpenAccountInNewWindow;
+import biz.wolschon.finance.jgnucash.actions.TransactionSplitAction;
 import biz.wolschon.finance.jgnucash.panels.DebugLogPanel;
 import biz.wolschon.finance.jgnucash.panels.TaxReportPanel;
 import biz.wolschon.finance.jgnucash.panels.TransactionsPanel;
@@ -135,6 +152,21 @@ public class JGnucashViewer extends JFrame implements Application {
     private JMenuItem myFileBugMenuItem;
 
     /**
+     * Popup-menu on the account-tree.
+     */
+    private JPopupMenu myAccountTreePopupMenu;
+
+    /**
+     * The actions we have on accounts.
+     */
+    private Collection<AccountAction> myAccountActions;
+
+    /**
+     * The actions we have on Splits.
+     */
+    private Collection<TransactionSplitAction> mySplitActions;
+
+    /**
      * This method initializes
      * the GnucashViewer.
      */
@@ -175,10 +207,10 @@ public class JGnucashViewer extends JFrame implements Application {
             	String message = aRecord.getLevel() + " "
                        + "in " + aRecord.getSourceClassName() + ":" + aRecord.getSourceMethodName() + "(...) "
                        + aRecord.getMessage();
-            	if (aRecord.getLevel().intValue() < Level.WARNING.intValue()) {
-                	System.out.println(message);
+                if (aRecord.getLevel().intValue() < Level.WARNING.intValue()) {
+                    System.out.println(message);
                 } else {
-                	System.err.println(message);
+                    System.err.println(message);
                 }
 
                 if (aRecord.getLevel().intValue() < Level.SEVERE.intValue()) {
@@ -219,13 +251,26 @@ public class JGnucashViewer extends JFrame implements Application {
             } else {
                 accountsTree.setModel(new GnucashAccountsTreeModel(getModel()));
             }
+            accountsTree.addMouseListener(new MouseAdapter() {
+
+                /* (non-Javadoc)
+                 * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+                 */
+                @Override
+                public void mouseReleased(final MouseEvent aE) {
+                    if (aE.isPopupTrigger()) {
+                        getAccountTreePopupMenu().show((JComponent) aE.getSource(),
+                                aE.getX(), aE.getY());
+                    }
+                }
+            });
 
             accountsTree.addTreeSelectionListener(new TreeSelectionListener() {
                 public void valueChanged(final TreeSelectionEvent e) {
 
                     TreePath path = e.getPath();
                     if (path == null) {
-                    	setSelectedAccount(null);
+                        setSelectedAccount(null);
                     } else {
                      GnucashAccountsTreeModel.GnucashAccountTreeEntry entry
                      = (GnucashAccountsTreeModel.GnucashAccountTreeEntry)
@@ -261,6 +306,7 @@ public class JGnucashViewer extends JFrame implements Application {
     protected TransactionsPanel getTransactionsPanel() {
         if (transactionsPanel == null) {
             transactionsPanel = new TransactionsPanel();
+            transactionsPanel.setSplitActions(getSplitActions());
         }
         return transactionsPanel;
     }
@@ -574,12 +620,21 @@ public class JGnucashViewer extends JFrame implements Application {
     }
 
 
+    /**
+     * Exit the JVM.
+     */
     protected void doExit() {
         System.exit(0);
     }
+    /**
+     * @return the file we operate on.
+     */
     protected GnucashFile getModel() {
         return myModel;
     }
+    /**
+     * @param model the file we operate on.
+     */
     public void setModel(final GnucashFile model) {
         if (model == null) {
             throw new IllegalArgumentException(
@@ -588,8 +643,131 @@ public class JGnucashViewer extends JFrame implements Application {
         myModel = model;
     }
 
-	@Override
-	public void startApplication() throws Exception {
-		// do nothing
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void startApplication() throws Exception {
+        // do nothing
+    }
+
+    /**
+     * @return the accountTreePopupMenu
+     */
+    protected JPopupMenu getAccountTreePopupMenu() {
+        if (myAccountTreePopupMenu == null) {
+            myAccountTreePopupMenu = new JPopupMenu();
+            Collection<AccountAction> accountActions = getAccountActions();
+            for (AccountAction accountAction2 : accountActions) {
+                final AccountAction accountAction = accountAction2;
+                JMenuItem newMenuItem = new JMenuItem(new Action() {
+
+                    @Override
+                    public void addPropertyChangeListener(final PropertyChangeListener aListener) {
+                        accountAction.addPropertyChangeListener(aListener);
+                    }
+
+                    @Override
+                    public Object getValue(final String aKey) {
+                        return accountAction.getValue(aKey);
+                    }
+
+                    @Override
+                    public boolean isEnabled() {
+                        accountAction.setAccount(getSelectedAccount());
+                        return accountAction.isEnabled();
+                    }
+
+                    @Override
+                    public void putValue(final String aKey, final Object aValue) {
+                        accountAction.putValue(aKey, aValue);
+                    }
+
+                    @Override
+                    public void removePropertyChangeListener(final PropertyChangeListener aListener) {
+                        accountAction.removePropertyChangeListener(aListener);
+                    }
+
+                    @Override
+                    public void setEnabled(final boolean aB) {
+                        accountAction.setEnabled(aB);
+                    }
+
+                    @Override
+                    public void actionPerformed(final ActionEvent aE) {
+                        accountAction.setAccount(getSelectedAccount());
+                        accountAction.actionPerformed(aE);
+                    }
+
+                });
+                myAccountTreePopupMenu.add(newMenuItem);
+            }
+
+        }
+        return myAccountTreePopupMenu;
+    }
+
+    /**
+     * @return the {@link AccountAction} we have
+     */
+    private Collection<AccountAction> getAccountActions() {
+        if (myAccountActions == null) {
+            myAccountActions = new LinkedList<AccountAction>();
+            myAccountActions.add(new OpenAccountInNewTab(getJTabbedPane()));
+            myAccountActions.add(new OpenAccountInNewWindow());
+        }
+        return myAccountActions;
+    }
+
+    /**
+     * @return the {@link AccountAction} we have
+     */
+    protected Collection<TransactionSplitAction> getSplitActions() {
+        if (mySplitActions == null) {
+            mySplitActions = new LinkedList<TransactionSplitAction>();
+            mySplitActions.add(new OpenAccountInNewTab(getJTabbedPane()));
+            mySplitActions.add(new OpenAccountInNewWindow());
+        }
+        LOGGER.info("JGnucashViewer has " + (mySplitActions == null ? "no" : mySplitActions.size()) + " split-actions");
+        return mySplitActions;
+    }
+
+
+    /**
+     * @param account the account to show
+     */
+    public void openAccountInTab(final GnucashAccount account) {
+        final TransactionsPanel newTransactionsPanel = new TransactionsPanel();
+        newTransactionsPanel.setAccount(account);
+        String tabName = account.getName();
+        addTab(tabName, newTransactionsPanel);
+    }
+
+    /**
+     * @param tabName the label of the tab
+     * @param tabContent the content
+     */
+    private void addTab(final String tabName, final JComponent tabContent) {
+
+        final JTabbedPane tabbedPane = getJTabbedPane();
+        tabbedPane.addTab(null, tabContent);
+        JPanel tab = new JPanel(new BorderLayout(2, 0));
+        tab.setOpaque(false);
+        tab.add(new JLabel(tabName), BorderLayout.CENTER);
+        JButton closeButton = new JButton("X");
+        closeButton.setBorder(BorderFactory.createEmptyBorder());
+        final int size = 10;
+        closeButton.setPreferredSize(new Dimension(size, size));
+        closeButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent aE) {
+                tabbedPane.remove(tabContent);
+            }
+
+        });
+        tab.add(closeButton, BorderLayout.EAST);
+        tabbedPane.setTabComponentAt(tabbedPane.getTabCount() - 1, tab);
+    }
+
 } //  @jve:visual-info  decl-index=0 visual-constraint="20,27"

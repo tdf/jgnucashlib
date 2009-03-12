@@ -10,9 +10,18 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Collection;
 import java.util.Date;
 
+import javax.swing.Action;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -21,6 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
+import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
+import biz.wolschon.finance.jgnucash.actions.TransactionSplitAction;
 import biz.wolschon.finance.jgnucash.swingModels.GnucashTransactionsSplitsTableModel;
 
 /**
@@ -52,6 +63,12 @@ public class ShowTransactionPanel extends JPanel {
 
 
     /**
+     * The actions we have on Splits.
+     */
+    private Collection<TransactionSplitAction> mySplitActions;
+
+
+    /**
      * @param aTransaction The transaction we are showing.
      */
     public ShowTransactionPanel(final GnucashTransaction aTransaction) {
@@ -68,6 +85,67 @@ public class ShowTransactionPanel extends JPanel {
         this.setLayout(new BorderLayout());
         this.add(getTransactionTableScrollPane(), BorderLayout.CENTER);
         setTransaction(getTransaction());
+    }
+
+    /**
+     * @param row the row to create a popup for
+     * @return the popup-menu
+     */
+    protected JPopupMenu getCellPopupMenu(final int row) {
+        JPopupMenu menu = new JPopupMenu();
+        final GnucashTransactionSplit split =  model.getTransactionSplit(row - 1);
+        if (split != null) {
+            Collection<TransactionSplitAction> splitActions = getSplitActions();
+            for (TransactionSplitAction splitAction2 : splitActions) {
+                final TransactionSplitAction splitAction = splitAction2;
+                JMenuItem newMenuItem = new JMenuItem(new Action() {
+
+                    @Override
+                    public void addPropertyChangeListener(final PropertyChangeListener aListener) {
+                        splitAction.addPropertyChangeListener(aListener);
+                    }
+
+                    @Override
+                    public Object getValue(final String aKey) {
+                        return splitAction.getValue(aKey);
+                    }
+
+                    @Override
+                    public boolean isEnabled() {
+                        splitAction.setSplit(split);
+                        return splitAction.isEnabled();
+                    }
+
+                    @Override
+                    public void putValue(final String aKey, final Object aValue) {
+                        splitAction.putValue(aKey, aValue);
+                    }
+
+                    @Override
+                    public void removePropertyChangeListener(final PropertyChangeListener aListener) {
+                        splitAction.removePropertyChangeListener(aListener);
+                    }
+
+                    @Override
+                    public void setEnabled(final boolean aB) {
+                        splitAction.setEnabled(aB);
+                    }
+
+                    @Override
+                    public void actionPerformed(final ActionEvent aE) {
+                        splitAction.setSplit(split);
+                        splitAction.actionPerformed(aE);
+                    }
+
+                });
+                menu.add(newMenuItem);
+            }
+
+            LOGGER.info("showing popup-menu with " + splitActions.size() + " split-actions");
+        } else {
+            LOGGER.info("no split found, not showing popup-menu");
+        }
+        return menu;
     }
 
     /**
@@ -204,8 +282,47 @@ public class ShowTransactionPanel extends JPanel {
         if (transactionTable == null) {
             transactionTable = new JTable();
             setModel(new SingleTransactionTableModel());
+            transactionTable.addMouseListener(new MouseAdapter() {
 
+                /* (non-Javadoc)
+                 * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+                 */
+                @Override
+                public void mouseReleased(final MouseEvent aE) {
+                    try {
+                        if (aE.isPopupTrigger()) {
+                            int row = transactionTable.rowAtPoint(aE.getPoint());
+                            if (row > 0) {
+                                getCellPopupMenu(row).show((JComponent) aE.getSource(),
+                                        aE.getX(), aE.getY());
+                            }  else {
+                                LOGGER.info("no split-row below mouse found, not showing popup-menu");
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("error showing popup-menu", e);
+                    }
+                }
+            });
         }
         return transactionTable;
+    }
+
+
+    /**
+     * Used to populate context-menus.
+     * @param aSplitActions the actions we are to support on splits
+     */
+    public void setSplitActions(final Collection<TransactionSplitAction> aSplitActions) {
+        mySplitActions = aSplitActions;
+        LOGGER.info("ShowTransactionPanel is given " + (mySplitActions == null ? "no" : mySplitActions.size()) + " split-actions");
+    }
+
+    /**
+     * @return the splitActions
+     */
+    protected Collection<TransactionSplitAction> getSplitActions() {
+        LOGGER.info("ShowTransactionPanel has " + (mySplitActions == null ? "no" : mySplitActions.size()) + " split-actions");
+        return mySplitActions;
     }
 }

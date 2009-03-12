@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -54,10 +55,14 @@ import org.java.plugin.registry.Extension.Parameter;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileWritingImpl;
+import biz.wolschon.finance.jgnucash.actions.AccountAction;
 import biz.wolschon.finance.jgnucash.actions.ImportPluginMenuAction;
+import biz.wolschon.finance.jgnucash.actions.OpenAccountInNewTabWritable;
+import biz.wolschon.finance.jgnucash.actions.OpenAccountInNewWindowWritable;
 import biz.wolschon.finance.jgnucash.actions.OpenFilePluginMenuAction;
 import biz.wolschon.finance.jgnucash.actions.SaveAsFilePluginMenuAction;
 import biz.wolschon.finance.jgnucash.actions.ToolPluginMenuAction;
+import biz.wolschon.finance.jgnucash.actions.TransactionSplitAction;
 import biz.wolschon.finance.jgnucash.panels.TransactionsPanel;
 import biz.wolschon.finance.jgnucash.panels.WritableTransactionsPanel;
 
@@ -70,7 +75,6 @@ import biz.wolschon.finance.jgnucash.panels.WritableTransactionsPanel;
  * Extended version of JGnucashViewer that allows for
  * changing and writing the gnucash-file.
  * <br/>
- * TODO: use Jakarta commons logging
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public class JGnucash extends JGnucashViewer {
@@ -285,6 +289,7 @@ public class JGnucash extends JGnucashViewer {
     protected WritableTransactionsPanel getWritableTransactionsPanel() {
         if (writableTransactionsPanel == null) {
             writableTransactionsPanel = new WritableTransactionsPanel(getPluginManager(), getPluginDescriptor());
+            writableTransactionsPanel.setSplitActions(getSplitActions());
         }
         return writableTransactionsPanel;
     }
@@ -691,4 +696,23 @@ public class JGnucash extends JGnucashViewer {
         getFileSaveMenuItem().setEnabled(true);
         getImportMenu().setEnabled(true);
     }
+    /**
+     * The actions we have on Splits.
+     */
+    private Collection<TransactionSplitAction> myWritableSplitActions;
+
+    /**
+     * @return the {@link AccountAction} we have
+     */
+    @Override
+    protected Collection<TransactionSplitAction> getSplitActions() {
+        if (myWritableSplitActions == null) {
+            myWritableSplitActions = new LinkedList<TransactionSplitAction>();
+            myWritableSplitActions.add(new OpenAccountInNewTabWritable(getJTabbedPane()));
+            myWritableSplitActions.add(new OpenAccountInNewWindowWritable());
+        }
+        LOGGER.info("JGnucashEditor has " + (myWritableSplitActions == null ? "no" : myWritableSplitActions.size()) + " split-actions");
+        return myWritableSplitActions;
+    }
+
 }

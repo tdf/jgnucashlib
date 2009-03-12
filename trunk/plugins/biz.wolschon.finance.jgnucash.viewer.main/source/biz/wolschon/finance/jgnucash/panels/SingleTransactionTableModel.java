@@ -25,7 +25,7 @@ import biz.wolschon.finance.jgnucash.swingModels.GnucashTransactionsSplitsTableM
  * <b>TableModel to show and edit the splits and details of a single transaction.</b>
  * @author  <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
-class SingleTransactionTableModel  implements GnucashTransactionsSplitsTableModel {
+public class SingleTransactionTableModel  implements GnucashTransactionsSplitsTableModel {
 
 
     /**

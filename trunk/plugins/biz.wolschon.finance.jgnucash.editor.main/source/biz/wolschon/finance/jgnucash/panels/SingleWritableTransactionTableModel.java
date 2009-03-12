@@ -22,17 +22,17 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
-     *
-     * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
-     * Project: jgnucashLib-V1<br/>
-     * ShowWritableTransactionPanel.java<br/>
-     * created: 21.09.2008 07:29:43 <br/>
-     *<br/><br/>
-     * <b>Extended version of the {@link SingleTransactionTableModel} that
-     * allows changing the displayed transaction</b>
-     * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
-     */
-    class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
+ *
+ * (c) 2008 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
+ * Project: jgnucashLib-V1<br/>
+ * ShowWritableTransactionPanel.java<br/>
+ * created: 21.09.2008 07:29:43 <br/>
+ *<br/><br/>
+ * <b>Extended version of the {@link SingleTransactionTableModel} that
+ * allows changing the displayed transaction</b>
+ * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
+ */
+class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
 
         /**
          * ${@inheritDoc}.
