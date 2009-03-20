@@ -162,22 +162,22 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
                 return desc;
             }
             case 3: { // +
-              if (split.getValue().isPositive()) {
+              if (split.getQuantity().isPositive()) {
 //                  //T O D O: use default-currency here
 //                  if (account != null && !account.getCurrencyID().equals("EUR")) {
 //                      return split.getValueFormatet();
 //                  }
-               return currencyFormat.format(split.getValue());
+               return currencyFormat.format(split.getQuantity());
               } else {
                 return "";
             }
             }
             case 4: { // -
-                if (!split.getValue().isPositive()) {
+                if (!split.getQuantity().isPositive()) {
 //                    if (account != null && !account.getCurrencyID().equals("EUR")) {
 //                        return split.getValueFormatet();
 //                    }
-                 return currencyFormat.format(split.getValue());
+                 return currencyFormat.format(split.getQuantity());
                 } else {
                     return "";
                 }
