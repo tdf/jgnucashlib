@@ -80,14 +80,16 @@ test  - runs some tests
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
 		      fork="true"
-		      jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"/>
+		      />
+			<!-- jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" -->
 	</target>
 	<target name="runonly"  description="Runs application without building it">
 		<echo message="For debugging, please connect to port 1044"></echo>
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
 		      fork="true" 
-			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"/>
+/>
+		<!-- 			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" -->
 	</target>
 
 	<target name="check"
