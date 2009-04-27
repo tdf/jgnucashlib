@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="jGnucashLib-Viewer" default="help" basedir=".">
+<project name="jGnucashLib-Viewer" default="run" basedir=".">
+<!--<project name="jGnucashLib-Viewer" default="help" basedir=".">-->
 	<property name="app.name" value="jGnucashEditor" />
 	<property name="app.version" value="2.0.19" />
 
@@ -56,6 +57,9 @@ test  - runs some tests
 	
 <!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
+			
+<!-- the plugin for importing account-statements for wirecard credit-card-acceptance still has some hardcoded account-ids that you need to change -->
+	      <ant dir="plugins/biz.wolschon.finance.jgnucash.wirecard" target="${target}" />
 		</parallel>
 	</target>
 
@@ -80,6 +84,7 @@ test  - runs some tests
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
 		      fork="true"
+			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"
 		      />
 			<!-- jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" -->
 	</target>
