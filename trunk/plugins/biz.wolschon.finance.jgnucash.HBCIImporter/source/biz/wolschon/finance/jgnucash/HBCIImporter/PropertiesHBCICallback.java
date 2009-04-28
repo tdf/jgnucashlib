@@ -223,7 +223,11 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
         case NEED_HOST:
             //if (msg.equals("Hostname/IP-Adresse")) {
                 retData.setLength(0); // empty the buffer first
-                retData.append(getProperties().getProperty(HBCIImporter.SETTINGS_SERVER));
+                String property = getProperties().getProperty(HBCIImporter.SETTINGS_SERVER);
+                if (property.startsWith("https://")) {
+                    property = property.substring("https://".length());
+                }
+                retData.append(property);
                 return;
             //}
         case NEED_USERID:

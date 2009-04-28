@@ -570,7 +570,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             GnucashWritableTransaction transaction = getMyAccount()
                     .getWritableFile().createWritableTransaction();
             transaction.setDescription("Saldo: " + aValue + " "
-                    + saldoOKStr);
+                    + saldoOKStr + " (imported via HBCI on " + DateFormat.getDateInstance().format(new Date()) + ")");
             transaction.setDatePosted(timestamp);
             transaction.setCurrencyNameSpace(getMyAccount()
                     .getCurrencyNameSpace());

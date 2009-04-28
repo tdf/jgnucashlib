@@ -27,7 +27,7 @@
 		       value="biz.wolschon.finance.jgnucash.HBCIImporter.HBCIImporter"/>
      </extension>
      	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
-	           point-id="Importer" id="HBCIImporter">
+	           point-id="Importer" id="HBCISaldoImporter">
 	   <parameter id="name"
 	           value="HBCI/FinTS-Saldo"/>
 	   <parameter id="description"

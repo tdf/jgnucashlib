@@ -58,7 +58,8 @@ Use top-level project build file to build application.
 		       excludes=""
 		       target="1.6"
 		       debug="true"
-		       optimize="false">
+		       optimize="false"
+			   encoding="ISO8859-15">
 		</javac>
 		<copy todir="${plugin.home}/classes">
 			<fileset dir="${basedir}/source"

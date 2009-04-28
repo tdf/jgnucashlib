@@ -80,11 +80,11 @@ test  - runs some tests
 	</target>
 
 	<target name="run" depends="build" description="Runs application">
-		<echo message="For debugging, please connect to port 1044"></echo>
+		<echo message="For debugging, please connect to port 1045"></echo>
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
 		      fork="true"
-			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"
+			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1045"
 		      />
 			<!-- jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" -->
 	</target>
@@ -93,7 +93,9 @@ test  - runs some tests
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
 		      fork="true" 
-/>
+			 			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" 
+
+		/>
 		<!-- 			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" -->
 	</target>
 

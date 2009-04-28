@@ -324,7 +324,7 @@ public class WirecardImporter {
       auszahlung.setTransactionNumber("Settlement " + settlementID);
       auszahlung.setDescription("Wirecard - Auszahlung Kreditkartenakzeptanz");
       //targetAccount 192,20eur "Auszahlung"
-      //auszahlungAccount -57,62 "ÜBERTRAG/ÜBERWEISUNG..."
+      //auszahlungAccount -57,62 "UEBERTRAG/UEBERWEISUNG..."
       //auszahlungAccountUSD -179,20 -134,58 "179,20USD*0,7510=134,58EUR"
 
       GnucashWritableTransactionSplit targetSplit = auszahlung.createWritingSplit(aBook.getAccountByID(targetAccount));
@@ -414,7 +414,7 @@ public class WirecardImporter {
         lineMustBeNull(aBuffer);
 
         lineMustEqual(aBuffer, "Rechnung");
-        // Rechnungsnummer: Händler: Händlerkennung: Rechnungsperiode: Währung: Produkt: Acquirer: Brand:
+        // Rechnungsnummer: Haendler: Haendlerkennung: Rechnungsperiode: Waehrung: Produkt: Acquirer: Brand:
         // 0913XA794429    Wolschon Import WDB 0000003161ED9CA8 2009-03-16 - 2009-03-22 USD Credit Card Wirecard Bank Master Card, Visa
         line = aBuffer.readLine();
         if (!line.startsWith("Rechnungsnummer: ")) {
