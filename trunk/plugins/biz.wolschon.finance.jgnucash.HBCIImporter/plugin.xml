@@ -26,4 +26,15 @@
 	   <parameter id="class"
 		       value="biz.wolschon.finance.jgnucash.HBCIImporter.HBCIImporter"/>
      </extension>
+     	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+	           point-id="Importer" id="HBCIImporter">
+	   <parameter id="name"
+	           value="HBCI/FinTS-Saldo"/>
+	   <parameter id="description"
+	           value="Import daily saldo via HBCI-online-banking."/>
+	   <parameter id="hasFixedAccount"
+	           value="false"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.HBCIImporter.HBCISaldoImporter"/>
+     </extension>
 </plugin>

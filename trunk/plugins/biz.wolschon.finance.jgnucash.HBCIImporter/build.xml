@@ -11,6 +11,8 @@
 	<path id="plugin.classpath">
 		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
 		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
+		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.AbstractScriptablePlugin/classes/"/>
+		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.AbstractScriptableImporter/classes/"/>
 		<fileset dir="${basedir}/../../lib" includes="*.jar" />
 		<fileset dir="${basedir}/lib" includes="**/*.jar" />
 	</path>
@@ -38,9 +40,9 @@ Use top-level project build file to build application.
 		       classpathref="plugin.classpath"
 		       excludes=""
 		       target="1.6"
-			   encoding="ISO8859-15"
 		       debug="true"
-		       optimize="false">
+		       optimize="false"
+			   encoding="ISO8859-15">
 		</javac>
 		<copy todir="${plugin.home}/classes">
 			<fileset dir="${basedir}/source"
