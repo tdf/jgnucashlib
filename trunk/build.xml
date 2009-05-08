@@ -2,7 +2,7 @@
 <project name="jGnucashLib-Viewer" default="run" basedir=".">
 <!--<project name="jGnucashLib-Viewer" default="help" basedir=".">-->
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.19" />
+	<property name="app.version" value="2.0.20" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -80,11 +80,11 @@ test  - runs some tests
 	</target>
 
 	<target name="run" depends="build" description="Runs application">
-		<echo message="For debugging, please connect to port 1045"></echo>
+		<echo message="For debugging, please connect to port 1046"></echo>
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
 		      fork="true"
-			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1045"
+			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1046"
 		      />
 			<!-- jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" -->
 	</target>
