@@ -148,7 +148,7 @@ public class HBCISaldoImporter extends AbstractScriptableImporter {
             org.kapott.hbci.manager.HBCIUtils.init(null, null, callback);
 
             org.kapott.hbci.manager.HBCIUtils.setParam("log.loglevel.default",
-                    "" + org.kapott.hbci.manager.HBCIUtils.LOG_WARN);
+                    "" + org.kapott.hbci.manager.HBCIUtils.LOG_DEBUG2);
 
             org.kapott.hbci.manager.HBCIUtils.setParam("client.passport.default", "PinTan");
 

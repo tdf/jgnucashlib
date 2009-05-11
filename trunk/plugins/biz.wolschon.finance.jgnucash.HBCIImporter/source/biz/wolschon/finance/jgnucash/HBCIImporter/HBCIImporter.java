@@ -305,14 +305,19 @@ public class HBCIImporter extends AbstractScriptableImporter {
 
         // check the config-file
         boolean ok = askRequiresSettings(settings, defaultSettings, configfile,
-                aCurrentAccount);
+                aCurrentAccount, aWritableModel);
         // user-attributes
 
         if (ok) {
             // run the actual import.
             setMyProperties(settings);
-            setMyAccount(aWritableModel.getAccountByID(settings
-                            .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)));
+            GnucashWritableAccount account = aWritableModel.getAccountByID(settings
+                            .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT));
+            if (account == null) {
+                settings.remove(HBCIImporter.SETTINGS_GNUCASHACCOUNT);
+                return runImport(aWritableModel, aCurrentAccount);
+            }
+            setMyAccount(account);
             synchronizeAllTransactions();
         }
 
@@ -328,6 +333,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
      *            the file to save a changed config to
      * @param aCurrentAccount
      *            the currently selected account (may be null)
+     * @param aWritableModel
      * @return true if all is ready for action
      * @throws IOException
      *             if we cannot write the config-file
@@ -335,7 +341,8 @@ public class HBCIImporter extends AbstractScriptableImporter {
     private boolean askRequiresSettings(final Properties settings,
                                         final Properties defaultSettings,
                                         final File configfile,
-                                        final GnucashWritableAccount aCurrentAccount)
+                                        final GnucashWritableAccount aCurrentAccount,
+                                        final GnucashWritableFile aWritableModel)
                                                                                      throws IOException {
         if (settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT) == null
                 || settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
@@ -344,7 +351,9 @@ public class HBCIImporter extends AbstractScriptableImporter {
                         .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
                         .equalsIgnoreCase(
                                 defaultSettings
-                                        .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT))) {
+                                        .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT))
+                || aWritableModel.getAccountByID(settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
+                        .trim()) == null) {
             if (aCurrentAccount != null) {
                 // the user cannot be expected to write down account-ids,
                 // so for this one setting we are going to help him

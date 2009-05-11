@@ -49,11 +49,11 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
 
 
     /**
-     * @param myProperties The settings like account-number, pin-code, bank.url, ....
+     * @param aProperties The settings like account-number, pin-code, bank.url, ....
      */
-    public PropertiesHBCICallback(final Properties myProperties) {
+    public PropertiesHBCICallback(final Properties aProperties) {
         super();
-        this.setProperties(myProperties);
+        this.setProperties(aProperties);
     }
 
     /**
@@ -64,10 +64,10 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
     }
 
     /**
-     * @param myProperties The settings like account-number, pin-code, bank.url, ....
+     * @param aProperties The settings like account-number, pin-code, bank.url, ....
      */
-    public void setProperties(Properties myProperties) {
-        this.myProperties = myProperties;
+    public void setProperties(final Properties aProperties) {
+        myProperties = aProperties;
     }
 
 
@@ -159,16 +159,24 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
 
 
 
-    public void status(HBCIPassport passport, int statusTag, Object o) {
+    /**
+     * {@inheritDoc}
+     */
+    public void status(final HBCIPassport passport, final int statusTag, final Object o) {
         LOGGER.info("status: statusTag=" + statusTag + " o=" + o);
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void status(final HBCIPassport passport, final int statusTag, final Object[] o) {
         LOGGER.info("status: statusTag=" + statusTag + " o[]=" + Arrays.toString(o));
-
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void callback(final HBCIPassport passport,
             final int reason,
             final String msg,
@@ -259,7 +267,7 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
                 retData.append("999");
                 return;
             }
-            retData.setLength(3); // select whatever method comes first
+            retData.setLength("999".length()); // select whatever method comes first
 
         default:
             LOGGER.warn("callback: (unhandled) reason=" + reason + " msg=" + msg);
@@ -275,15 +283,30 @@ public class PropertiesHBCICallback implements org.kapott.hbci.callback.HBCICall
     /**
      * Log to log4j.
      * @see org.kapott.hbci.callback.HBCICallback#log(java.lang.String, int, java.util.Date, java.lang.StackTraceElement)
+     * @param msg the message to log
+     * @param level the log-level
+     * @param date timestamp
+     * @param trace optional stracktrace
      */
     public void log(final String msg, final int level, final Date date, final StackTraceElement trace) {
-        LOGGER.info(msg);
-
+        if (level <= org.kapott.hbci.manager.HBCIUtils.LOG_ERR) {
+            LOGGER.error(msg);
+        } else if (level <= org.kapott.hbci.manager.HBCIUtils.LOG_WARN) {
+            LOGGER.warn(msg);
+        } else {
+            LOGGER.info(msg);
+        }
     }
 
 
-    public boolean useThreadedCallback(HBCIPassport arg0, int arg1, String arg2,
-            int arg3, StringBuffer arg4) {
+    /**
+     * {@inheritDoc}
+     */
+    public boolean useThreadedCallback(final HBCIPassport arg0,
+                                       final int arg1,
+                                       final String arg2,
+                                       final int arg3,
+                                       final StringBuffer arg4) {
         // Auto-generated method stub
         return false;
     }
