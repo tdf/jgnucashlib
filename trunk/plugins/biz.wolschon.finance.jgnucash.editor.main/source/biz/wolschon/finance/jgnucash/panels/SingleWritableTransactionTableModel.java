@@ -222,31 +222,36 @@ class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
                  return;
              case 4: // retain the value in the "-" -field to sum both
                     try {
+                        String value = aValue.toString();
+                        if (value.trim().length() == 0) {
+                            value = "0";
+                        }
                         if (!split.getValue().isPositive()) {
+                            // we fill the "+"-field but there is already a value in the "-"-field -> add them
                             FixedPointNumber add = split.getQuantity();
                             FixedPointNumber addValue = split.getValue();
                             int index = aValue.toString().indexOf('(');
                             if (index != -1) {
                                 // format: "<value> (<quantity>)"
-                                split.setValue(aValue.toString().substring(0, index));
-                                split.setQuantity(aValue.toString().substring(index + 1).replace(')', ' '));
+                                split.setValue(value.toString().substring(0, index));
+                                split.setQuantity(value.toString().substring(index + 1).replace(')', ' '));
 
                                 split.setQuantity(add.add(split.getQuantity()));
                                 split.setValue(addValue.add(split.getValue()));
                             } else {
                                 // format: "<quantity>"
-                                split.setQuantity(aValue.toString());
+                                split.setQuantity(value.toString());
                                 split.setQuantity(add.add(split.getQuantity()));
                             }
                         } else {
-                            int index = aValue.toString().indexOf('(');
+                            int index = value.indexOf('(');
                              if (index != -1) {
                                  // format: "<value> (<quantity>)"
-                                 split.setValue(aValue.toString().substring(0, index));
-                                 split.setQuantity(aValue.toString().substring(index + 1).replace(')', ' '));
+                                 split.setValue(value.toString().substring(0, index));
+                                 split.setQuantity(value.toString().substring(index + 1).replace(')', ' '));
                              } else {
                                  // format: "<quantity>"
-                                 split.setQuantity(aValue.toString());
+                                 split.setQuantity(value.toString());
                              }
                         }
                         if (!split.getTransaction().isBalanced()) {
@@ -265,34 +270,39 @@ class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
                  return;
              case 5: // retain the value in the "+" -field to sum both
                     try {
+                        String value = aValue.toString();
+                        if (value.trim().length() == 0) {
+                            value = "0";
+                        }
+                        // we fill the "-"-field but there is already a value in the "+"-field -> add them
                         if (split.getValue().isPositive()) {
                             FixedPointNumber sub = split.getQuantity();
                             FixedPointNumber subValue = split.getValue();
-                            int index = aValue.toString().indexOf('(');
+                            int index = value.toString().indexOf('(');
                             if (index != -1) {
                                 // format: "<value> (<quantity>)"
-                                split.setValue(aValue.toString().substring(0, index));
-                                split.setQuantity(aValue.toString().substring(index + 1).replace(')', ' '));
+                                split.setValue(value.toString().substring(0, index));
+                                split.setQuantity(value.toString().substring(index + 1).replace(')', ' '));
 
-                                split.setQuantity(sub.subtract(split.getQuantity()));
-                                split.setValue(subValue.subtract(split.getValue()));
+                                split.setQuantity(sub.add(split.getQuantity()));
+                                split.setValue(subValue.add(split.getValue()));
                             } else {
                                 // format: "<quantity>"
-                                split.setQuantity(aValue.toString());
-                                split.setQuantity(sub.subtract(split.getQuantity()));
+                                split.setValue(value.toString());
+                                split.setQuantity(sub.add(split.getQuantity()));
                             }
                         } else {
-                            int index = aValue.toString().indexOf('(');
+                            int index = value.toString().indexOf('(');
                             if (index != -1) {
                                 // format: "<value> (<quantity>)"
-                                split.setValue(aValue.toString().substring(0, index));
-                                split.setQuantity(aValue.toString().substring(index + 1).replace(')', ' '));
-                                split.setQuantity(split.getQuantity().negate());
-                                split.setValue(split.getValue().negate());
+                                split.setValue(value.toString().substring(0, index));
+                                split.setQuantity(value.toString().substring(index + 1).replace(')', ' '));
+                                split.setQuantity(split.getQuantity());
+                                split.setValue(split.getValue());
                             } else {
                                 // format: "<quantity>"
-                                split.setQuantity(aValue.toString());
-                                split.setQuantity(split.getQuantity().negate());
+                                split.setValue(value.toString());
+                                split.setQuantity(split.getValue());
                             }
                         }
                         if (!split.getTransaction().isBalanced()) {
@@ -428,4 +438,4 @@ class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
            return aColumnIndex > 0; // date can only be edited on the transaction. Not on the splits.
        }
 
-    }
+}
