@@ -682,11 +682,14 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
     }
 
     /**
-     * @param myAccount
+     * @param aAccount
      *            The account we are importing to.
      */
-    public void setMyAccount(final GnucashWritableAccount myAccount) {
-        this.myAccount = myAccount;
+    public void setMyAccount(final GnucashWritableAccount aAccount) {
+        if (aAccount == null) {
+            throw new IllegalArgumentException("Null als Gnucash-Konto übergeben");
+        }
+        myAccount = aAccount;
     }
 
     /**
