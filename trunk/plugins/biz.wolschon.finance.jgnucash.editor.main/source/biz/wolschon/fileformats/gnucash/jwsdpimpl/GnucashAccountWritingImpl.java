@@ -157,7 +157,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         }
 
 
-        file.getRootElement().getGncBook().getGncAccount().add(account);
+        file.getRootElement().getGncBook().getBookElements().add(account);
         file.setModified(true);
         return account;
     }
@@ -174,7 +174,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         throw new IllegalStateException("cannot remove account while it contains child-accounts!");
     }
 
-     getWritableFile().getRootElement().getGncBook().getGncAccount().remove(getJwsdpPeer());
+     getWritableFile().getRootElement().getGncBook().getBookElements().remove(getJwsdpPeer());
      getWritableFile().removeAccount(this);
     }
 

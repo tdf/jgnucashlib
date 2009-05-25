@@ -609,10 +609,9 @@ public class JGnucashViewer extends JFrame implements Application {
             setTitle(TITLE);
             jSplitPane.setDividerLocation(0.5);
             return true;
-        } catch (IOException e1) {
+        } catch (Exception e1) {
            LOGGER.error("cannot load file '" + f.getAbsoluteFile() + "'", e1);
-        } catch (JAXBException e1) {
-            LOGGER.error("cannot load file '" + f.getAbsoluteFile() + "'", e1);
+           e1.printStackTrace();
         } finally {
             setCursor(Cursor.getDefaultCursor());
         }

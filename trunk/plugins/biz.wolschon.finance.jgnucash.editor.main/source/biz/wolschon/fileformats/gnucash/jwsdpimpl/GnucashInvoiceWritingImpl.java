@@ -35,14 +35,14 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable.TaxTableEntry;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncInvoiceType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotsType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActLotsType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActLotsType.GncLotType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncInvoiceType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncInvoiceType.InvoicePosttxnType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncInvoiceType.InvoicePosttxnType;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -156,7 +156,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
      * @return
      * @throws JAXBException
      */
-    protected static GncV2Type.GncBookType.GncGncInvoiceType createInvoice(final GnucashFileWritingImpl file,
+    protected static GncGncInvoiceType createInvoice(final GnucashFileWritingImpl file,
                                                                         final String internalID,
                                                                         final String invoiceNumber,
                                                                         final GnucashJob job,
@@ -168,30 +168,30 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
         ObjectFactory factory = file.getObjectFactory();
         String invoiceguid = (internalID==null?file.createGUID():internalID);
 
-        GncV2Type.GncBookType.GncGncInvoiceType invoice = file.createGncV2TypeGncBookTypeGncGncInvoiceType();
+        GncGncInvoiceType invoice = file.createGncGncInvoiceType();
         invoice.setInvoiceActive(1); //TODO: is this correct?
         invoice.setInvoiceBillingId(invoiceNumber);
         {
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoiceCurrencyType currency = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoiceCurrencyType();
+            GncGncInvoiceType.InvoiceCurrencyType currency = factory.createGncGncInvoiceTypeInvoiceCurrencyType();
             currency.setCmdtyId(file.getDefaultCurrencyID());
             currency.setCmdtySpace("ISO4217");
             invoice.setInvoiceCurrency(currency);
         }
         {
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoiceGuidType invoiceref = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoiceGuidType();
+            GncGncInvoiceType.InvoiceGuidType invoiceref = factory.createGncGncInvoiceTypeInvoiceGuidType();
             invoiceref.setType("guid");
             invoiceref.setValue(invoiceguid);
             invoice.setInvoiceGuid(invoiceref);
         }
         invoice.setInvoiceId(invoiceNumber);
         {
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoiceOpenedType opened = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoiceOpenedType();
+            GncGncInvoiceType.InvoiceOpenedType opened = factory.createGncGncInvoiceTypeInvoiceOpenedType();
             opened.setTsDate(OPENEDDATEFORMAT.format(new Date()));
             invoice.setInvoiceOpened(opened);
         }
         {
 
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoiceOwnerType jobref = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoiceOwnerType();
+            GncGncInvoiceType.InvoiceOwnerType jobref = factory.createGncGncInvoiceTypeInvoiceOwnerType();
             jobref.setOwnerType("gncJob");
             jobref.setVersion("2.0.0");
             {
@@ -203,18 +203,18 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
             invoice.setInvoiceOwner(jobref);
         }
         {
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoicePostaccType postacc = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoicePostaccType();
+            GncGncInvoiceType.InvoicePostaccType postacc = factory.createGncGncInvoiceTypeInvoicePostaccType();
             postacc.setType("guid");
             postacc.setValue(accountToTransferMoneyTo.getId());
             invoice.setInvoicePostacc(postacc);
         }
         {
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoicePostedType posted = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoicePostedType();
+            GncGncInvoiceType.InvoicePostedType posted = factory.createGncGncInvoiceTypeInvoicePostedType();
             posted.setTsDate(OPENEDDATEFORMAT.format(new Date()));
             invoice.setInvoicePosted(posted);
         }
         {
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoicePostlotType lotref = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoicePostlotType();
+            GncGncInvoiceType.InvoicePostlotType lotref = factory.createGncGncInvoiceTypeInvoicePostlotType();
             lotref.setType("guid");
 
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActLotsType.GncLotType newlot =
@@ -225,7 +225,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
             invoice.setInvoicePostlot(lotref);
         }
         {
-            GncV2Type.GncBookType.GncGncInvoiceType.InvoicePosttxnType transactionref = factory.createGncV2TypeGncBookTypeGncGncInvoiceTypeInvoicePosttxnType();
+            GncGncInvoiceType.InvoicePosttxnType transactionref = factory.createGncGncInvoiceTypeInvoicePosttxnType();
             transactionref.setType("guid");
             transactionref.setValue(createPostTransaction(file, factory, invoiceguid, dueDate).getId());
 
@@ -233,7 +233,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
         }
         invoice.setVersion("2.0.0");
 
-        file.getRootElement().getGncBook().getGncGncInvoice().add(invoice);
+        file.getRootElement().getGncBook().getBookElements().add(invoice);
         file.setModified(true);
         return invoice;
     }

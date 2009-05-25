@@ -42,7 +42,21 @@
               </xs:element>
               <xs:element name="book_slots" type="slots_type" minOccurs="0" maxOccurs="1"/>
               <xs:element ref="gnc_count-data" minOccurs="0" maxOccurs="unbounded"/>
-              
+
+              <xs:group ref="book_elements" minOccurs="0" maxOccurs="unbounded"/>
+
+            </xs:sequence>
+            <xs:attribute name="version" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+<!-- ============= elements in a gnc:book=================== -->
+
+<xs:group name="book_elements">
+ <xs:choice>
 <!-- ===================== support for currencies and funds that have price-quotes ===================== -->
               
               <xs:element name="gnc_commodity" minOccurs="0" maxOccurs="unbounded">
@@ -131,6 +145,9 @@
               
               <xs:element ref="gnc_account" minOccurs="0" maxOccurs="unbounded"/>
               <xs:element name="gnc_budget" type="gnc_budget" minOccurs="0" maxOccurs="unbounded"/>
+
+<!-- ===================== transactions and scheduled transactions ===================== -->
+
               <xs:element ref="gnc_transaction" minOccurs="0" maxOccurs="unbounded"/>
               <xs:element name="gnc_template-transactions" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
@@ -276,6 +293,9 @@
                   <xs:attribute name="version" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
+
+<!-- ===================== customers, jobs and invoices ===================== -->
+
               <xs:element name="gnc_GncCustomer" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:sequence>
@@ -332,6 +352,7 @@
                   <xs:attribute name="version" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
+
               <xs:element name="gnc_GncJob" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:sequence>
@@ -361,6 +382,7 @@
                   <xs:attribute name="version" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
+
               <xs:element name="gnc_GncTaxTable" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:sequence>
@@ -421,6 +443,7 @@
                   <xs:attribute name="version" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
+
               <xs:element name="gnc_GncInvoice" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:sequence>
@@ -574,13 +597,11 @@
                   <xs:attribute name="version" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
-            </xs:sequence>
-            <xs:attribute name="version" type="xs:string" use="required"/>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
+
+ </xs:choice>
+</xs:group>
+<!-- ===================== end of the possible elements of a gnc:book ===================== -->
+
   <xs:element name="gnc_account">
     <xs:complexType>
       <xs:sequence>

@@ -27,9 +27,8 @@ import org.apache.commons.logging.LogFactory;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableCustomer;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncCustomerType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncCustomerType;
 
 /**
  * created: 11.06.2005<br/>
@@ -90,7 +89,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
      */
     public void remove() {
         GncGncCustomerType peer = getJwsdpPeer();
-        (getFile()).getRootElement().getGncBook().getGncGncCustomer().remove(peer);
+        (getFile()).getRootElement().getGncBook().getBookElements().remove(peer);
         (getFile()).removeCustomer(this);
     }
 
@@ -124,7 +123,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
 
 
         {
-            GncV2Type.GncBookType.GncGncCustomerType.CustGuidType id = factory.createGncV2TypeGncBookTypeGncGncCustomerTypeCustGuidType();
+            GncGncCustomerType.CustGuidType id = factory.createGncGncCustomerTypeCustGuidType();
             id.setType("guid");
             id.setValue(guid);
             customer.setCustGuid(id);
@@ -161,7 +160,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         }
 
         {
-            GncV2Type.GncBookType.GncGncCustomerType.CustCurrencyType currency = factory.createGncV2TypeGncBookTypeGncGncCustomerTypeCustCurrencyType();
+            GncGncCustomerType.CustCurrencyType currency = factory.createGncGncCustomerTypeCustCurrencyType();
             currency.setCmdtyId(file.getDefaultCurrencyID());
             currency.setCmdtySpace("ISO4217");
             customer.setCustCurrency(currency);
@@ -170,7 +169,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         customer.setCustActive(1);
 
 
-        file.getRootElement().getGncBook().getGncGncCustomer().add(customer);
+        file.getRootElement().getGncBook().getBookElements().add(customer);
         file.setModified(true);
         return customer;
     }

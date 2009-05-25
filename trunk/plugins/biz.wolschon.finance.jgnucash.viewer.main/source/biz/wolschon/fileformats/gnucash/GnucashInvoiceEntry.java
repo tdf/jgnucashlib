@@ -23,7 +23,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  *
  */
-public interface GnucashInvoiceEntry extends Comparable {
+public interface GnucashInvoiceEntry extends Comparable<GnucashInvoiceEntry> {
 
     /**
      * @return the unique-id to identify this object with across name- and hirarchy-changes
@@ -54,8 +54,17 @@ public interface GnucashInvoiceEntry extends Comparable {
     String getPriceFormatet();
 
 
+    /**
+     * Possible value for {@link #getAction()}.
+     */
     String ACTION_JOB = "Auftrag";
+    /**
+     * Possible value for {@link #getAction()}.
+     */
     String ACTION_MATERIAL = "Material";
+    /**
+     * Possible value for {@link #getAction()}.
+     */
     String ACTION_HOURS = "Stunden";
 
     /**
@@ -73,6 +82,7 @@ public interface GnucashInvoiceEntry extends Comparable {
      * @return the number of items of price ${@link #getPrice()} and type ${@link #getAction()}.
      * @deprecated use ${@link #getQuantityFormated()}
      */
+    @Deprecated
     String getQuantityFormatet();
     /**
      * @return the number of items of price ${@link #getPrice()} and type ${@link #getAction()}.

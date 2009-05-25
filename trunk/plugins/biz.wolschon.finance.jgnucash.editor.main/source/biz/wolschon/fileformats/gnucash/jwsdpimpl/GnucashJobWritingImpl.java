@@ -26,10 +26,9 @@ import biz.wolschon.fileformats.gnucash.GnucashCustomer;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashWritableJob;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncJobType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.OwnerIdType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncJobType;
 
 /**
  * created: 11.06.2006<br/>
@@ -55,7 +54,7 @@ public class GnucashJobWritingImpl extends GnucashJobImpl implements
             throw new IllegalStateException("cannot remove a job that has invoices!");
         }
         GnucashFileWritingImpl writableFile = (GnucashFileWritingImpl) getFile();
-        writableFile.getRootElement().getGncBook().getGncGncJob().remove(getJwsdpPeer());
+        writableFile.getRootElement().getGncBook().getBookElements().remove(getJwsdpPeer());
         writableFile.removeJob(this);
     }
     /**
@@ -85,6 +84,7 @@ public class GnucashJobWritingImpl extends GnucashJobImpl implements
      * @param guid the internal id to use. May be null to generate an ID.
      * @return the jaxb-job
      */
+    @SuppressWarnings("unchecked")
     private static GncGncJobType createJob(
             final GnucashFileWritingImpl file,
             final String guid,
@@ -103,7 +103,7 @@ public class GnucashJobWritingImpl extends GnucashJobImpl implements
 
 
 
-        GncV2Type.GncBookType.GncGncJobType job = file.createGncGncJobType();
+        GncGncJobType job = file.createGncGncJobType();
 
         job.setJobActive(1);
         job.setJobId("");
@@ -111,14 +111,14 @@ public class GnucashJobWritingImpl extends GnucashJobImpl implements
         job.setVersion("2.0.0");
 
         {
-            GncV2Type.GncBookType.GncGncJobType.JobGuidType id = factory.createGncV2TypeGncBookTypeGncGncJobTypeJobGuidType();
+            GncGncJobType.JobGuidType id = factory.createGncGncJobTypeJobGuidType();
             id.setType("guid");
             id.setValue((guid==null?file.createGUID():guid));
             job.setJobGuid(id);
         }
 
         {
-            GncV2Type.GncBookType.GncGncJobType.JobOwnerType owner = factory.createGncV2TypeGncBookTypeGncGncJobTypeJobOwnerType();
+            GncGncJobType.JobOwnerType owner = factory.createGncGncJobTypeJobOwnerType();
             owner.setOwnerType("gncCustomer");
 
             OwnerIdType ownerid = factory.createOwnerIdType();
@@ -131,7 +131,7 @@ public class GnucashJobWritingImpl extends GnucashJobImpl implements
         }
 
 
-        file.getRootElement().getGncBook().getGncGncJob().add(job);
+        file.getRootElement().getGncBook().getBookElements().add(job);
         file.setModified(true);
         return job;
 
@@ -200,13 +200,15 @@ public class GnucashJobWritingImpl extends GnucashJobImpl implements
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableJob#setJobNumber(java.lang.String)
      */
     public void setJobNumber(final String jobId) {
-        if (jobId == null || jobId.trim().length() == 0)
+        if (jobId == null || jobId.trim().length() == 0) {
             throw new IllegalArgumentException("null or empty job-number given!");
+        }
         GnucashJob otherJob =  getWritingFile().getJobByNumber(jobId);
         if (otherJob != null
                 &&
-           !otherJob.getId().equals(getId()))
+           !otherJob.getId().equals(getId())) {
             throw new IllegalArgumentException("another job (id='" + otherJob.getId() + "' already exists with given jobNumber '" + jobId + "')");
+        }
 
 
 
@@ -229,8 +231,9 @@ public class GnucashJobWritingImpl extends GnucashJobImpl implements
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableJob#setName(java.lang.String)
      */
     public void setName(final String jobName) {
-        if (jobName == null || jobName.trim().length() == 0)
+        if (jobName == null || jobName.trim().length() == 0) {
             throw new IllegalArgumentException("null or empty job-name given!");
+        }
 
 
         Object old = getJwsdpPeer().getJobName();

@@ -13,17 +13,15 @@
 package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
-
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashCustomer;
@@ -33,7 +31,7 @@ import biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry;
 import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncInvoiceType;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -46,16 +44,14 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
 
 
     /**
-     *
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getCustomer()
+     * {@inheritDoc}
      */
     public GnucashCustomer getCustomer() {
         return getJob().getCustomer();
     }
     /**
      * @return getAmmountWithoutTaxes().isMoreThen(getAmmountPayedWithoutTaxes())
-     * 
+     *
      * @throws JAXBException if we have issues with the XML-backend
      *
      * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#isNotFullyPayed()
@@ -74,10 +70,10 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
     /**
      * The transactions that are paying for this invoice.
      */
-    private Collection<GnucashTransaction> payingTransactions = new LinkedList<GnucashTransaction>();
+    private final Collection<GnucashTransaction> payingTransactions = new LinkedList<GnucashTransaction>();
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#addPayingTransaction(biz.wolschon.fileformats.gnucash.GnucashTransaction)
+     * {@inheritDoc}
      */
     public void addPayingTransaction(final GnucashTransactionSplit trans) {
 
@@ -92,7 +88,7 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#addTransaction(GnucashTransaction)
+     * {@inheritDoc}
      */
     public void addTransaction(final GnucashTransaction trans) {
         //
@@ -101,18 +97,18 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
 
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getPayingTransaction()
+     * {@inheritDoc}
      */
     public Collection<GnucashTransaction> getPayingTransactions() {
         return payingTransactions;
     }
-    
+
     /**
-	 * @return
-	 */
-	public String getAccountIDToTransferMoneyTo() {
-		return jwsdpPeer.getInvoicePostacc().getValue();
-	}
+     * {@inheritDoc}
+     */
+    public String getAccountIDToTransferMoneyTo() {
+        return jwsdpPeer.getInvoicePostacc().getValue();
+    }
 
     /**
      * @return the transaction that transferes the money from the customer to
@@ -121,28 +117,27 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
      */
     public GnucashTransaction getPostTransaction() {
      if (jwsdpPeer.getInvoicePosttxn() == null) {
-     	return null;//unposted invoices have no postlot
+          return null; //unposted invoices have no postlot
      }
      return file.getTransactionByID(jwsdpPeer.getInvoicePosttxn().getValue());
     }
 
     /**
-     *
-     * @throws JAXBException if we have issues with the XML-backend
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getAmmountPayedWithTaxes()
+     * {@inheritDoc}
      */
     public FixedPointNumber getAmmountPayedWithTaxes() throws JAXBException {
 
         FixedPointNumber takenFromReceivableAccount = new FixedPointNumber();
         for (GnucashTransaction transaction : getPayingTransactions()) {
-            
+
             for (GnucashTransactionSplit split : transaction.getSplits()) {
-                
+
                 if (split.getAccount().getType().equals(GnucashAccount.ACCOUNTTYPE_RECEIVABLE)
                         &&
                   !split.getValue().isPositive()
-                   )
+                   ) {
                     takenFromReceivableAccount.subtract(split.getValue());
+                }
             }
 
         }
@@ -154,11 +149,7 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
     }
 
     /**
-     *
-     *
-     * 
-     * @throws JAXBException if we have issues with the XML-backend
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getAmmountUnPayed()
+     * {@inheritDoc}
      */
     public FixedPointNumber getAmmountUnPayed() throws JAXBException {
 
@@ -172,15 +163,14 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
 
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getAmmountWithoutTaxes()
+     * {@inheritDoc}
      */
     public FixedPointNumber getAmmountWithoutTaxes() {
 
         FixedPointNumber retval = new FixedPointNumber();
 
-        for (Iterator iter = getEntries().iterator(); iter.hasNext();) {
-            GnucashInvoiceEntry entry = (GnucashInvoiceEntry) iter.next();
+        for (Object element : getEntries()) {
+            GnucashInvoiceEntry entry = (GnucashInvoiceEntry) element;
             retval.add(entry.getSumExclTaxes());
         }
 
@@ -189,43 +179,41 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
 
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getTaxes()
+     * {@inheritDoc}
      */
     public TaxedSum[] getTaxes() {
 
-        List taxedSums = new LinkedList();
+        List<TaxedSum> taxedSums = new LinkedList<TaxedSum>();
 
         invoiceentries:
-            for (Iterator iter = getEntries().iterator(); iter.hasNext();) {
-            GnucashInvoiceEntry entry = (GnucashInvoiceEntry) iter.next();
+            for (Object element : getEntries()) {
+                GnucashInvoiceEntry entry = (GnucashInvoiceEntry) element;
 
-            FixedPointNumber taxpercent = entry.getApplicableTaxPercend();
+                FixedPointNumber taxpercent = entry.getApplicableTaxPercend();
 
-            for (Iterator iterator = taxedSums.iterator(); iterator.hasNext();) {
-                TaxedSum taxedSum = (TaxedSum) iterator.next();
-                if (taxedSum.getTaxpercent().equals(taxpercent)) {
-                    taxedSum.setTaxsum(
-                            taxedSum.getTaxsum().add(
-                                    entry.getSumInclTaxes().subtract(entry.getSumExclTaxes())
-                                                    )
-                                    );
-                    continue invoiceentries;
+                for (TaxedSum taxedSum2 : taxedSums) {
+                    TaxedSum taxedSum = taxedSum2;
+                    if (taxedSum.getTaxpercent().equals(taxpercent)) {
+                        taxedSum.setTaxsum(
+                                taxedSum.getTaxsum().add(
+                                        entry.getSumInclTaxes().subtract(entry.getSumExclTaxes())
+                                )
+                        );
+                        continue invoiceentries;
+                    }
                 }
+
+                TaxedSum taxedSum = new TaxedSum(taxpercent, entry.getSumInclTaxes().subtract(entry.getSumExclTaxes()));
+                taxedSums.add(taxedSum);
+
             }
 
-            TaxedSum taxedSum = new TaxedSum(taxpercent, entry.getSumInclTaxes().subtract(entry.getSumExclTaxes()));
-            taxedSums.add(taxedSum);
-
-        }
-
-        return (TaxedSum[]) taxedSums.toArray(new TaxedSum[taxedSums.size()]);
+        return taxedSums.toArray(new TaxedSum[taxedSums.size()]);
 
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getAmmountWithTaxes()
+     * {@inheritDoc}
      */
     public FixedPointNumber getAmmountWithTaxes() {
 
@@ -236,8 +224,8 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
             //      multiply the sums with the tax% to be calculatng
             //      correctly
 
-            for (Iterator iter = getEntries().iterator(); iter.hasNext();) {
-                GnucashInvoiceEntry entry = (GnucashInvoiceEntry) iter.next();
+            for (Object element : getEntries()) {
+                GnucashInvoiceEntry entry = (GnucashInvoiceEntry) element;
                 retval.add(entry.getSumInclTaxes());
             }
 
@@ -247,38 +235,35 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
 
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getJob()
+     * {@inheritDoc}
      */
     public GnucashJob getJob() {
         return file.getJobByID(getJobID());
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getJobID()
+     * {@inheritDoc}
      */
     public String getJobID() {
-        return jwsdpPeer.getInvoiceOwner().getOwnerId().getValue();
+        return getJwsdpPeer().getInvoiceOwner().getOwnerId().getValue();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getJobType()
+     * {@inheritDoc}
      */
     public String getJobType() {
-        return jwsdpPeer.getInvoiceOwner().getOwnerType();
+        return getJwsdpPeer().getInvoiceOwner().getOwnerType();
     }
 
     /**
      * the JWSDP-object we are facading.
      */
-    protected GncV2Type.GncBookType.GncGncInvoiceType jwsdpPeer;
+    protected GncGncInvoiceType jwsdpPeer;
 
     /**
      * The file we belong to.
      */
-    private GnucashFile file;
+    private final GnucashFile file;
 
 
     /**
@@ -287,45 +272,40 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
      * @param gncFile the file to register under
      */
     public GnucashInvoiceImpl(
-            final GncV2Type.GncBookType.GncGncInvoiceType peer,
+            final GncGncInvoiceType peer,
             final GnucashFile gncFile) {
         super();
-        this.jwsdpPeer = peer;
-        this.file = gncFile;
+        jwsdpPeer = peer;
+        file = gncFile;
 
     }
+
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getId()
+     * {@inheritDoc}
      */
     public String getId() {
-        return jwsdpPeer.getInvoiceGuid().getValue();
+        return getJwsdpPeer().getInvoiceGuid().getValue();
     }
 
     /**
-     *
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getLotID()
+     * {@inheritDoc}
      */
     public String getLotID() {
-    	if (jwsdpPeer.getInvoicePostlot() == null) {
-    		return null;//unposted invoices have no postlot
-    	}
-        return jwsdpPeer.getInvoicePostlot().getValue();
+       if (getJwsdpPeer().getInvoicePostlot() == null) {
+          return null; //unposted invoices have no postlot
+       }
+        return getJwsdpPeer().getInvoicePostlot().getValue();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getDescription()
+     * {@inheritDoc}
      */
     public String getDescription() {
-        // TODO Auto-generated method stub
-        return null;
+        return getJwsdpPeer().getInvoiceNotes();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getFile()
+     * {@inheritDoc}
      */
     public GnucashFile getFile() {
         return file;
@@ -338,15 +318,14 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
     protected Collection<GnucashInvoiceEntry> entries = new HashSet<GnucashInvoiceEntry>();
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getEntries()
+     * {@inheritDoc}
      */
     public Collection<GnucashInvoiceEntry> getEntries() {
         return entries;
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getEntryById(java.lang.String)
+     * {@inheritDoc}
      */
     public GnucashInvoiceEntry getEntryById(final String id) {
         for (GnucashInvoiceEntry element : getEntries()) {
@@ -368,13 +347,13 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
      * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getDateOpened()
      */
     protected Date dateOpened;
+
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getDateOpened()
+     * {@inheritDoc}
      */
     public Date getDateOpened() {
         if (dateOpened == null) {
-            String s = jwsdpPeer.getInvoiceOpened().getTsDate();
+            String s = getJwsdpPeer().getInvoiceOpened().getTsDate();
             try {
                 //"2001-09-18 00:00:00 +0200"
                 dateOpened = DATEOPENEDFORMAT.parse(s);
@@ -411,15 +390,14 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getDateOpenedFormatet()
+     * {@inheritDoc}
      */
     public String getDateOpenedFormatet() {
      return getDateFormat().format(getDateOpened());
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getDatePostedFormatet()
+     * {@inheritDoc}
      */
     public String getDatePostedFormatet() {
         return getDateFormat().format(getDatePosted());
@@ -436,13 +414,13 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
      * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getDatePosted()
      */
     protected Date datePosted;
+
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getDatePosted()
+     * {@inheritDoc}
      */
     public Date getDatePosted() {
         if (datePosted == null) {
-            String s = jwsdpPeer.getInvoiceOpened().getTsDate();
+            String s = getJwsdpPeer().getInvoiceOpened().getTsDate();
             try {
                 //"2001-09-18 00:00:00 +0200"
                 datePosted = DATEPOSTEDFORMAT.parse(s);
@@ -460,20 +438,19 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getInvoiceNumber()
+     * {@inheritDoc}
      */
     public String getInvoiceNumber() {
-        return jwsdpPeer.getInvoiceBillingId();
+        return getJwsdpPeer().getInvoiceBillingId();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#addEntry(biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry)
+     * {@inheritDoc}
      */
     public void addEntry(final GnucashInvoiceEntry entry) {
-        if (!entries.contains(entry))
+        if (!entries.contains(entry)) {
             entries.add(entry);
+        }
     }
 
     /**
@@ -481,14 +458,13 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
      * and secondarily on the date it was entered.
      *
      * @see java.lang.Comparable#compareTo(java.lang.Object)
+     * @param o invoice to compare with
+     * @return -1 0 or 1
      */
-    public int compareTo(final Object o) {
-        if (!(o instanceof GnucashInvoice)) {
-            return 0;
-        }
+    public int compareTo(final GnucashInvoice o) {
 
 
-        GnucashInvoice other = (GnucashInvoice) o;
+        GnucashInvoice other = o;
 
         try {
             int compare = other.getDatePosted().compareTo(getDatePosted());
@@ -507,14 +483,14 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
      *
      * @return The JWSDP-Object we are wrapping
      */
-    public GncV2Type.GncBookType.GncGncInvoiceType getJwsdpPeer() {
+    public GncGncInvoiceType getJwsdpPeer() {
         return jwsdpPeer;
     }
 
     /**
-     *
-     * @see java.lang.Object#toString()
+     * {@inheritDoc}
      */
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("[GnucashInvoiceImpl:");
@@ -558,24 +534,24 @@ public class GnucashInvoiceImpl implements GnucashInvoice {
    }
 
 
-    /**
-     * @throws JAXBException if we have issues with the XML-backend
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getAmmountUnPayedFormatet()
-     */
-    public String getAmmountUnPayedFormatet() throws JAXBException {
+   /**
+    * {@inheritDoc}
+    */
+   public String getAmmountUnPayedFormatet() throws JAXBException {
         return this.getCurrencyFormat().format(this.getAmmountUnPayed());
     }
-    /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getAmmountWithTaxesFormatet()
-     */
-    public String getAmmountWithTaxesFormatet() {
-        return this.getCurrencyFormat().format(this.getAmmountWithTaxes());
-    }
 
-    /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoice#getAmmountWithoutTaxesFormatet()
-     */
-    public String getAmmountWithoutTaxesFormatet() {
-        return this.getCurrencyFormat().format(this.getAmmountWithoutTaxes());
-    }
+   /**
+    * {@inheritDoc}
+    */
+   public String getAmmountWithTaxesFormatet() {
+       return this.getCurrencyFormat().format(this.getAmmountWithTaxes());
+   }
+
+   /**
+    * {@inheritDoc}
+    */
+   public String getAmmountWithoutTaxesFormatet() {
+       return this.getCurrencyFormat().format(this.getAmmountWithoutTaxes());
+   }
 }

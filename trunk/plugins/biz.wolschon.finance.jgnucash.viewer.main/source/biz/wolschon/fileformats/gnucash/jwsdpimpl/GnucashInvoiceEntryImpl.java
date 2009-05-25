@@ -13,15 +13,15 @@
 package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 
 import javax.xml.bind.JAXBException;
 
 import biz.wolschon.fileformats.gnucash.GnucashInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncEntryType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.numbers.FixedPointNumber;
 
@@ -43,7 +43,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
     /**
      * the JWSDP-object we are facading.
      */
-    private GncV2Type.GncBookType.GncGncEntryType jwsdpPeer;
+    private final GncGncEntryType jwsdpPeer;
 
 
 
@@ -54,10 +54,10 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      */
     public GnucashInvoiceEntryImpl(
             final GnucashInvoice invoice,
-            final GncV2Type.GncBookType.GncGncEntryType peer) throws JAXBException {
+            final GncGncEntryType peer) throws JAXBException {
         super((peer.getEntrySlots() == null) ? new ObjectFactory().createSlotsType() : peer.getEntrySlots(), invoice.getFile());
-        this.myInvoice = invoice;
-        this.jwsdpPeer = peer;
+        myInvoice = invoice;
+        jwsdpPeer = peer;
 
         getInvoice().addEntry(this);
 
@@ -70,31 +70,30 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      * @see #jwsdpPeer
      */
     public GnucashInvoiceEntryImpl(
-            final GncV2Type.GncBookType.GncGncEntryType peer,
+            final GncGncEntryType peer,
             final GnucashFileImpl gncFile) throws JAXBException {
         super((peer.getEntrySlots() == null) ? new ObjectFactory().createSlotsType() : peer.getEntrySlots(), gncFile);
-        this.jwsdpPeer = peer;
+        jwsdpPeer = peer;
 
         GnucashInvoice invoice = getInvoice();
-        if (invoice == null)
+        if (invoice == null) {
             throw new IllegalStateException("no invoice with id '"
                              + getInvoiceID()
                              + "' for invoiceEntry with id '"
                              + getId()
                              + "'");
+        }
         invoice.addEntry(this);
     }
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getId()
+     * {@inheritDoc}
      */
     public String getId() {
         return jwsdpPeer.getEntryGuid().getValue();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getInvoiceID()
+     * {@inheritDoc}
      */
     public String getInvoiceID() {
         return jwsdpPeer.getEntryInvoice().getValue();
@@ -107,18 +106,18 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
     private GnucashInvoice myInvoice;
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getInvoice()
+     * {@inheritDoc}
      */
     public GnucashInvoice getInvoice() {
         if (myInvoice == null) {
             myInvoice = getFile().getInvoiceByID(getInvoiceID());
-            if (myInvoice == null)
+            if (myInvoice == null) {
                 throw new IllegalStateException("no invoice with id '"
                                  + getInvoiceID()
                                  + "' for invoiceEntry with id '"
                                  + getId()
                                  + "'");
+            }
         }
         return myInvoice;
     }
@@ -128,7 +127,14 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      * The taxtable in the gnucash xml-file.
      * It defines what sales-tax-rates are known.
      */
-    protected GnucashTaxTable myTaxtable;
+    private GnucashTaxTable myTaxtable;
+
+    /**
+     * @param aTaxtable the taxtable to set
+     */
+    protected void setTaxtable(final GnucashTaxTable aTaxtable) {
+        myTaxtable = aTaxtable;
+    }
 
     /**
      *
@@ -136,7 +142,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      *         It defines what sales-tax-rates are known.
      */
     protected GnucashTaxTable getTaxTable() {
-        if (this.myTaxtable == null) {
+        if (myTaxtable == null) {
             String taxTableId = jwsdpPeer.getEntryITaxtable().getValue();
             if (taxTableId == null) {
                 System.err.println("Invoice with id '"
@@ -144,9 +150,9 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
                          + "' is taxable but has empty id for the taxtable");
                 return null;
             }
-            this.myTaxtable = getFile().getTaxTableByID(taxTableId);
+            myTaxtable = getFile().getTaxTableByID(taxTableId);
 
-            if (this.myTaxtable == null) {
+            if (myTaxtable == null) {
                 System.err.println("Invoice with id '"
                                  + getId()
                                  + "' is taxable but has an unknown "
@@ -156,7 +162,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
             }
         }
 
-        return this.myTaxtable;
+        return myTaxtable;
     }
 
     /**
@@ -164,8 +170,9 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      */
     public String getApplicableTaxPercendFormatet() {
         FixedPointNumber applicableTaxPercend = getApplicableTaxPercend();
-        if (applicableTaxPercend == null)
+        if (applicableTaxPercend == null) {
             return this.getPercentFormat().format(0);
+        }
         return this.getPercentFormat().format(applicableTaxPercend);
     }
 
@@ -199,7 +206,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
         }
 
 
-        GnucashTaxTable.TaxTableEntry taxTableEntry = (GnucashTaxTable.TaxTableEntry) taxtable.getEntries().iterator().next();
+        GnucashTaxTable.TaxTableEntry taxTableEntry = taxtable.getEntries().iterator().next();
         if (!taxTableEntry.getType().equals(GnucashTaxTable.TaxTableEntry.TYPE_PERCENT)) {
             System.err.println("Invoice with id '"
                               + getId()
@@ -302,15 +309,16 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
         return new FixedPointNumber(val);
     }
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getQuantity()
+     * {@inheritDoc}
      * @deprecated use ${@link #getQuantityFormated()}
      */
+    @Deprecated
     public String getQuantityFormatet() {
         return getNumberFormat().format(getQuantity());
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getQuantity()
+     * {@inheritDoc}
      */
     public String getQuantityFormated() {
         return getNumberFormat().format(getQuantity());
@@ -318,7 +326,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
 
     /**
      *
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getDescription()
+     * {@inheritDoc}
      */
     public String getDescription() {
         if (getJwsdpPeer().getEntryDescription() == null) {
@@ -330,12 +338,11 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
 
 
     /**
-     *
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     * {@inheritDoc}
      */
-    public int compareTo(final Object o) {
+    public int compareTo(final GnucashInvoiceEntry o) {
         try {
-            GnucashInvoiceEntry otherSplit = (GnucashInvoiceEntry) o;
+            GnucashInvoiceEntry otherSplit = o;
             GnucashInvoice otherTrans = otherSplit.getInvoice();
             int c = otherTrans.compareTo(getInvoice());
             if (c != 0) {
@@ -366,9 +373,9 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
     }
 
     /**
-     *
-     * @see java.lang.Object#toString()
+     * {@inheritDoc}
      */
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("[GnucashInvoiceEntryImpl:");
@@ -393,19 +400,19 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      *
      * @return The JWSDP-Object we are wrapping.
      */
-    protected GncV2Type.GncBookType.GncGncEntryType getJwsdpPeer() {
+    protected GncGncEntryType getJwsdpPeer() {
         return jwsdpPeer;
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getSumInclTaxesFormatet()
+     * {@inheritDoc}
      */
     public String getSumInclTaxesFormatet() {
         return ((GnucashInvoiceImpl) getInvoice()).getCurrencyFormat().format(getSumInclTaxes());
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry#getSumExclTaxesFormatet()
+     * {@inheritDoc}
      */
     public String getSumExclTaxesFormatet() {
         return ((GnucashInvoiceImpl) getInvoice()).getCurrencyFormat().format(getSumExclTaxes());

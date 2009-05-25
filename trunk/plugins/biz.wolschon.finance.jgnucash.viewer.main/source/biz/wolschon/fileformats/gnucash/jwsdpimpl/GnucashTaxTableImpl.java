@@ -15,16 +15,14 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
-import biz.wolschon.fileformats.gnucash.GnucashTaxTable.TaxTableEntry;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncTaxTableType.TaxtableEntriesType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncTaxTableType.TaxtableParentType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncTaxTableType.TaxtableEntriesType.GncGncTaxTableEntryType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncTaxTableType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncTaxTableType.TaxtableEntriesType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncTaxTableType.TaxtableParentType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncTaxTableType.TaxtableEntriesType.GncGncTaxTableEntryType;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -56,7 +54,7 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
         /**
          * the file we belong to.
          */
-        private GnucashFile myFile;
+        private final GnucashFile myFile;
 
 
         /**
@@ -66,7 +64,7 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
         public GnucashTaxTableEntryImpl(final GncGncTaxTableEntryType element, final GnucashFile file) {
             super();
             setJwsdpPeer(element);
-            this.myFile = file;
+            myFile = file;
         }
 
 
@@ -152,8 +150,8 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
                 throw new IllegalArgumentException("null 'account' given!");
             }
 
-            this.myAccount = account;
-            this.myAccountID = account.getId();
+            myAccount = account;
+            myAccountID = account.getId();
             getJwsdpPeer().getTteAcct().setType("guid");
             getJwsdpPeer().getTteAcct().setValue(account.getId());
         }
@@ -195,12 +193,12 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
     /**
      * the JWSDP-object we are facading.
      */
-    private GncV2Type.GncBookType.GncGncTaxTableType jwsdpPeer;
+    private final GncGncTaxTableType jwsdpPeer;
 
     /**
      * The file we belong to.
      */
-    private GnucashFile file;
+    private final GnucashFile file;
 
     /**
      * @param peer the JWSDP-object we are facading.
@@ -208,11 +206,11 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
      * @param gncFile the file to register under
      */
     public GnucashTaxTableImpl(
-            final GncV2Type.GncBookType.GncGncTaxTableType peer,
+            final GncGncTaxTableType peer,
             final GnucashFile gncFile) {
         super();
-        this.jwsdpPeer = peer;
-        this.file = gncFile;
+        jwsdpPeer = peer;
+        file = gncFile;
     }
 
     /**
@@ -227,7 +225,7 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
      *
      * @return The JWSDP-Object we are wrapping.
      */
-    public GncV2Type.GncBookType.GncGncTaxTableType getJwsdpPeer() {
+    public GncGncTaxTableType getJwsdpPeer() {
         return jwsdpPeer;
     }
 
@@ -269,13 +267,15 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
      */
     public String getParentID() {
         TaxtableParentType parent = jwsdpPeer.getTaxtableParent();
-        if (parent == null)
+        if (parent == null) {
             return null;
+        }
         return parent.getValue();
     }
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashTaxTable#getParent()
+     * @return the parent tax-table or null
      */
     public GnucashTaxTable getParent() {
         return getFile().getTaxTableByID(getParentID());
@@ -288,15 +288,15 @@ public class GnucashTaxTableImpl implements GnucashTaxTable {
 
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashTaxTable#getEntries()
+     * @return all entries to this tax-table
      */
+    @SuppressWarnings("unchecked")
     public Collection<TaxTableEntry> getEntries() {
         if (entries == null) {
             TaxtableEntriesType jwsdpEntries = getJwsdpPeer().getTaxtableEntries();
             entries = new ArrayList<TaxTableEntry>(jwsdpEntries.getGncGncTaxTableEntry().size());
-            for (Iterator iter = jwsdpEntries.getGncGncTaxTableEntry().iterator(); iter.hasNext();) {
-                GncV2Type.GncBookType.GncGncTaxTableType.TaxtableEntriesType.GncGncTaxTableEntryType
-                element = (GncV2Type.GncBookType.GncGncTaxTableType.TaxtableEntriesType.GncGncTaxTableEntryType)
-                iter.next();
+            for (Iterator<GncGncTaxTableEntryType> iter = jwsdpEntries.getGncGncTaxTableEntry().iterator(); iter.hasNext();) {
+                GncGncTaxTableEntryType element = iter.next();
 
                 entries.add(new GnucashTaxTableEntryImpl(element, getFile()));
             }

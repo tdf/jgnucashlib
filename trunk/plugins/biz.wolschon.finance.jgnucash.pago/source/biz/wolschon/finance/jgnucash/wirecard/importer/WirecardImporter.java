@@ -324,7 +324,7 @@ public class WirecardImporter {
       auszahlung.setTransactionNumber("Settlement " + settlementID);
       auszahlung.setDescription("Wirecard - Auszahlung Kreditkartenakzeptanz");
       //targetAccount 192,20eur "Auszahlung"
-      //auszahlungAccount -57,62 "ÜBERTRAG/ÜBERWEISUNG..."
+      //auszahlungAccount -57,62 "UEBERTRAG/UEBERWEISUNG..."
       //auszahlungAccountUSD -179,20 -134,58 "179,20USD*0,7510=134,58EUR"
 
       GnucashWritableTransactionSplit targetSplit = auszahlung.createWritingSplit(aBook.getAccountByID(targetAccount));

@@ -33,7 +33,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  * @see biz.wolschon.fileformats.gnucash.GnucashCustomer
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
-public interface GnucashInvoice extends Comparable {
+public interface GnucashInvoice extends Comparable<GnucashInvoice> {
 
 
 
@@ -61,9 +61,21 @@ public interface GnucashInvoice extends Comparable {
      * @see ${@link GnucashInvoiceEntry}
      */
     Collection<GnucashInvoiceEntry> getEntries();
+    /**
+     * @return the date when this transaction was added to or modified in the books.
+     */
     Date getDateOpened();
+    /**
+     * @return the date when this transaction was added to or modified in the books.
+     */
     String getDateOpenedFormatet();
+    /**
+     * @return the date when this transaction hapened.
+     */
     Date getDatePosted();
+    /**
+     * @return the date when this transaction hapened.
+     */
     String getDatePostedFormatet();
 
     /**
@@ -156,8 +168,8 @@ public interface GnucashInvoice extends Comparable {
         public TaxedSum(final FixedPointNumber pTaxpercent,
                         final FixedPointNumber pTaxsum) {
             super();
-            this.myTaxpercent = pTaxpercent;
-            this.taxsum = (FixedPointNumber) pTaxsum.clone();
+            myTaxpercent = pTaxpercent;
+            taxsum = (FixedPointNumber) pTaxsum.clone();
         }
 
 
@@ -177,7 +189,7 @@ public interface GnucashInvoice extends Comparable {
          */
         public TaxedSum(final FixedPointNumber taxpercent) {
             super();
-            this.myTaxpercent = taxpercent;
+            myTaxpercent = taxpercent;
         }
      /**
       *
@@ -198,7 +210,7 @@ public interface GnucashInvoice extends Comparable {
                    + "' not allowed for field this.taxpercent");
         }
 
-        this.myTaxpercent = taxpercent;
+        myTaxpercent = taxpercent;
     }
     /**
      *
@@ -212,7 +224,7 @@ public interface GnucashInvoice extends Comparable {
      * @param pTaxsum The sum of payed taxes.
      */
     public void setTaxsum(final FixedPointNumber pTaxsum) {
-        this.taxsum = pTaxsum;
+        taxsum = pTaxsum;
     }
     }
 
@@ -222,7 +234,10 @@ public interface GnucashInvoice extends Comparable {
      * @see TaxedSum
      */
     TaxedSum[] getTaxes();
-    
+
+    /**
+     * @return the id of the {@link GnucashAccount} the payment is made to.
+     */
     String getAccountIDToTransferMoneyTo();
 
     /**
@@ -231,12 +246,12 @@ public interface GnucashInvoice extends Comparable {
      *         taxes.
      */
     GnucashTransaction getPostTransaction();
-    
+
     /**
      *
      * @return the transactions the customer payed this invoice vis.
      */
-    Collection getPayingTransactions();
+    Collection<? extends GnucashTransaction> getPayingTransactions();
 
     /**
      *
@@ -256,7 +271,7 @@ public interface GnucashInvoice extends Comparable {
     void addEntry(GnucashInvoiceEntry entry);
     /**
      * @return (getAmmountWithoutTaxes().isMoreThen(getAmmountPayedWithoutTaxes()))
-     * 
+     *
      * @throws JAXBException if we have issues with the XML-backend
      */
     boolean isNotFullyPayed() throws JAXBException;

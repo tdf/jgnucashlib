@@ -56,14 +56,25 @@ import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccount;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncSchedxaction;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncTemplateTransactions;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncCommodityType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncCountDataType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncCustomerType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncEntryType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncInvoiceType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncJobType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncTaxTableType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncPricedbType.PriceType.PriceCommodityType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCommodityType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.impl.runtime.DefaultJAXBContextImpl;
 import biz.wolschon.finance.ComplexCurrencyTable;
 import biz.wolschon.numbers.FixedPointNumber;
@@ -139,8 +150,12 @@ public class GnucashFileImpl implements GnucashFile {
 
             taxTablesById = new HashMap<String, GnucashTaxTable>();
 
-            List<GncV2Type.GncBookType.GncGncTaxTableType> gncGncTaxTables = this.getRootElement().getGncBook().getGncGncTaxTable();
-            for (GncV2Type.GncBookType.GncGncTaxTableType jwsdpPeer : gncGncTaxTables) {
+            List bookElements = this.getRootElement().getGncBook().getBookElements();
+            for (Object bookElement : bookElements) {
+                if (!(bookElement instanceof GncGncTaxTableType)) {
+                    continue;
+                }
+                GncGncTaxTableType jwsdpPeer = (GncGncTaxTableType) bookElement;
                 GnucashTaxTableImpl gnucashTaxTable = new GnucashTaxTableImpl(jwsdpPeer, this);
                 taxTablesById.put(gnucashTaxTable.getId(), gnucashTaxTable);
             }
@@ -461,11 +476,15 @@ public class GnucashFileImpl implements GnucashFile {
 
         // fill maps
         accountid2account = new HashMap<String, GnucashAccount>();
-        for (Iterator iter = pRootElement.getGncBook().getGncAccount()
+        for (Iterator iter = pRootElement.getGncBook().getBookElements()
                 .iterator(); iter.hasNext();) {
-            GncAccountType jwsdpAccount = (GncAccountType) iter.next();
+            Object bookElement = iter.next();
+            if (!(bookElement instanceof GncAccountType)) {
+                continue;
+            }
+            GncAccountType jwsdpAccount = (GncAccountType) bookElement;
             try {
-            	GnucashAccount account = createAccount(jwsdpAccount);
+                GnucashAccount account = createAccount(jwsdpAccount);
                 accountid2account.put(account.getId(), account);
             } catch (RuntimeException e) {
                 LOGGER.error("[RuntimeException] Problem in "
@@ -484,19 +503,25 @@ public class GnucashFileImpl implements GnucashFile {
         }
 
         invoiceid2invoice = new HashMap<String, GnucashInvoice>();
-        for (Iterator iter = pRootElement.getGncBook().getGncGncInvoice()
+        for (Iterator iter = pRootElement.getGncBook().getBookElements()
                 .iterator(); iter.hasNext();) {
-            GncV2Type.GncBookType.GncGncInvoiceType jwsdpInvoice = (GncV2Type.GncBookType.GncGncInvoiceType) iter
-                    .next();
+            Object bookElement = iter.next();
+            if (!(bookElement instanceof GncGncInvoiceType)) {
+                continue;
+            }
+            GncGncInvoiceType jwsdpInvoice = (GncGncInvoiceType) bookElement;
             GnucashInvoice invoice = createInvoice(jwsdpInvoice);
             invoiceid2invoice.put(invoice.getId(), invoice);
         }
         // invoiceEntries reer to invoices, therefore they must be loaded after
         // them
-        for (Iterator iter = pRootElement.getGncBook().getGncGncEntry()
+        for (Iterator iter = pRootElement.getGncBook().getBookElements()
                 .iterator(); iter.hasNext();) {
-            GncV2Type.GncBookType.GncGncEntryType jwsdpInvoiceEntry = (GncV2Type.GncBookType.GncGncEntryType) iter
-                    .next();
+            Object bookElement = iter.next();
+            if (!(bookElement instanceof GncGncEntryType)) {
+                continue;
+            }
+            GncGncEntryType jwsdpInvoiceEntry = (GncGncEntryType) bookElement;
             try {
                 createInvoiceEntry(jwsdpInvoiceEntry);
             } catch (RuntimeException e) {
@@ -517,12 +542,16 @@ public class GnucashFileImpl implements GnucashFile {
         // transactions refer to invoices, therefore they must be loaded after
         // them
         transactionid2transaction = new HashMap<String, GnucashTransaction>();
-        for (GncTransactionType jwsdpTransaction
-                : (List<GncTransactionType>) pRootElement.getGncBook().getGncTransaction()) {
-
+        for (Iterator iter = pRootElement.getGncBook().getBookElements()
+                .iterator(); iter.hasNext();) {
+            Object bookElement = iter.next();
+            if (!(bookElement instanceof GncTransactionType)) {
+                continue;
+            }
+            GncTransactionType jwsdpTransaction = (GncTransactionType) bookElement;
 
             try {
-            	GnucashTransactionImpl account = createTransaction(jwsdpTransaction);
+                GnucashTransactionImpl account = createTransaction(jwsdpTransaction);
                 transactionid2transaction.put(account.getId(), account);
                 for (GnucashTransactionSplit split : account.getSplits()) {
                     /*String accountID = */split.getAccountID();
@@ -544,8 +573,13 @@ public class GnucashFileImpl implements GnucashFile {
         }
 
         customerid2customer = new HashMap<String, GnucashCustomer>();
-        for (GncV2Type.GncBookType.GncGncCustomerType jwsdpCustomer
-                : (List<GncV2Type.GncBookType.GncGncCustomerType>) pRootElement.getGncBook().getGncGncCustomer()) {
+        for (Iterator iter = pRootElement.getGncBook().getBookElements()
+                .iterator(); iter.hasNext();) {
+            Object bookElement = iter.next();
+            if (!(bookElement instanceof GncGncCustomerType)) {
+                continue;
+            }
+            GncGncCustomerType jwsdpCustomer = (GncGncCustomerType) bookElement;
 
             try {
                 GnucashCustomerImpl customer = createCustomer(jwsdpCustomer);
@@ -558,8 +592,13 @@ public class GnucashFileImpl implements GnucashFile {
         }
 
         jobid2job = new HashMap<String, GnucashJob>();
-        for (GncV2Type.GncBookType.GncGncJobType jwsdpjob
-                :(List<GncV2Type.GncBookType.GncGncJobType>) pRootElement.getGncBook().getGncGncJob()) {
+        for (Iterator iter = pRootElement.getGncBook().getBookElements()
+                .iterator(); iter.hasNext();) {
+            Object bookElement = iter.next();
+            if (!(bookElement instanceof GncGncJobType)) {
+                continue;
+            }
+            GncGncJobType jwsdpjob = (GncGncJobType) bookElement;
 
             GnucashJobImpl job = createJob(jwsdpjob);
             String jobID = job.getId();
@@ -570,6 +609,48 @@ public class GnucashFileImpl implements GnucashFile {
             jobid2job.put(job.getId(), job);
         }
 
+        // check for unknown book-elements
+        for (Iterator iter = pRootElement.getGncBook().getBookElements()
+                .iterator(); iter.hasNext();) {
+            Object bookElement = iter.next();
+            if (bookElement instanceof GncTransactionType) {
+                continue;
+            }
+            if (bookElement instanceof BookElementsGncSchedxaction) {
+                continue;
+            }
+            if (bookElement instanceof BookElementsGncTemplateTransactions) {
+                continue;
+            }
+            if (bookElement instanceof GncAccountType) {
+                continue;
+            }
+            if (bookElement instanceof GncGncInvoiceType) {
+                continue;
+            }
+            if (bookElement instanceof GncGncEntryType) {
+                continue;
+            }
+            if (bookElement instanceof GncGncJobType) {
+                continue;
+            }
+            if (bookElement instanceof GncGncCustomerType) {
+                continue;
+            }
+            if (bookElement instanceof GncCommodityType) {
+                continue;
+            }
+            if (bookElement instanceof BookElementsGncPricedb) {
+                continue;
+            }
+            if (bookElement instanceof BookElementsGncGncTaxTable) {
+                continue;
+            }
+            if (bookElement instanceof BookElementsGncBudget) {
+                continue;
+            }
+            throw new IllegalArgumentException("<gnc:book> contains unknown element [" + bookElement.getClass().getName() + "]");
+        }
     }
 
     /**
@@ -584,29 +665,40 @@ public class GnucashFileImpl implements GnucashFile {
         if (root == null) {
             return "EUR";
         }
-        List<biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccount> gncAccounts = root.getGncBook().getGncAccount();
-        for (GncAccount gncAccount : gncAccounts) {
-            if (gncAccount.getActCommodity() != null
-                && gncAccount.getActCommodity().getCmdtySpace().equals("ISO4217")) {
-                return gncAccount.getActCommodity().getCmdtyId();
+        for (Iterator iter = getRootElement().getGncBook().getBookElements()
+                .iterator(); iter.hasNext();) {
+            Object bookElement = iter.next();
+            if (!(bookElement instanceof GncAccountType)) {
+                continue;
+            }
+            GncAccountType jwsdpAccount = (GncAccountType) bookElement;
+            if (jwsdpAccount.getActCommodity() != null
+                && jwsdpAccount.getActCommodity().getCmdtySpace().equals("ISO4217")) {
+                return jwsdpAccount.getActCommodity().getCmdtyId();
             }
         }
         return "EUR";
     }
 
     /**
-     * @param pRootElement
+     * @param pRootElement the root-element of the Gnucash-file
      */
+    @SuppressWarnings("unchecked")
     private void loadPriceDatabase(final GncV2 pRootElement) {
-        if (pRootElement.getGncBook().getGncPricedb() == null) {
-            //case: no priceDB in file
-            getCurrencyTable().clear();
-        } else {
-            if (pRootElement.getGncBook().getGncPricedb().getVersion() != 1) {
+        boolean noPriceDB = true;
+        List<Object> bookElements = pRootElement.getGncBook().getBookElements();
+        for (Object bookElement : bookElements) {
+            if (!(bookElement instanceof GncPricedbType)) {
+                continue;
+            }
+            noPriceDB = false;
+            GncPricedbType priceDB = (GncPricedbType) bookElement;
+
+            if (priceDB.getVersion() != 1) {
 
                 LOGGER.warn("We know only the format of the price-db 1, "
                         + "the file has version "
-                        + pRootElement.getGncBook().getGncPricedb().getVersion()
+                        + priceDB.getVersion()
                         + " prices will not be loaded!");
             } else {
                   getCurrencyTable().clear();
@@ -614,9 +706,8 @@ public class GnucashFileImpl implements GnucashFile {
                           getDefaultCurrencyID(),
                           new FixedPointNumber(1));
 
-                  for (Iterator iter = pRootElement.getGncBook()
-                          .getGncPricedb().getPrice().iterator(); iter.hasNext();) {
-                      GncV2Type.GncBookType.GncPricedbType.PriceType price = (GncV2Type.GncBookType.GncPricedbType.PriceType) iter.next();
+                  for (Iterator<PriceType> iter = priceDB.getPrice().iterator(); iter.hasNext();) {
+                      PriceType price = iter.next();
                       PriceCommodityType comodity = price.getPriceCommodity();
 
                     // check if we already have a latest price for this comodity
@@ -657,6 +748,11 @@ public class GnucashFileImpl implements GnucashFile {
                 }
             }
         }
+
+        if (noPriceDB) {
+            //case: no priceDB in file
+            getCurrencyTable().clear();
+        }
     }
 
 
@@ -669,16 +765,16 @@ public class GnucashFileImpl implements GnucashFile {
      * @param pCmdtySpace the namespace for pCmdtyId
      * @param pCmdtyId the currency-name
      * @param depth used for recursion. Allways call with '0'
-     * @param used for aborting recursive quotes (quotes to other then the base-
+     *        for aborting recursive quotes (quotes to other then the base-
      *        currency) we abort if the depth reached 6.
      * @return the latest price-quote in the gnucash-file in the default-currency
      * @see {@link GnucashFile#getLatestPrice(String, String)}
      * @see #getDefaultCurrencyID()
      */
+    @SuppressWarnings("unchecked")
     private FixedPointNumber getLatestPrice(final String pCmdtySpace,
                                             final String pCmdtyId,
                                             final int depth) {
-
         if (pCmdtySpace == null) {
             throw new IllegalArgumentException("null parameter 'pCmdtySpace' "
                                              + "given");
@@ -690,19 +786,15 @@ public class GnucashFileImpl implements GnucashFile {
 
         Date latestDate = null;
         FixedPointNumber latestQuote = null;
+        FixedPointNumber factor = new FixedPointNumber(1); // factor is used if the quote is not to our base-currency
+        final int maxRecursionDepth = 5;
 
-        // factor is used if the quote is not to our base-currency
-        FixedPointNumber factor = new FixedPointNumber(1);
-
-
-
-            for (Iterator iterator = getRootElement().getGncBook()
-                                    .getGncPricedb().getPrice()
-                                    .iterator(); iterator.hasNext();) {
-                GncV2Type.GncBookType.GncPricedbType.PriceType priceQuote
-                  = (GncV2Type.GncBookType.GncPricedbType.PriceType)
-                  iterator.next();
-
+        for (Object bookElement : getRootElement().getGncBook().getBookElements()) {
+            if (!(bookElement instanceof GncPricedbType)) {
+                continue;
+            }
+            GncPricedbType priceDB = (GncPricedbType) bookElement;
+            for (PriceType priceQuote : (List<PriceType>) priceDB.getPrice()) {
 
                 try {
                     if (priceQuote == null) {
@@ -710,7 +802,6 @@ public class GnucashFileImpl implements GnucashFile {
                                 + " there may be a problem with JWSDP");
                         continue;
                     }
-
                     if (priceQuote.getPriceCurrency() == null) {
                         LOGGER.warn("gnucash-file contains price-quotes"
                                 + " with no currency id='"
@@ -718,7 +809,6 @@ public class GnucashFileImpl implements GnucashFile {
                                 + "'");
                         continue;
                     }
-
                     if (priceQuote.getPriceCurrency().getCmdtyId() == null) {
                         LOGGER.warn("gnucash-file contains price-quotes"
                                 + " with no currency-id id='"
@@ -756,16 +846,12 @@ public class GnucashFileImpl implements GnucashFile {
                                 + "'");
                         continue;
                     }*/
-
-
                     if (!priceQuote.getPriceCommodity().getCmdtySpace().equals(pCmdtySpace)) {
                         continue;
                     }
-
                     if (!priceQuote.getPriceCommodity().getCmdtyId().equals(pCmdtyId)) {
                         continue;
                     }
-
                     /*if (priceQuote.getPriceCommodity().getCmdtySpace().equals("FUND")
                             &&
                         (priceQuote.getPriceType() == null
@@ -781,7 +867,7 @@ public class GnucashFileImpl implements GnucashFile {
 
                     if (!priceQuote.getPriceCurrency()
                             .getCmdtySpace().equals("ISO4217")) {
-                        if (depth > 5) {
+                        if (depth > maxRecursionDepth) {
                             LOGGER.warn("ignoring price-quote that is not in an"
                                   + " ISO4217 -currency but in '"
                                   + priceQuote.getPriceCurrency().getCmdtyId());
@@ -793,7 +879,7 @@ public class GnucashFileImpl implements GnucashFile {
                     } else {
                         if (!priceQuote.getPriceCurrency()
                                 .getCmdtyId().equals(getDefaultCurrencyID())) {
-                            if (depth > 5) {
+                            if (depth > maxRecursionDepth) {
                                 LOGGER.warn("ignoring price-quote that is not in "
                                         + getDefaultCurrencyID() + " "
                                         + "but in  '"
@@ -859,6 +945,7 @@ public class GnucashFileImpl implements GnucashFile {
                 }
 
             }
+        }
 
         LOGGER.debug(getClass().getName()
                             + ".getLatestPrice(pCmdtySpace='"
@@ -891,7 +978,7 @@ public class GnucashFileImpl implements GnucashFile {
      * @return the new GnucashInvoice to wrap the given jaxb-object.
      */
     protected GnucashInvoice createInvoice(
-            final GncV2Type.GncBookType.GncGncInvoiceType jwsdpInvoice) {
+            final GncGncInvoiceType jwsdpInvoice) {
         GnucashInvoice invoice = new GnucashInvoiceImpl(jwsdpInvoice, this);
         return invoice;
     }
@@ -903,7 +990,7 @@ public class GnucashFileImpl implements GnucashFile {
      * @throws JAXBException on problems with the xml-backend
      */
     protected GnucashInvoiceEntry createInvoiceEntry(
-            final GncV2Type.GncBookType.GncGncEntryType jwsdpInvoiceEntry) throws JAXBException {
+            final GncGncEntryType jwsdpInvoiceEntry) throws JAXBException {
         GnucashInvoiceEntry entry = new GnucashInvoiceEntryImpl(
                 jwsdpInvoiceEntry, this);
         return entry;
@@ -915,7 +1002,7 @@ public class GnucashFileImpl implements GnucashFile {
      * @return the new GnucashJob to wrap the given jaxb-object.
      */
     protected GnucashJobImpl createJob(
-            final GncV2Type.GncBookType.GncGncJobType jwsdpjob) {
+            final GncGncJobType jwsdpjob) {
 
         GnucashJobImpl job = new GnucashJobImpl(jwsdpjob, this);
         return job;
@@ -928,7 +1015,7 @@ public class GnucashFileImpl implements GnucashFile {
      * @throws JAXBException on problems with the xml-backend
      */
     protected GnucashCustomerImpl createCustomer(
-            final GncV2Type.GncBookType.GncGncCustomerType jwsdpCustomer) throws JAXBException {
+            final GncGncCustomerType jwsdpCustomer) throws JAXBException {
         GnucashCustomerImpl customer = new GnucashCustomerImpl(jwsdpCustomer,
                 this);
         return customer;

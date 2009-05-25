@@ -24,14 +24,18 @@ import javax.xml.bind.JAXBException;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashCustomer;
+import biz.wolschon.fileformats.gnucash.GnucashInvoice;
+import biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry;
-import biz.wolschon.fileformats.gnucash.GnucashTaxTable.TaxTableEntry;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncEntryType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncEntryType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncEntryType.EntryGuidType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncEntryType.EntryITaxtableType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncEntryType.EntryInvoiceType;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -52,10 +56,10 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
     /**
      * Our helper to implement the GnucashWritableObject-interface.
      */
-    private GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
+    private final GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(this);
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#setUserDefinedAttribute(java.lang.String, java.lang.String)
+     * {@inheritDoc}
      */
     public void setUserDefinedAttribute(final String name, final String value) throws JAXBException {
         helper.setUserDefinedAttribute(name, value);
@@ -91,13 +95,17 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
      * @return
      * @throws JAXBException
      */
-    private static GncV2Type.GncBookType.GncGncEntryType createSKR03_16PercentInvoiceEntry(
+    private static GncGncEntryType createSKR03_16PercentInvoiceEntry(
                                                                                            final GnucashInvoiceWritingImpl invoice,
                                                                                            final FixedPointNumber quantity,
                                                                                            final FixedPointNumber price) throws JAXBException {
         GnucashAccount account = invoice.getFile().getAccountByName("Umsatzerlöse 16% USt");
-        if (account == null)
+        if (account == null) {
+            account = invoice.getFile().getAccountByName("Umsatzerlöse 19% USt"); // national tax-rate has changed
+        }
+        if (account == null) {
             throw new IllegalStateException("Cannot file account 'Umsatzerlöse 16% USt' from SKR04!");
+        }
 
         return  createInvoiceEntry(invoice, account, quantity, price);
     }
@@ -106,7 +114,7 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
                                           final FixedPointNumber quantity,
                                           final FixedPointNumber price) throws JAXBException {
         super(invoice, createSKR03_16PercentInvoiceEntry(invoice, quantity, price));
-        invoice.addEntry((GnucashInvoiceEntryImpl) this);
+        invoice.addEntry(this);
         this.invoice = invoice;
     }
 
@@ -127,14 +135,14 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
                                           final FixedPointNumber quantity,
                                           final FixedPointNumber price) throws JAXBException {
         super(invoice, createInvoiceEntry(invoice, account, quantity, price));
-        invoice.addEntry((GnucashInvoiceEntryImpl) this);
+        invoice.addEntry(this);
         this.invoice = invoice;
     }
 
     /**
      * @see ${@link #GnucashInvoiceEntryWritingImpl(GnucashInvoiceWritingImpl, GnucashAccount, FixedPointNumber, FixedPointNumber)}
      */
-    protected static GncV2Type.GncBookType.GncGncEntryType createInvoiceEntry(
+    protected static GncGncEntryType createInvoiceEntry(
                                          final GnucashInvoiceWritingImpl invoice,
                                          final GnucashAccount account,
                                          final FixedPointNumber quantity,
@@ -142,18 +150,19 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
 
 //      TODO: keep count-data in file intact <gnc:count-data cd:type="gnc:GncEntry">18</gnc:count-data>
 
-        if (!invoice.isModifiable())
+        if (!invoice.isModifiable()) {
             throw new IllegalArgumentException("The given invoice has payments and is"
                     + " thus not modifiable");
+        }
 
 
         GnucashFileWritingImpl gnucashFileWritingImpl = (GnucashFileWritingImpl) invoice.getFile();
         ObjectFactory factory = gnucashFileWritingImpl.getObjectFactory();
 
-        GncV2Type.GncBookType.GncGncEntryType entry = gnucashFileWritingImpl.createGncV2TypeGncBookTypeGncGncEntryType();
+        GncGncEntryType entry = gnucashFileWritingImpl.createGncGncEntryType();
 
         {
-            GncV2Type.GncBookType.GncGncEntryType.EntryGuidType guid = factory.createGncV2TypeGncBookTypeGncGncEntryTypeEntryGuidType();
+            EntryGuidType guid = factory.createGncGncEntryTypeEntryGuidType();
             guid.setType("guid");
             guid.setValue((gnucashFileWritingImpl).createGUID());
             entry.setEntryGuid(guid);
@@ -161,18 +170,18 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
 
         entry.setEntryAction("Stunden");
         {
-            GncV2Type.GncBookType.GncGncEntryType.EntryDateType entryDate = factory.createGncV2TypeGncBookTypeGncGncEntryTypeEntryDateType();
+            GncGncEntryType.EntryDateType entryDate = factory.createGncGncEntryTypeEntryDateType();
             entryDate.setTsDate(ENTRYDATEFORMAT.format(new Date()));
             entry.setEntryDate(entryDate);
         }
         entry.setEntryDescription("no description");
         {
-            GncV2Type.GncBookType.GncGncEntryType.EntryEnteredType entered = factory.createGncV2TypeGncBookTypeGncGncEntryTypeEntryEnteredType();
+            GncGncEntryType.EntryEnteredType entered = factory.createGncGncEntryTypeEntryEnteredType();
             entered.setTsDate(ENTRYDATEFORMAT.format(new Date()));
             entry.setEntryEntered(entered);
         }
         {
-            GncV2Type.GncBookType.GncGncEntryType.EntryIAcctType iacct = factory.createGncV2TypeGncBookTypeGncGncEntryTypeEntryIAcctType();
+            GncGncEntryType.EntryIAcctType iacct = factory.createGncGncEntryTypeEntryIAcctType();
             iacct.setType("guid");
             iacct.setValue(account.getId());
             entry.setEntryIAcct(iacct);
@@ -181,7 +190,7 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
         entry.setEntryIDiscType("PERCENT");
         {
 
-            GncV2Type.GncBookType.GncGncEntryType.EntryInvoiceType inv = factory.createGncV2TypeGncBookTypeGncGncEntryTypeEntryInvoiceType();
+            EntryInvoiceType inv = factory.createGncGncEntryTypeEntryInvoiceType();
             inv.setType("guid");
             inv.setValue(invoice.getId());
             entry.setEntryInvoice(inv);
@@ -191,17 +200,19 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
         entry.setEntryITaxincluded(0);
         {
             //TODO: use not the first but the default taxtable
-            GncV2Type.GncBookType.GncGncEntryType.EntryITaxtableType taxtableref = factory.createGncV2TypeGncBookTypeGncGncEntryTypeEntryITaxtableType();
+            EntryITaxtableType taxtableref = factory.createGncGncEntryTypeEntryITaxtableType();
             taxtableref.setType("guid");
 
             GnucashTaxTable taxTable = null;
             GnucashCustomer customer = invoice.getCustomer();
-            if (customer != null)
+            if (customer != null) {
                 taxTable = customer.getCustomerTaxTable();
+            }
 
             // use first tax-table found
-            if (taxTable == null)
-                taxTable = (GnucashTaxTable) invoice.getFile().getTaxTables().iterator().next();
+            if (taxTable == null) {
+                taxTable = invoice.getFile().getTaxTables().iterator().next();
+            }
 
             /*GncV2Type.GncBookType.GncGncTaxTableType taxtable = (GncV2Type.GncBookType.GncGncTaxTableType)
                 ((GnucashFileImpl) invoice.getFile()).getRootElement().getGncBook().getGncGncTaxTable().get(0);
@@ -216,7 +227,7 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
 
 
 
-        invoice.getFile().getRootElement().getGncBook().getGncGncEntry().add(entry);
+        invoice.getFile().getRootElement().getGncBook().getBookElements().add(entry);
         invoice.getFile().setModified(true);
 
         return entry;
@@ -232,12 +243,14 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
     private GnucashWritableInvoice invoice;
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry#getInvoice()
+     * {@inheritDoc}
      */
+    @Override
     public GnucashWritableInvoice getInvoice() {
-        if (this.invoice == null)
-            this.invoice = (GnucashWritableInvoice) super.getInvoice();
-        return this.invoice;
+        if (invoice == null) {
+            invoice = (GnucashWritableInvoice) super.getInvoice();
+        }
+        return invoice;
 
     }
 
@@ -246,16 +259,19 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
      * @param desc the new description
      */
     public void setDescription(final String desc) {
-        if (desc == null)
+        if (desc == null) {
             throw new IllegalArgumentException("null description given! Please use the empty string instead of null for an empty description");
-        if (!this.getInvoice().isModifiable())
+        }
+        if (!this.getInvoice().isModifiable()) {
             throw new IllegalStateException("This Invoice has payments and is not modifiable!");
+        }
         Object old = getDescription();
         getJwsdpPeer().setEntryDescription(desc);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-        if (propertyChangeSupport != null)
+        if (propertyChangeSupport != null) {
             propertyChangeSupport.firePropertyChange("description", old, desc);
+        }
     }
 
     /**
@@ -279,8 +295,7 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
     }
 
     /**
-     * @throws JAXBException
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry#setTaxTable()
+     * {@inheritDoc}
      */
     public void setTaxTable(final GnucashTaxTable tax) throws JAXBException {
 
@@ -288,7 +303,7 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
             ((GnucashInvoiceWritingImpl) getInvoice()).subtractEntry(this);
 
 
-            this.myTaxtable = tax;
+            super.setTaxtable(tax);
             if (tax == null) {
                 getJwsdpPeer().setEntryITaxable(0);
             } else {
@@ -297,7 +312,7 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
                     getJwsdpPeer().setEntryITaxtable(
                             ((GnucashFileWritingImpl) getInvoice().getFile())
                             .getObjectFactory()
-                            .createGncV2TypeGncBookTypeGncGncEntryTypeEntryITaxtableType());
+                            .createGncGncEntryTypeEntryITaxtableType());
                     getJwsdpPeer().getEntryITaxtable().setValue("guid");
                 }
                 getJwsdpPeer().getEntryITaxtable().setValue(tax.getId());
@@ -329,8 +344,9 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry#setPrice(FixedPointNumber)
      */
     public void setPrice(final FixedPointNumber price) {
-        if (!this.getInvoice().isModifiable())
+        if (!this.getInvoice().isModifiable()) {
             throw new IllegalStateException("This Invoice has payments and is not modifiable!");
+        }
         try {
             Object old = getPrice();
 
@@ -340,8 +356,9 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
 
 
             PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-            if (propertyChangeSupport != null)
+            if (propertyChangeSupport != null) {
                 propertyChangeSupport.firePropertyChange("price", old, price);
+            }
 
         } catch (JAXBException x) {
             IllegalStateException x2 = new IllegalStateException("cannot set price of Invoice-Entry '" + toString() + "'");
@@ -354,15 +371,17 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry#setAction(java.lang.String)
      */
     public void setAction(final String action) {
-        if (!this.getInvoice().isModifiable())
+        if (!this.getInvoice().isModifiable()) {
             throw new IllegalStateException("This Invoice has payments and is not modifiable!");
+        }
 
         Object old = getAction();
         getJwsdpPeer().setEntryAction(action);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-        if (propertyChangeSupport != null)
+        if (propertyChangeSupport != null) {
             propertyChangeSupport.firePropertyChange("action", old, action);
+        }
 
     }
 
@@ -388,8 +407,9 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry#setQuantity(FixedPointNumber)
      */
     public void setQuantity(final FixedPointNumber quantity) {
-        if (!this.getInvoice().isModifiable())
+        if (!this.getInvoice().isModifiable()) {
             throw new IllegalStateException("This Invoice has payments and is not modifiable!");
+        }
         try {
             Object old = getQuantity();
 
@@ -398,8 +418,9 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
             ((GnucashInvoiceWritingImpl) getInvoice()).addEntry(this);
 
             PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
-            if (propertyChangeSupport != null)
+            if (propertyChangeSupport != null) {
                 propertyChangeSupport.firePropertyChange("quantity", old, quantity);
+            }
 
         } catch (JAXBException x) {
             IllegalStateException x2 = new IllegalStateException("cannot set quantity of Invoice-Entry '"
@@ -412,12 +433,13 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableInvoiceEntry#remove()
      */
     public void remove() {
-        if (!this.getInvoice().isModifiable())
+        if (!this.getInvoice().isModifiable()) {
             throw new IllegalStateException("This Invoice has payments and is not modifiable!");
+        }
         try {
             GnucashInvoiceWritingImpl gnucashInvoiceWritingImpl = ((GnucashInvoiceWritingImpl) getInvoice());
             gnucashInvoiceWritingImpl.removeEntry(this);
-            gnucashInvoiceWritingImpl.getFile().getRootElement().getGncBook().getGncGncEntry().remove(this.getJwsdpPeer());
+            gnucashInvoiceWritingImpl.getFile().getRootElement().getGncBook().getBookElements().remove(this.getJwsdpPeer());
             ((GnucashFileWritingImpl) gnucashInvoiceWritingImpl.getFile()).decrementCountDataFor("gnc:GncEntry");
         } catch (JAXBException x) {
             IllegalStateException x2 = new IllegalStateException("cannot remove Invoice-Entry '" + toString() + "'");
@@ -428,15 +450,16 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#getFile()
+     * {@inheritDoc}
      */
     public GnucashWritableFile getWritableFile() {
         return (GnucashWritableFile) super.getFile();
     }
-    
+
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#getFile()
+     * {@inheritDoc}
      */
+    @Override
     public GnucashWritableFile getFile() {
         return (GnucashWritableFile) super.getFile();
     }

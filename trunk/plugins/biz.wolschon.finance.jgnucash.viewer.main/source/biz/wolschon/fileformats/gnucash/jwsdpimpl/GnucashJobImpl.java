@@ -13,7 +13,6 @@
 package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ import biz.wolschon.fileformats.gnucash.GnucashCustomer;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashJob;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncJobType;
 
 /**
  * created: 14.05.2005 <br/>
@@ -35,12 +34,12 @@ public class GnucashJobImpl implements GnucashJob {
     /**
      * the JWSDP-object we are facading.
      */
-    private GncV2Type.GncBookType.GncGncJobType jwsdpPeer;
+    private final GncGncJobType jwsdpPeer;
 
     /**
      * The file we belong to.
      */
-    private GnucashFile file;
+    private final GnucashFile file;
 
     /**
      * @param peer the JWSDP-object we are facading.
@@ -48,11 +47,11 @@ public class GnucashJobImpl implements GnucashJob {
      * @param gncFile the file to register under
      */
     public GnucashJobImpl(
-            final GncV2Type.GncBookType.GncGncJobType peer,
+            final GncGncJobType peer,
             final GnucashFile gncFile) {
         super();
-        this.jwsdpPeer = peer;
-        this.file = gncFile;
+        jwsdpPeer = peer;
+        file = gncFile;
     }
 
     /**
@@ -67,7 +66,7 @@ public class GnucashJobImpl implements GnucashJob {
      *
      * @return The JWSDP-Object we are wrapping.
      */
-    public GncV2Type.GncBookType.GncGncJobType getJwsdpPeer() {
+    public GncGncJobType getJwsdpPeer() {
         return jwsdpPeer;
     }
 
@@ -92,8 +91,8 @@ public class GnucashJobImpl implements GnucashJob {
      * @return all invoices that refer to this job.
      * @see GnucashJob#getInvoices()
      */
-    public Collection getInvoices() {
-        List retval = new LinkedList();
+    public Collection<? extends GnucashInvoice> getInvoices() {
+        List<GnucashInvoice> retval = new LinkedList<GnucashInvoice>();
         for (GnucashInvoice invoice : getFile().getInvoices()) {
             if (invoice.getJobID().equals(getId())) {
                 retval.add(invoice);
@@ -112,16 +111,14 @@ public class GnucashJobImpl implements GnucashJob {
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashJob#getCustomerType()
+     * {@inheritDoc}
      */
     public String getCustomerType() {
         return jwsdpPeer.getJobOwner().getOwnerType();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashJob#getCustomerId()
+     * {@inheritDoc}
      */
     public String getCustomerId() {
         assert jwsdpPeer.getJobOwner().getOwnerId().getType().equals("guid");
@@ -129,24 +126,21 @@ public class GnucashJobImpl implements GnucashJob {
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashJob#getCustomer()
+     * {@inheritDoc}
      */
     public GnucashCustomer getCustomer() {
         return file.getCustomerByID(getCustomerId());
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashJob#getJobNumber()
+     * {@inheritDoc}
      */
     public String getJobNumber() {
-     return jwsdpPeer.getJobId();
+        return jwsdpPeer.getJobId();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashJob#getName()
+     * {@inheritDoc}
      */
     public String getName() {
         return jwsdpPeer.getJobName();

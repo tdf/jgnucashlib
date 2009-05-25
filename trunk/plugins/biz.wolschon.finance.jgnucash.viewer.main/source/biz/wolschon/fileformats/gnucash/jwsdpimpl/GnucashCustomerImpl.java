@@ -24,9 +24,9 @@ import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncCustomerType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2Type.GncBookType.GncGncCustomerType.CustTaxtableType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncCustomerType.CustTaxtableType;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -41,10 +41,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
     /**
      * the JWSDP-object we are facading.
      */
-    private GncV2Type.GncBookType.GncGncCustomerType jwsdpPeer;
-
-
-
+    private final GncGncCustomerType jwsdpPeer;
 
 
     /**
@@ -55,25 +52,26 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
      * @see #file
      */
     protected GnucashCustomerImpl(
-            final GncV2Type.GncBookType.GncGncCustomerType peer,
+            final GncGncCustomerType peer,
             final GnucashFile gncFile) throws JAXBException {
         super((peer.getCustSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getCustSlots(), gncFile);
-        if (peer.getCustSlots() == null)
+        if (peer.getCustSlots() == null) {
             peer.setCustSlots(getSlots());
-        this.jwsdpPeer = peer;
+        }
+        jwsdpPeer = peer;
     }
 
     /**
      *
      * @return the JWSDP-object we are wrapping.
      */
-    public GncV2Type.GncBookType.GncGncCustomerType getJwsdpPeer() {
+    public GncGncCustomerType getJwsdpPeer() {
         return jwsdpPeer;
     }
 
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getId()
+     * {@inheritDoc}
      */
     public String getId() {
          return jwsdpPeer.getCustGuid().getValue();
@@ -97,14 +95,14 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getDiscount()
+     * {@inheritDoc}
      */
     public String getDiscount() {
         return jwsdpPeer.getCustDiscount();
     }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getNotes()
+     * {@inheritDoc}
      */
     public String getNotes() {
         return jwsdpPeer.getCustNotes();
@@ -114,7 +112,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
      * date is not checked so invoiced that have entered payments in
      * the future are considered payed.
      * @return the current number of unpayed invoices
-     * 
+     *
      * @throws JAXBException if we have issues with the XML-backend
      */
     public int getOpenInvoices() throws JAXBException {
@@ -158,7 +156,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
 
     /**
      * @see #getIncomeGenerated()
-     * formatet acording to the current locale's currency-format
+     * @return formated acording to the current locale's currency-format
      */
     public String getIncomeGeneratedFormatet() {
         return getCurrencyFormat().format(getIncomeGenerated());
@@ -167,7 +165,8 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
 
     /**
      * @see #getIncomeGenerated()
-     * formatet acording to the given locale's currency-format
+     * @param l the locale to format for
+     * @return formated acording to the given locale's currency-format
      */
     public String getIncomeGeneratedFormatet(final Locale l) {
         return NumberFormat.getCurrencyInstance(l).format(getIncomeGenerated());
@@ -175,7 +174,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
 
     /**
      * @return the sum of left to pay unpayed invoiced
-     * 
+     *
      * @throws JAXBException if we have issues with the XML-backend
      */
     public FixedPointNumber getOutstandingValue() throws JAXBException  {
@@ -192,17 +191,16 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
     }
 
     /**
-     * 
      * @throws JAXBException if we have issues with the XML-backend
      * @see #getOutstandingValue()
-     * formatet acording to the current locale's currency-format
+     * @return formatet acording to the current locale's currency-format
      */
     public String getOutstandingValueFormatet() throws JAXBException {
         return getCurrencyFormat().format(getOutstandingValue());
     }
 
     /**
-     * 
+     *
      * @throws JAXBException if we have issues with the XML-backend
      * @see #getOutstandingValue()
      * formatet acording to the given locale's currency-format
@@ -214,52 +212,52 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
 
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getCustomerNumber()
+     * {@inheritDoc}
      */
     public String getCustomerNumber() {
         return jwsdpPeer.getCustId();
-   }
+    }
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getCustomerTaxTableID()
+     * {@inheritDoc}
      */
     public String getCustomerTaxTableID() {
         CustTaxtableType custTaxtable = jwsdpPeer.getCustTaxtable();
-        if (custTaxtable == null)
+        if (custTaxtable == null) {
             return null;
+        }
         return custTaxtable.getValue();
-   }
+    }
+
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getCustomerTaxTable()
+     * {@inheritDoc}
      */
     public GnucashTaxTable getCustomerTaxTable() {
         String id = getCustomerTaxTableID();
-        if (id == null)
+        if (id == null) {
             return null;
+        }
         return getFile().getTaxTableByID(id);
-   }
+    }
 
 
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getName()
+     * {@inheritDoc}
      */
     public String getName() {
         return jwsdpPeer.getCustName();
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getAddress()
+     * {@inheritDoc}
      */
     public GnucashCustomer.Address getAddress() {
         return new AddressImpl(jwsdpPeer.getCustAddr());
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashCustomer#getShippingAddress()
+     * {@inheritDoc}
      */
     public GnucashCustomer.Address getShippingAddress() {
         return new AddressImpl(jwsdpPeer.getCustShipaddr());
@@ -280,7 +278,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
         /**
          * The JWSDP-object we are wrapping.
          */
-        private biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Address jwsdpPeer;
+        private final biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Address jwsdpPeer;
 
         /**
          * @param newPeer the JWSDP-object we are wrapping.
@@ -288,7 +286,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
         public AddressImpl(
                 final biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Address newPeer) {
             super();
-            this.jwsdpPeer = newPeer;
+            jwsdpPeer = newPeer;
         }
         /**
          *
@@ -303,8 +301,9 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
          * @see biz.wolschon.fileformats.gnucash.GnucashCustomer.Address#getAddressName()
          */
        public String getAddressName() {
-    	   if (jwsdpPeer.getAddrName() == null)
-         		 return "";
+    	   if (jwsdpPeer.getAddrName() == null) {
+            return "";
+        }
           return jwsdpPeer.getAddrName();
          }
 
@@ -312,8 +311,9 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
         * @see biz.wolschon.fileformats.gnucash.GnucashCustomer.Address#getAddressLine1()
         */
          public String getAddressLine1() {
-        	 if (jwsdpPeer.getAddrAddr1() == null)
-        		 return "";
+        	 if (jwsdpPeer.getAddrAddr1() == null) {
+                return "";
+            }
              return jwsdpPeer.getAddrAddr1();
          }
 
@@ -321,8 +321,9 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
           * @see biz.wolschon.fileformats.gnucash.GnucashCustomer.Address#getAddressLine2()
           */
          public String getAddressLine2() {
-        	 if (jwsdpPeer.getAddrAddr2() == null)
-        		 return "";
+        	 if (jwsdpPeer.getAddrAddr2() == null) {
+                return "";
+            }
              return jwsdpPeer.getAddrAddr2();
          }
 
@@ -331,8 +332,9 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
          * @return third and last line below the name
          */
         public String getAddressLine3() {
-        	if (jwsdpPeer.getAddrAddr3() == null)
-       		 return "";
+        	if (jwsdpPeer.getAddrAddr3() == null) {
+                return "";
+            }
             return jwsdpPeer.getAddrAddr3();
         }
         /**
@@ -340,8 +342,9 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
          * @return fourth and last line below the name
          */
         public String getAddressLine4() {
-        	if (jwsdpPeer.getAddrAddr4() == null)
-       		 return "";
+        	if (jwsdpPeer.getAddrAddr4() == null) {
+                return "";
+            }
             return jwsdpPeer.getAddrAddr4();
         }
 
@@ -350,8 +353,9 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
          * @return telephone
          */
         public String getTel() {
-        	if (jwsdpPeer.getAddrPhone() == null)
-       		 return "";
+        	if (jwsdpPeer.getAddrPhone() == null) {
+                return "";
+            }
             return jwsdpPeer.getAddrPhone();
         }
 
@@ -360,8 +364,9 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
          * @return Fax
          */
         public String getFax() {
-        	if (jwsdpPeer.getAddrFax() == null)
-          		 return "";
+        	if (jwsdpPeer.getAddrFax() == null) {
+                return "";
+            }
             return jwsdpPeer.getAddrFax();
         }
 
@@ -370,15 +375,17 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
          * @return Email
          */
         public String getEmail() {
-        	if (jwsdpPeer.getAddrEmail() == null)
-          		 return "";
+        	if (jwsdpPeer.getAddrEmail() == null) {
+                return "";
+            }
             return jwsdpPeer.getAddrEmail();
         }
 
          /**
           * @see java.lang.Object#toString()
           */
-         public String toString() {
+         @Override
+        public String toString() {
             return getAddressName() + "\n"
                  + getAddressLine1() + "\n"
                  + getAddressLine2();
