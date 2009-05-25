@@ -83,7 +83,7 @@ Use top-level project build file to build application.
 		<javadoc destdir="${plugin.home}/docs/api"
 		         classpathref="plugin.classpath"
 		         sourcepath="${basedir}/source"
-		         packagenames="${plugin.id}.*">
+		    	packagenames="biz.*"> 
 		</javadoc>
 	</target>
 </project>
