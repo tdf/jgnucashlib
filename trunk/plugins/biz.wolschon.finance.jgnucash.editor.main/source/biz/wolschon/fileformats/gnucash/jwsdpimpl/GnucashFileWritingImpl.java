@@ -431,7 +431,6 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
                 GncEntry++;
             } else if (element instanceof BookElementsGncTemplateTransactions) {
             } else if (element instanceof BookElementsGncGncTaxTable) {
-            } else if (element instanceof BookElementsGncCommodity) {
             } else if (element instanceof BookElementsGncSchedxaction) {
             } else if (element instanceof BookElementsGncBudget) {
             } else if (element instanceof BookElementsGncPricedb) {
@@ -1254,12 +1253,13 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
        }
        if (getCurrencyTable().getConversionFactor(pCmdtySpace, pCmdtyId) == null) {
 
-           GncCommodityType newCurrency = getObjectFactory().createGncCommodityType();
+           GncCommodityType newCurrency = getObjectFactory().createBookElementsGncCommodity();
            newCurrency.setCmdtyFraction(pCmdtyNameFraction);
            newCurrency.setCmdtySpace(pCmdtySpace);
            newCurrency.setCmdtyId(pCmdtyId);
            newCurrency.setCmdtyName(pCmdtyName);
            newCurrency.setVersion("2.0.0");
+           getRootElement().getGncBook().getBookElements().add(newCurrency);
            incrementCountDataFor("commodity");
        }
        // add price-quote
