@@ -17,6 +17,7 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashObject;
 import biz.wolschon.finance.ComplexCurrencyTable;
 import biz.wolschon.numbers.FixedPointNumber;
 
@@ -29,7 +30,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  * <br/>
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
-public interface GnucashFile {
+public interface GnucashFile extends GnucashObject {
 
     /**
      *

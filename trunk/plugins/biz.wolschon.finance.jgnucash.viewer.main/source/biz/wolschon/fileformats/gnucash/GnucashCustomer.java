@@ -158,7 +158,7 @@ public interface GnucashCustomer extends GnucashObject {
      * The gnucash-file is the top-level class to contain everything.
      * @return the file we are associated with
      */
-    GnucashFile getFile();
+    GnucashFile getGnucashFile();
 
     /**
      * @return the unique-id to identify this object with across name- and hirarchy-changes

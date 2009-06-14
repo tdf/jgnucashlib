@@ -86,7 +86,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
       * @return Returns the file.
       * @see ${@link #myFile}
       */
-     public GnucashFile getFile() {
+     public GnucashFile getGnucashFile() {
          return myFile;
      }
 
@@ -161,7 +161,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
             return null;
         }
 
-        return getFile().getAccountByID(id);
+        return getGnucashFile().getAccountByID(id);
     }
 
     /**
@@ -202,7 +202,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
         return retval;
     }
 
-       ComplexCurrencyTable currencyTable = getFile().getCurrencyTable();
+       ComplexCurrencyTable currencyTable = getGnucashFile().getCurrencyTable();
 
        if (currencyTable == null) {
            LOGGER.warn("SimpleAccount.getBalance() - cannot transfer "
@@ -408,7 +408,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
 
 
-       ComplexCurrencyTable currencyTable = getFile().getCurrencyTable();
+       ComplexCurrencyTable currencyTable = getGnucashFile().getCurrencyTable();
 
        if (currencyTable == null) {
            LOGGER.warn("SimpleAccount.getBalance() - cannot transfer "
@@ -419,13 +419,13 @@ public abstract class SimpleAccount  implements GnucashAccount {
        if (!currencyTable.convertToBaseCurrency(getCurrencyNameSpace(),
                 retval,
                 getCurrencyID())) {
-           Collection<String> currencies = getFile().getCurrencyTable().getCurrencies(getCurrencyNameSpace());
+           Collection<String> currencies = getGnucashFile().getCurrencyTable().getCurrencies(getCurrencyNameSpace());
 		LOGGER.warn("SimpleAccount.getBalance() - cannot transfer "
                    + "from our currency '"
                    + getCurrencyNameSpace() + "'-'"
                    + getCurrencyID()
                    + "' to the base-currency!"
-                   + " \n(we know " + getFile().getCurrencyTable().getNameSpaces().size()
+                   + " \n(we know " + getGnucashFile().getCurrencyTable().getNameSpaces().size()
                    + " currency-namespaces and "
                    + (currencies==null?"no":""+currencies.size())
                    + " currencies in our namespace)");

@@ -55,7 +55,7 @@ public interface GnucashTransaction extends Comparable<GnucashTransaction> {
      * The gnucash-file is the top-level class to contain everything.
      * @return the file we are associated with
      */
-    GnucashFile getFile();
+    GnucashFile getGnucashFile();
 
     /**
      * Do not modify the returned collection!
