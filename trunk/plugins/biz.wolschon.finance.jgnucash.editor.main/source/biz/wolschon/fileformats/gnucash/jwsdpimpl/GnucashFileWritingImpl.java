@@ -371,7 +371,9 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
 
 
     /**
-     * Calculate and set the correct valued for all the following count-data.
+     * Calculate and set the correct valued for all the following count-data.<br/>
+     * Also check the that only valid elements are in the book-element
+     * and that they have the correct order.
      *
      * <gnc:count-data cd:type="commodity">2</gnc:count-data>
      * <gnc:count-data cd:type="account">394</gnc:count-data>
@@ -430,7 +432,6 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
             } else if (element instanceof BookElementsGncGncEntry) {
                 GncEntry++;
             } else if (element instanceof BookElementsGncTemplateTransactions) {
-            } else if (element instanceof BookElementsGncGncTaxTable) {
             } else if (element instanceof BookElementsGncSchedxaction) {
             } else if (element instanceof BookElementsGncBudget) {
             } else if (element instanceof BookElementsGncPricedb) {
@@ -438,6 +439,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
                 throw new IllegalStateException("Unecpected element in GNC:Book found! <" + element.toString() + ">");
             }
         }
+
         setCountDataFor("commodity", commodity);
         setCountDataFor("account", account);
         setCountDataFor("transaction", transaction);
@@ -446,6 +448,9 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
         setCountDataFor("gnc:GncTaxTable", GncTaxTable);
         setCountDataFor("gnc:GncInvoice", GncInvoice);
         setCountDataFor("gnc:GncEntry", GncEntry);
+        // make sure the correct sort-order of the entity-types is obeyed in writing.
+        // (we do not enforce this in the xml-schema to allow for reading out of order files)
+        java.util.Collections.sort(bookElements, new BookElementsSorter());
     }
     /**
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableFile#getRootElement()
