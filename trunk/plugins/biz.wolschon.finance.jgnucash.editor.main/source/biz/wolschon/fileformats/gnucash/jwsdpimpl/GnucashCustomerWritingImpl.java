@@ -89,8 +89,8 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
      */
     public void remove() {
         GncGncCustomerType peer = getJwsdpPeer();
-        (getFile()).getRootElement().getGncBook().getBookElements().remove(peer);
-        (getFile()).removeCustomer(this);
+        (getGnucashFile()).getRootElement().getGncBook().getBookElements().remove(peer);
+        (getGnucashFile()).removeCustomer(this);
     }
 
 
@@ -180,8 +180,8 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
      * The gnucash-file is the top-level class to contain everything.
      * @return the file we are associated with
      */
-    public GnucashFileWritingImpl getWritableFile() {
-        return (GnucashFileWritingImpl) super.getFile();
+    public GnucashFileWritingImpl getWritableGnucashFile() {
+        return (GnucashFileWritingImpl) super.getGnucashFile();
     }
 
 
@@ -190,8 +190,8 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
      * @return the file we are associated with
      */
     @Override
-    public GnucashFileWritingImpl getFile() {
-        return (GnucashFileWritingImpl) super.getFile();
+    public GnucashFileWritingImpl getGnucashFile() {
+        return (GnucashFileWritingImpl) super.getGnucashFile();
     }
 
     /**
@@ -201,7 +201,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
     public void setCustomerNumber(final String number) {
         Object old = getCustomerNumber();
         getJwsdpPeer().setCustId(number);
-        getFile().setModified(true);
+        getGnucashFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
         if (propertyChangeSupport != null) {
@@ -216,7 +216,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
     public void setDiscount(final String discount) {
         Object old = getDiscount();
         getJwsdpPeer().setCustDiscount(discount);
-        getFile().setModified(true);
+        getGnucashFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
         if (propertyChangeSupport != null) {
@@ -231,7 +231,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
     public void setNotes(final String notes) {
         Object old = getNotes();
         getJwsdpPeer().setCustNotes(notes);
-        getFile().setModified(true);
+        getGnucashFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
         if (propertyChangeSupport != null) {
@@ -247,7 +247,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
     public void setName(final String name) {
         Object old = getName();
         getJwsdpPeer().setCustName(name);
-        getFile().setModified(true);
+        getGnucashFile().setModified(true);
 
         PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
         if (propertyChangeSupport != null) {
@@ -296,7 +296,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         } else */{
             try {
                 if (getJwsdpPeer().getCustAddr() == null) {
-                    getJwsdpPeer().setCustAddr(getFile().getObjectFactory().createAddress());
+                    getJwsdpPeer().setCustAddr(getGnucashFile().getObjectFactory().createAddress());
                 }
             } catch (JAXBException e) {
                 LOGGER.error("[JAXBException] Problem in "
@@ -315,7 +315,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
             getJwsdpPeer().getCustAddr().setAddrPhone(adr.getTel());
         }
 
-        getFile().setModified(true);
+        getGnucashFile().setModified(true);
     }
 
     /**
@@ -329,7 +329,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
         } else */{
             try {
                 if (getJwsdpPeer().getCustShipaddr() == null) {
-                    getJwsdpPeer().setCustShipaddr(getFile().getObjectFactory().createAddress());
+                    getJwsdpPeer().setCustShipaddr(getGnucashFile().getObjectFactory().createAddress());
                 }
             } catch (JAXBException e) {
                 LOGGER.error("[JAXBException] Problem in "
@@ -347,7 +347,7 @@ public class GnucashCustomerWritingImpl extends GnucashCustomerImpl implements G
             getJwsdpPeer().getCustShipaddr().setAddrFax(adr.getFax());
             getJwsdpPeer().getCustShipaddr().setAddrPhone(adr.getTel());
         }
-        getFile().setModified(true);
+        getGnucashFile().setModified(true);
     }
 
     /**

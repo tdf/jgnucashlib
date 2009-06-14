@@ -46,7 +46,7 @@ public interface GnucashWritableAccount extends GnucashAccount, GnucashObject, G
     /**
      * @return the file we belong to
      */
-    GnucashWritableFile getWritableFile();
+    GnucashWritableFile getWritableGnucashFile();
 
     /**
      * Change the user-definable name.

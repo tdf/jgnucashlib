@@ -78,7 +78,7 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
      * @return the file we are associated with
      */
     public GnucashFileWritingImpl getWritingFile()  {
-        return (GnucashFileWritingImpl) getFile();
+        return (GnucashFileWritingImpl) getGnucashFile();
     }
 
     /**

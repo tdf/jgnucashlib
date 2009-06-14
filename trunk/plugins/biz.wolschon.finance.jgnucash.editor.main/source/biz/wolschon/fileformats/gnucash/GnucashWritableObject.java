@@ -5,20 +5,9 @@
  */
 package biz.wolschon.fileformats.gnucash;
 
-//other imports
-import java.util.*;
-
-//automatically created logger for debug and error -output
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import javax.xml.bind.JAXBException;
 
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashObject;
-
-//automatically created propertyChangeListener-Support
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import javax.xml.bind.JAXBException;
 
 
 /**
@@ -35,7 +24,7 @@ public interface GnucashWritableObject {
     /**
      * @return the File we belong to.
      */
-    GnucashWritableFile getWritableFile();
+    GnucashWritableFile getWritableGnucashFile();
 
     /**
      * @param name the name of the user-defined attribute

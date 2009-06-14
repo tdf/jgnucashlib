@@ -38,7 +38,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  *
  */
-public interface GnucashWritableFile extends GnucashFile {
+public interface GnucashWritableFile extends GnucashFile, GnucashWritableObject {
 
     /**
      * @return true if this file has been modified.
@@ -64,7 +64,7 @@ public interface GnucashWritableFile extends GnucashFile {
     /**
      * Write the data to the given file.
      * That file becomes the new file returned by
-     * {@link GnucashFile#getFile()}
+     * {@link GnucashFile#getGnucashFile()}
      * @param file the file to write to
      * @throws IOException kn io-poblems
      * @throws JAXBException on xml-problems or content by the xml-schema

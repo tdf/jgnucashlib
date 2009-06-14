@@ -179,7 +179,7 @@ public class GnucashTransactionSplitWritingImpl extends
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit#setAccount(biz.wolschon.fileformats.gnucash.GnucashAccount)
      */
     public void setAccountID(final String accountId) {
-        setAccount(getTransaction().getFile().getAccountByID(accountId));
+        setAccount(getTransaction().getGnucashFile().getAccountByID(accountId));
     }
 
     /**
@@ -194,7 +194,7 @@ public class GnucashTransactionSplitWritingImpl extends
                         getJwsdpPeer().getSplitAccount().getValue());
         getJwsdpPeer().getSplitAccount().setType("guid");
         getJwsdpPeer().getSplitAccount().setValue(account.getId());
-        ((GnucashWritableFile) getFile()).setModified(true);
+        ((GnucashWritableFile) getGnucashFile()).setModified(true);
 
         if (old == null || !old.equals(account.getId())) {
             if (getPropertyChangeSupport() != null) {
@@ -259,7 +259,7 @@ public class GnucashTransactionSplitWritingImpl extends
 
         String old = getJwsdpPeer().getSplitQuantity();
         getJwsdpPeer().setSplitQuantity(n.toGnucashString());
-        ((GnucashWritableFile) getFile()).setModified(true);
+        ((GnucashWritableFile) getGnucashFile()).setModified(true);
         if (isCurrencyMatching()) {
             String oldvalue = getJwsdpPeer().getSplitValue();
             getJwsdpPeer().setSplitValue(n.toGnucashString());
@@ -305,7 +305,7 @@ public class GnucashTransactionSplitWritingImpl extends
         }
         String old = getJwsdpPeer().getSplitValue();
         getJwsdpPeer().setSplitValue(n.toGnucashString());
-        ((GnucashWritableFile) getFile()).setModified(true);
+        ((GnucashWritableFile) getGnucashFile()).setModified(true);
         if (isCurrencyMatching()) {
             String oldquantity = getJwsdpPeer().getSplitQuantity();
             getJwsdpPeer().setSplitQuantity(n.toGnucashString());
@@ -334,7 +334,7 @@ public class GnucashTransactionSplitWritingImpl extends
 
         String old = getJwsdpPeer().getSplitMemo();
         getJwsdpPeer().setSplitMemo(desc);
-        ((GnucashWritableFile) getFile()).setModified(true);
+        ((GnucashWritableFile) getGnucashFile()).setModified(true);
 
         if (old == null || !old.equals(desc)) {
             if (getPropertyChangeSupport() != null) {
@@ -361,7 +361,7 @@ public class GnucashTransactionSplitWritingImpl extends
 
         String old = getJwsdpPeer().getSplitAction();
         getJwsdpPeer().setSplitAction(action);
-        ((GnucashWritableFile) getFile()).setModified(true);
+        ((GnucashWritableFile) getGnucashFile()).setModified(true);
 
         if (old == null || !old.equals(action)) {
             if (getPropertyChangeSupport() != null) {
@@ -426,7 +426,7 @@ public class GnucashTransactionSplitWritingImpl extends
      *
      * ${@inheritDoc}.
      */
-    public GnucashWritableFile getWritableFile() {
-        return (GnucashWritableFile) getFile();
+    public GnucashWritableFile getWritableGnucashFile() {
+        return (GnucashWritableFile) getGnucashFile();
     }
 }

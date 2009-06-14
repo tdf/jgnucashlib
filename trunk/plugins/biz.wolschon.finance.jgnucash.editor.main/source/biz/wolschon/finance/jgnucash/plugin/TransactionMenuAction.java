@@ -47,7 +47,6 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
  *<br/><br/>
  * <b>Plugins of this kind apear in the context-menu for selected transactions}.</b>
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
- * TODO: implement the context-menu that is to support these plugins
  */
 public interface TransactionMenuAction {
 

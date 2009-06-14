@@ -205,7 +205,7 @@ class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
                         return;
                     }
                  try {
-                        GnucashAccount account = getTransaction().getFile().getAccountByIDorNameEx(aValue.toString(), aValue.toString());
+                        GnucashAccount account = getTransaction().getGnucashFile().getAccountByIDorNameEx(aValue.toString(), aValue.toString());
                         if (account != null) {
                             split.setAccount(account);
                         }
@@ -394,7 +394,7 @@ class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
         */
        private GnucashAccount getBalancingAccount(
                                                   final GnucashWritableTransaction transaction) {
-           return transaction.getFile().getAccountByIDorName("c3e524eccc4e66cde2dc8eb3666ff469", "Ausgleichskonto-EUR");
+           return transaction.getGnucashFile().getAccountByIDorName("c3e524eccc4e66cde2dc8eb3666ff469", "Ausgleichskonto-EUR");
        }
 
        /**

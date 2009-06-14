@@ -5,25 +5,21 @@
  */
 package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 
-//other imports
-import java.util.*;
-
 //automatically created logger for debug and error -output
-import org.apache.commons.logging.LogFactory;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.List;
+
+import javax.xml.bind.JAXBException;
+
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableObject;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType;
-
-//automatically created propertyChangeListener-Support
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 
 
 /**
@@ -43,25 +39,25 @@ public class GnucashWritableObjectHelper implements GnucashWritableObject {
     private GnucashObjectImpl gnucashObject;
 
     /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#getFile()
+     * {@inheritDoc}
      */
-    public GnucashWritableFile getWritableFile() {
-        return ((GnucashWritableObject) getGnucashObject()).getWritableFile();
-    }
-    
-    /**
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#getFile()
-     */
-    public GnucashWritableFile getFile() {
-        return ((GnucashWritableObject) getGnucashObject()).getWritableFile();
+    public GnucashWritableFile getWritableGnucashFile() {
+        return ((GnucashWritableObject) getGnucashObject()).getWritableGnucashFile();
     }
 
     /**
-     * @param gnucashObject
+     * {@inheritDoc}
      */
-    public GnucashWritableObjectHelper(final GnucashObjectImpl gnucashObject) {
+    public GnucashWritableFile getFile() {
+        return ((GnucashWritableObject) getGnucashObject()).getWritableGnucashFile();
+    }
+
+    /**
+     * @param aGnucashObject the object we are helping with
+     */
+    public GnucashWritableObjectHelper(final GnucashObjectImpl aGnucashObject) {
         super();
-        setGnucashObject(gnucashObject);
+        setGnucashObject(aGnucashObject);
     }
 
     /**
@@ -73,7 +69,7 @@ public class GnucashWritableObjectHelper implements GnucashWritableObject {
     @SuppressWarnings("unchecked")
     public void setUserDefinedAttribute(final String name, final String value) throws JAXBException {
 
-        List<Slot> slots = (List<Slot>) getGnucashObject().getSlots().getSlot();
+        List<Slot> slots = getGnucashObject().getSlots().getSlot();
         for (Slot slot : slots) {
             if (slot.getSlotKey().equals(name)) {
                 slot.getSlotValue().getContent().clear();
@@ -183,6 +179,7 @@ public synchronized void removePropertyChangeListener(
  * and hashCode.
  * @return className and hashCode
  */
+@Override
 public String toString() {
     return "GnucashWritableObjectHelper@" + hashCode();
 }

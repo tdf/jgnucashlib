@@ -594,46 +594,46 @@ public class JGnucash extends JGnucashViewer {
                 JOptionPane.ERROR_MESSAGE);
     }
 
-	/**
-	 * @param f
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws JAXBException
-	 */
-	private void saveFile() {
-		try {
+    /**
+     * @param f
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws JAXBException
+     */
+    private void saveFile() {
+        try {
             File oldfile = new File(getWritableModel().getFile().getAbsolutePath());
-            oldfile.renameTo(new File(oldfile.getName()+(new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.SS").format(new Date()))+".backup"));
+            oldfile.renameTo(new File(oldfile.getName() + (new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.SS").format(new Date()))+".backup"));
 
-			getWritableModel().writeFile(getWritableModel().getFile());
-			hasChanged = false;
-		} catch (FileNotFoundException e) {
-			File f = getWritableModel().getFile();
-			if (f == null) {
-				f = new File("unknown");
-			}
-			LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (file not found)", e);
-			JOptionPane.showMessageDialog(this, "Error",
-					"cannot save file '" + f.getAbsolutePath() + "' (file not found)",
-	                JOptionPane.ERROR_MESSAGE);
+            getWritableModel().writeFile(getWritableModel().getFile());
+            hasChanged = false;
+        } catch (FileNotFoundException e) {
+            File f = getWritableModel().getFile();
+            if (f == null) {
+                f = new File("unknown");
+            }
+            LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (file not found)", e);
+            JOptionPane.showMessageDialog(this, "Error",
+                    "cannot save file '" + f.getAbsolutePath() + "' (file not found)",
+                    JOptionPane.ERROR_MESSAGE);
         } catch (IOException e) {
-        	File f = getWritableModel().getFile();
-			if (f == null) {
-				f = new File("unknown");
-			}
-			LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (io-problem)", e);
-			JOptionPane.showMessageDialog(this, "Error",
-					"cannot save file '" + f.getAbsolutePath() + "' (io-problem)",
-	                JOptionPane.ERROR_MESSAGE);
+            File f = getWritableModel().getFile();
+            if (f == null) {
+                f = new File("unknown");
+            }
+            LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (io-problem)", e);
+            JOptionPane.showMessageDialog(this, "Error",
+                    "cannot save file '" + f.getAbsolutePath() + "' (io-problem)",
+                    JOptionPane.ERROR_MESSAGE);
         } catch (JAXBException e) {
-        	File f = getWritableModel().getFile();
-			if (f == null) {
-				f = new File("unknown");
-			}
-			LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)", e);
-			JOptionPane.showMessageDialog(this, "Error",
-					"cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)",
-	                JOptionPane.ERROR_MESSAGE);
+            File f = getWritableModel().getFile();
+            if (f == null) {
+                f = new File("unknown");
+            }
+            LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)", e);
+             JOptionPane.showMessageDialog(this, "Error",
+                    "cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)",
+                    JOptionPane.ERROR_MESSAGE);
         }
 	}
 
@@ -702,6 +702,11 @@ public class JGnucash extends JGnucashViewer {
     private Collection<TransactionSplitAction> myWritableSplitActions;
 
     /**
+     * The actions we have on accounts.
+     */
+    private Collection<AccountAction> myAccountActions;
+
+    /**
      * @return the {@link AccountAction} we have
      */
     @Override
@@ -713,6 +718,56 @@ public class JGnucash extends JGnucashViewer {
         }
         LOGGER.info("JGnucashEditor has " + (myWritableSplitActions == null ? "no" : myWritableSplitActions.size()) + " split-actions");
         return myWritableSplitActions;
+    }
+
+
+    /**
+     * @return the {@link AccountAction} we have
+     */
+    @Override
+    protected Collection<AccountAction> getAccountActions() {
+        if (myAccountActions == null) {
+            myAccountActions = super.getAccountActions();
+
+            PluginManager manager = getPluginManager();
+            // if we are configured for the plugin-api
+            if (manager != null) {
+                ExtensionPoint toolExtPoint = manager.getRegistry().getExtensionPoint(
+                                              getPluginDescriptor().getId(), "AccountAction");
+                for (Iterator<Extension> it = toolExtPoint.getConnectedExtensions().iterator(); it.hasNext();) {
+                    Extension ext = it.next();
+                    String pluginName = "unknown";
+
+                    try {
+                        getPluginManager().activatePlugin(ext.getDeclaringPluginDescriptor().getId());
+                        // Get plug-in class loader.
+                        ClassLoader classLoader = getPluginManager().getPluginClassLoader(
+                                                  ext.getDeclaringPluginDescriptor());
+                        // Load Tool class.
+                        Class toolCls = classLoader.loadClass(
+                                ext.getParameter("class").valueAsString());
+                        // Create Tool instance.
+                        Object o = toolCls.newInstance();
+                        if (!(o instanceof AccountAction)) {
+                            LOGGER.error("Plugin '" + pluginName + "' does not implement AccountAction-interface.");
+                            JOptionPane.showMessageDialog(this, "Error",
+                                    "The AccountAction-Plugin '" + pluginName + "'"
+                                    + " does not implement AccountAction-interface.",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            myAccountActions.add((AccountAction) o);
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("cannot load TransactionMenuAction-Plugin '" + pluginName + "'", e);
+                        JOptionPane.showMessageDialog(this, "Error",
+                                "Cannot load AccountAction-Plugin '" + pluginName + "'",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+        }
+        return myAccountActions;
     }
 
 }

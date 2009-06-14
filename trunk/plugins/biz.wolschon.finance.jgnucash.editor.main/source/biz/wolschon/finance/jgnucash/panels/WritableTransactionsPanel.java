@@ -105,8 +105,8 @@ public class WritableTransactionsPanel extends TransactionsPanel {
 
         /**
          * @param aWritableTransactionsPanel
-         * @param aExt
-         * @param aPluginName
+         * @param aExt the plugin to execute
+         * @param aPluginName the name to display
          */
         public TransactionMenuActionMenuAction(final Extension aExt,
                 final String aPluginName) {
@@ -354,8 +354,7 @@ public class WritableTransactionsPanel extends TransactionsPanel {
    private Component getTransactionTableContextMenu() {
        if (myContextMenu == null) {
            myContextMenu = new JPopupMenu();
-           // TODO add plugins id= TransactionMenuAction
-           //biz.wolschon.finance.jgnucash.plugin.TransactionMenuAction
+
            PluginManager manager = getPluginManager();
            // if we are configured for the plugin-api
            if (manager != null) {

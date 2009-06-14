@@ -174,8 +174,8 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         throw new IllegalStateException("cannot remove account while it contains child-accounts!");
     }
 
-     getWritableFile().getRootElement().getGncBook().getBookElements().remove(getJwsdpPeer());
-     getWritableFile().removeAccount(this);
+     getWritableGnucashFile().getRootElement().getGncBook().getBookElements().remove(getJwsdpPeer());
+     getWritableGnucashFile().removeAccount(this);
     }
 
 
@@ -183,8 +183,8 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * The gnucash-file is the top-level class to contain everything.
      * @return the file we are associated with
      */
-    public GnucashWritableFile getWritableFile() {
-     return (GnucashFileWritingImpl) getFile();
+    public GnucashWritableFile getWritableGnucashFile() {
+     return (GnucashFileWritingImpl) getGnucashFile();
     }
 
 
@@ -315,7 +315,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
      * set getWritableFile().setModified(true).
      */
     protected void setIsModified() {
-        GnucashWritableFile writableFile = getWritableFile();
+        GnucashWritableFile writableFile = getWritableGnucashFile();
         writableFile.setModified(true);
     }
 
@@ -453,7 +453,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         if (newParent == null || newParent.trim().length() == 0) {
             setParentAccount(null);
         } else {
-            setParentAccount(getFile().getAccountByID(newParent));
+            setParentAccount(getGnucashFile().getAccountByID(newParent));
         }
     }
 
@@ -480,7 +480,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         Object old = null;
         biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType.ActParentType parent = getJwsdpPeer().getActParent();
         if (parent == null) {
-            parent = ((GnucashFileWritingImpl) getWritableFile())
+            parent = ((GnucashFileWritingImpl) getWritableGnucashFile())
                         .getObjectFactory().createGncAccountTypeActParentType();
             parent.setType("guid");
             parent.setValue(parentAccount.getId());

@@ -194,7 +194,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         jsEngine.put("value", value);
         jsEngine.put("transaction", myAccountSplit.getTransaction());
         jsEngine.put("myAccountSplit", myAccountSplit);
-        jsEngine.put("file", myAccountSplit.getWritableFile());
+        jsEngine.put("file", myAccountSplit.getWritableGnucashFile());
         FixedPointNumber ustValue = ((FixedPointNumber) value.clone())
                 .divideBy(new FixedPointNumber("-1,19")).multiply(
                         new FixedPointNumber("0,19")); // TODO: get tax-% from
@@ -238,7 +238,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
 
         try {
             GnucashWritableTransaction transaction = getMyAccount()
-                    .getWritableFile().createWritableTransaction();
+                    .getWritableGnucashFile().createWritableTransaction();
             transaction.setDescription(text.replace('\n', ' '));
             transaction.setDatePosted(date);
             transaction.setCurrencyNameSpace(getMyAccount()
@@ -281,7 +281,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                                     .getProperty(
                                             getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT
                                                     + scriptnum);
-                            otherAccount = getMyAccount().getWritableFile()
+                            otherAccount = getMyAccount().getWritableGnucashFile()
                                     .getAccountByID(alternateAccountID);
 
                             if (otherAccount == null) {
@@ -568,7 +568,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             }
 
             GnucashWritableTransaction transaction = getMyAccount()
-                    .getWritableFile().createWritableTransaction();
+                    .getWritableGnucashFile().createWritableTransaction();
             transaction.setDescription("Saldo: " + aValue + " "
                     + saldoOKStr + " (imported via HBCI on " + DateFormat.getDateInstance().format(new Date()) + ")");
             transaction.setDatePosted(timestamp);
@@ -602,7 +602,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      *             if account-creation fails-
      */
     protected GnucashWritableAccount getDefaultAccount() throws JAXBException {
-        GnucashWritableFile writableFile = getMyAccount().getWritableFile();
+        GnucashWritableFile writableFile = getMyAccount().getWritableGnucashFile();
         String accountID = getMyProperties().getProperty(
                 getPluginName() + SETTINGS_DEFAULTTARGETACCOUNT);
         GnucashWritableAccount account = accountID == null ? null

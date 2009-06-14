@@ -83,6 +83,7 @@ import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransaction;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCommodityType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCurrencyType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.impl.GncPricedbTypeImpl.PriceTypeImpl.PriceCommodityTypeImpl;
@@ -1480,5 +1481,30 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
         getRootElement().getGncBook().getBookElements().remove(impl.getJwsdpPeer());
         this.decrementCountDataFor("gnc:GncInvoice");
         setModified(true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GnucashWritableFile getWritableGnucashFile() {
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void setUserDefinedAttribute(final String aName, final String aValue)
+                                                                    throws JAXBException {
+        List<Slot> slots = getRootElement().getGncBook().getBookSlots().getSlot();
+        for (Slot slot : slots) {
+            if (slot.getSlotKey().equals(aName)) {
+                slot.getSlotValue().getContent().clear();
+                slot.getSlotValue().getContent().add(aValue);
+                return;
+            }
+        }
     }
 }

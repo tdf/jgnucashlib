@@ -225,7 +225,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
             };
             accountsCombo.setToolTipText("Account-name"); //make sure a tooltip-manager exists
             if (transaction != null) {
-                Collection<GnucashAccount> accounts = transaction.getFile().getAccounts();
+                Collection<GnucashAccount> accounts = transaction.getGnucashFile().getAccounts();
                 for (GnucashAccount gnucashAccount : accounts) {
                     accountsCombo.addItem(gnucashAccount.getQualifiedName());
                 }

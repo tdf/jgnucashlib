@@ -452,15 +452,15 @@ public class GnucashInvoiceEntryWritingImpl extends GnucashInvoiceEntryImpl impl
     /**
      * {@inheritDoc}
      */
-    public GnucashWritableFile getWritableFile() {
-        return (GnucashWritableFile) super.getFile();
+    public GnucashWritableFile getWritableGnucashFile() {
+        return (GnucashWritableFile) super.getGnucashFile();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public GnucashWritableFile getFile() {
-        return (GnucashWritableFile) super.getFile();
+    public GnucashWritableFile getGnucashFile() {
+        return (GnucashWritableFile) super.getGnucashFile();
     }
 }
