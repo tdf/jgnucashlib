@@ -709,7 +709,7 @@ public class JGnucashViewer extends JFrame implements Application {
     /**
      * @return the {@link AccountAction} we have
      */
-    private Collection<AccountAction> getAccountActions() {
+    protected Collection<AccountAction> getAccountActions() {
         if (myAccountActions == null) {
             myAccountActions = new LinkedList<AccountAction>();
             myAccountActions.add(new OpenAccountInNewTab(getJTabbedPane()));
