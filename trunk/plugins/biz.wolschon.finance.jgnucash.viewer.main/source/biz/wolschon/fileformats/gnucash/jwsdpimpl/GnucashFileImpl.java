@@ -387,7 +387,7 @@ public class GnucashFileImpl implements GnucashFile {
     }
 
     /**
-     * @see #getFile()
+     * @see #getGnucashFile()
      */
     private File file;
 
@@ -448,6 +448,13 @@ public class GnucashFileImpl implements GnucashFile {
      */
     protected Map<String, GnucashCustomer> customerid2customer;
 
+
+    /**
+     * Helper to implement the {@link GnucashObject}-interface
+     * without having the same code twice.
+     */
+    private GnucashObjectImpl myGnucashObject;
+
     /**
      * @return the underlying JAXB-element
      */
@@ -472,6 +479,7 @@ public class GnucashFileImpl implements GnucashFile {
         // fill prices
 
         loadPriceDatabase(pRootElement);
+        myGnucashObject = new GnucashObjectImpl(pRootElement.getGncBook().getBookSlots(), this);
 
 
         // fill maps
@@ -1049,9 +1057,9 @@ public class GnucashFileImpl implements GnucashFile {
     }
 
     /**
-     *
-     * @see biz.wolschon.fileformats.gnucash.GnucashFile#getFile()
+     * {@inheritDoc}
      */
+    @Override
     public File getFile() {
         return file;
     }
@@ -1700,6 +1708,32 @@ public class GnucashFileImpl implements GnucashFile {
             }
             return reat;
         };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GnucashFile getGnucashFile() {
+        return this;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getUserDefinedAttribute(final String aName) {
+        return myGnucashObject.getUserDefinedAttribute(aName);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<String> getUserDefinedAttributeKeys() {
+        return myGnucashObject.getUserDefinedAttributeKeys();
     }
 
 

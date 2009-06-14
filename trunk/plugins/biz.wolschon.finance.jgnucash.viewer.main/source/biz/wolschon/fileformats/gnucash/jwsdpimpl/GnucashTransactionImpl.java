@@ -286,10 +286,10 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
 
     /**
      *
-     * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getFile()
+     * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getGnucashFile()
      */
     @Override
-    public GnucashFile getFile() {
+    public GnucashFile getGnucashFile() {
         return file;
     }
 

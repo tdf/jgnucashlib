@@ -110,7 +110,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      */
     public GnucashInvoice getInvoice() {
         if (myInvoice == null) {
-            myInvoice = getFile().getInvoiceByID(getInvoiceID());
+            myInvoice = getGnucashFile().getInvoiceByID(getInvoiceID());
             if (myInvoice == null) {
                 throw new IllegalStateException("no invoice with id '"
                                  + getInvoiceID()
@@ -150,7 +150,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
                          + "' is taxable but has empty id for the taxtable");
                 return null;
             }
-            myTaxtable = getFile().getTaxTableByID(taxTableId);
+            myTaxtable = getGnucashFile().getTaxTableByID(taxTableId);
 
             if (myTaxtable == null) {
                 System.err.println("Invoice with id '"

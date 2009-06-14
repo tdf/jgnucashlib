@@ -55,7 +55,7 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
     public GnucashTransactionSplitImpl(
             final GncTransactionType.TrnSplitsType.TrnSplitType peer,
             final GnucashTransaction transaction) throws JAXBException {
-        super((peer.getSplitSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getSplitSlots(), transaction.getFile());
+        super((peer.getSplitSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getSplitSlots(), transaction.getGnucashFile());
         this.jwsdpPeer = peer;
         this.myTransaction = transaction;
 
@@ -79,7 +79,7 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
 
         String lot = getLotID();
         if (lot != null) {
-            for (GnucashInvoice invoice : getTransaction().getFile().getInvoices()) {
+            for (GnucashInvoice invoice : getTransaction().getGnucashFile().getInvoices()) {
             	String lotID = invoice.getLotID();
                 if (lotID != null && lotID.equals(lot)) {
                     // if action=="Rechnung" this is a split of the post-transaction,
@@ -170,7 +170,7 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
      * @see biz.wolschon.fileformats.gnucash.GnucashTransactionSplit#getAccount()
      */
     public GnucashAccount getAccount() {
-        return myTransaction.getFile().getAccountByID(getAccountID());
+        return myTransaction.getGnucashFile().getAccountByID(getAccountID());
     }
 
     /**

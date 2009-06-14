@@ -115,7 +115,7 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
      * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getChildren()
      */
     public Collection getChildren() {
-        return getFile().getAccountsByParentID(getId());
+        return getGnucashFile().getAccountsByParentID(getId());
     }
 
     /**

@@ -45,6 +45,6 @@ public interface GnucashObject {
     /**
      * @return the File we belong to.
      */
-    GnucashFile getFile();
+    GnucashFile getGnucashFile();
 
 }

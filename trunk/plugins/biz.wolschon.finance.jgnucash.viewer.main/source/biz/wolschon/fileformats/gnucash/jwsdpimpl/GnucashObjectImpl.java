@@ -8,16 +8,6 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 //other imports
 
 //automatically created logger for debug and error -output
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
-import biz.wolschon.fileformats.gnucash.GnucashFile;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotsType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType;
-
-//automatically created propertyChangeListener-Support
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -25,6 +15,15 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import biz.wolschon.fileformats.gnucash.GnucashFile;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotsType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType;
 
 
 
@@ -48,22 +47,21 @@ public class GnucashObjectImpl implements GnucashObject {
     /**
      * The file we belong to.
      */
-    private GnucashFile myFile;
-    
-    
+    private final GnucashFile myFile;
+
+
     /**
-     * 
      * @return all keys that can be used with ${@link #getUserDefinedAttribute(String)}}.
      */
     @SuppressWarnings("unchecked")
-    public Collection<String> getUserDefinedAttributeKeys() {    	
-    	List<Slot> slots = (List<Slot>) getSlots().getSlot();
-    	List<String> retval = new ArrayList<String>(slots.size());
+    public Collection<String> getUserDefinedAttributeKeys() {
+        List<Slot> slots = getSlots().getSlot();
+        List<String> retval = new ArrayList<String>(slots.size());
 
         for (Slot slot : slots) {
-        	retval.add(slot.getSlotKey());
+            retval.add(slot.getSlotKey());
        }
-        
+
         return retval;
     }
 
@@ -74,7 +72,7 @@ public class GnucashObjectImpl implements GnucashObject {
     @SuppressWarnings("unchecked")
     public String getUserDefinedAttribute(final String name) {
 
-         List<Slot> slots = (List<Slot>) getSlots().getSlot();
+         List<Slot> slots = getSlots().getSlot();
          for (Slot slot : slots) {
             if (slot.getSlotKey().equals(name)) {
             	Object value = slot.getSlotValue().getContent().get(0);
@@ -186,6 +184,7 @@ public class GnucashObjectImpl implements GnucashObject {
      * and hashCode.
      * @return className and hashCode
      */
+    @Override
     public String toString() {
         return "GnucashObjectImpl@" + hashCode();
     }
@@ -208,11 +207,11 @@ public class GnucashObjectImpl implements GnucashObject {
             throw new IllegalArgumentException("null 'slots' given!");
         }
 
-        Object old = this.mySlots;
+        Object old = mySlots;
         if (old == slots) {
             return; // nothing has changed
         }
-        this.mySlots = slots;
+        mySlots = slots;
 
         // we have an xsd-problem saving empty slots so we add a dummy-value
         if (slots.getSlot().isEmpty()) {
@@ -253,7 +252,7 @@ public class GnucashObjectImpl implements GnucashObject {
      * @return Returns the file.
      * @see ${@link #myFile}
      */
-    public GnucashFile getFile() {
+    public GnucashFile getGnucashFile() {
         return myFile;
     }
 

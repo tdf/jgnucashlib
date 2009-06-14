@@ -85,7 +85,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
 
         List<GnucashJob> retval = new LinkedList<GnucashJob>();
 
-        for (GnucashJob job : getFile().getJobs()) {
+        for (GnucashJob job : getGnucashFile().getJobs()) {
             if (job.getCustomerId().equals(getId())) {
                 retval.add(job);
             }
@@ -117,7 +117,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
      */
     public int getOpenInvoices() throws JAXBException {
         int count = 0;
-        for (GnucashInvoice invoice : getFile().getInvoices()) {
+        for (GnucashInvoice invoice : getGnucashFile().getInvoices()) {
             if (invoice.getCustomer() != this) {
                 continue;
             }
@@ -137,7 +137,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
     public FixedPointNumber getIncomeGenerated() {
         FixedPointNumber retval = new FixedPointNumber();
 
-        for (GnucashInvoice invoice : getFile().getInvoices()) {
+        for (GnucashInvoice invoice : getGnucashFile().getInvoices()) {
             if (invoice.getCustomer() != this) {
                 continue;
             }
@@ -180,7 +180,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
     public FixedPointNumber getOutstandingValue() throws JAXBException  {
         FixedPointNumber retval = new FixedPointNumber();
 
-        for (GnucashInvoice invoice : getFile().getInvoices()) {
+        for (GnucashInvoice invoice : getGnucashFile().getInvoices()) {
             if (invoice.getCustomer() != this) {
                 continue;
             }
@@ -237,7 +237,7 @@ public class GnucashCustomerImpl extends GnucashObjectImpl implements GnucashCus
         if (id == null) {
             return null;
         }
-        return getFile().getTaxTableByID(id);
+        return getGnucashFile().getTaxTableByID(id);
     }
 
 
