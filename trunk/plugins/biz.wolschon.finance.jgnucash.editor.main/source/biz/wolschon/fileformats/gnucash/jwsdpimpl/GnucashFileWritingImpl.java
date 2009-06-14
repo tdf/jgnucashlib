@@ -62,6 +62,7 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashWritableJob;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncCommodity;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncCustomer;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEntry;
@@ -69,6 +70,8 @@ import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncIn
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncJob;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncSchedxaction;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncTemplateTransactions;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccount;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncCommodityType;
@@ -392,6 +395,22 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
         int GncTaxTable = 0;
         int GncInvoice = 0;
         int GncEntry = 0;
+        /*
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncTemplateTransactions}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncInvoice}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEntry}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncJob}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncCommodity}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncCustomer}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncSchedxaction}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccount}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb}
+         * {@link biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransaction}
+         */
         List<Object> bookElements = getRootElement().getGncBook().getBookElements();
         for (Object element : bookElements) {
             if (element instanceof BookElementsGncCommodity) {
@@ -410,6 +429,12 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
                 GncInvoice++;
             } else if (element instanceof BookElementsGncGncEntry) {
                 GncEntry++;
+            } else if (element instanceof BookElementsGncTemplateTransactions) {
+            } else if (element instanceof BookElementsGncGncTaxTable) {
+            } else if (element instanceof BookElementsGncCommodity) {
+            } else if (element instanceof BookElementsGncSchedxaction) {
+            } else if (element instanceof BookElementsGncBudget) {
+            } else if (element instanceof BookElementsGncPricedb) {
             } else {
                 throw new IllegalStateException("Unecpected element in GNC:Book found! <" + element.toString() + ">");
             }
