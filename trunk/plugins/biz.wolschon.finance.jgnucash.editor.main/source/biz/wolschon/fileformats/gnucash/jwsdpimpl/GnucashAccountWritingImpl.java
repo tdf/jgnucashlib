@@ -104,7 +104,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
     private static GncAccountType createAccount(final GnucashFileWritingImpl file, final String accountguid) throws JAXBException {
         ObjectFactory factory = file.getObjectFactory();
 
-        GncAccountType account = factory.createGncAccountType();
+        GncAccountType account = factory.createGncAccount();
         //left unset account.setActCode();
         account.setActCommodityScu((short) 100); // x,yz
         account.setActDescription("no description yet");

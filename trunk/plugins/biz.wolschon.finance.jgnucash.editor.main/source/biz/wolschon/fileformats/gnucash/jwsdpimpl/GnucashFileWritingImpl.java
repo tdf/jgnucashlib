@@ -292,7 +292,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
             List bookElements = this.getRootElement().getGncBook().getBookElements();
             for (Object bookElement : bookElements) {
                 if (bookElement instanceof GncGncTaxTableType) {
-                    GncGncTaxTableType jwsdpPeer = (GncGncTaxTableType) bookElement;
+                    BookElementsGncGncTaxTable jwsdpPeer = (BookElementsGncGncTaxTable) bookElement;
                     GnucashTaxTableImpl gnucashTaxTable = new GnucashTaxTableImpl(jwsdpPeer, this);
                     taxTablesById.put(gnucashTaxTable.getId(), gnucashTaxTable);
                 }
@@ -410,6 +410,8 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
                 GncInvoice++;
             } else if (element instanceof BookElementsGncGncEntry) {
                 GncEntry++;
+            } else {
+                throw new IllegalStateException("Unecpected element in GNC:Book found! <" + element.toString() + ">");
             }
         }
         setCountDataFor("commodity", commodity);
@@ -477,7 +479,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
      * @throws JAXBException on jaxb-problems
      */
     protected GncGncInvoiceType createGncGncInvoiceType() throws JAXBException {
-        GncGncInvoiceType retval =  getObjectFactory().createGncGncInvoiceType();
+        GncGncInvoiceType retval =  getObjectFactory().createBookElementsGncGncInvoice();
         incrementCountDataFor("gnc:GncInvoice");
         return retval;
     }
@@ -488,7 +490,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
      * @throws JAXBException on jaxb-problems
      */
     protected GncGncEntryType createGncGncEntryType() throws JAXBException {
-        GncGncEntryType retval = getObjectFactory().createGncGncEntryType();
+        GncGncEntryType retval = getObjectFactory().createBookElementsGncGncEntry();
         incrementCountDataFor("gnc:GncEntry");
         return retval;
     }
@@ -498,7 +500,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
      * @throws JAXBException on jaxb-problems
      */
     protected GncGncCustomerType createGncGncCustomerType() throws JAXBException {
-        GncGncCustomerType retval = getObjectFactory().createGncGncCustomerType();
+        GncGncCustomerType retval = getObjectFactory().createBookElementsGncGncCustomer();
         incrementCountDataFor("gnc:GncCustomer");
         return retval;
     }
@@ -509,7 +511,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
      * @throws JAXBException on jaxb-errors
      */
     public GncGncJobType createGncGncJobType() throws JAXBException {
-        GncGncJobType retval = getObjectFactory().createGncGncJobType();
+        GncGncJobType retval = getObjectFactory().createBookElementsGncGncJob();
         incrementCountDataFor("gnc:GncJob");
         return retval;
     }
