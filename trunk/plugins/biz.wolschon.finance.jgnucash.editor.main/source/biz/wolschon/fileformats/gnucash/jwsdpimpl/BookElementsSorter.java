@@ -1,5 +1,5 @@
 /**
- * BookElementsSorter.javaTransactionMenuAction.java
+ * BookElementsSorter.java
  * created: 14.06.2009
  * (c) 2008 by <a href="http://Wolschon.biz">Wolschon Softwaredesign und Beratung</a>
  * This file is part of jgnucashLib-GPL by Marcus Wolschon <a href="mailto:Marcus@Wolscon.biz">Marcus@Wolscon.biz</a>.
