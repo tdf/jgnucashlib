@@ -176,7 +176,9 @@ public class SplitterTool implements ToolPlugin {
         // remove all old Transactions from the existing file
         for (GnucashTransaction transaction : allTransaction) {
             GnucashTransaction removeMe = aWritableModel.getTransactionByID(transaction.getId());
-            aWritableModel.removeTransaction((GnucashWritableTransaction) removeMe);
+            if (removeMe.getDatePosted().before(splitDate) || removeMe.getDatePosted().equals(splitDate)) {
+                aWritableModel.removeTransaction((GnucashWritableTransaction) removeMe);
+            }
         }
 
         return "";
