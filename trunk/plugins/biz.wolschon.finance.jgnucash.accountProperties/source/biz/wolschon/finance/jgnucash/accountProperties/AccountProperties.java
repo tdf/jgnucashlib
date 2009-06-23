@@ -35,6 +35,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collection;
@@ -278,7 +279,23 @@ public class AccountProperties implements AccountAction {
             myPropertySheet.setMode(PropertySheetPanel.VIEW_AS_CATEGORIES);
             myPropertySheet.setDescriptionVisible(true);
 
-            //        SavingPropertyChangeListener savingPropertyChangeListener = new SavingPropertyChangeListener();
+            myPropertySheet.addPropertySheetChangeListener(new PropertyChangeListener() {
+
+                @Override
+                public void propertyChange(final PropertyChangeEvent aEvt) {
+                    Object property = aEvt.getSource();
+                    if (property instanceof DefaultProperty) {
+                        DefaultProperty prop = (DefaultProperty) property;
+                        try {
+                            myAccount.setUserDefinedAttribute(prop.getName(),
+                                    prop.getValue().toString());
+                        } catch (Exception e) {
+                            // TODO: handle exception
+                        }
+                    }
+                }
+
+            });
             //
             updateCustomAttributesPanel();
             //        for (ConfigurationSetting setting : getConfigSection().getSettings()) {
@@ -310,7 +327,10 @@ public class AccountProperties implements AccountAction {
         Collection<String> keys = myAccount.getUserDefinedAttributeKeys();
         for (String key : keys) {
             DefaultProperty property = new DefaultProperty();
+            property.setName(key);
             property.setDisplayName(key);
+            property.setEditable(true);
+            //property.setCategory("");
             property.setValue(myAccount.getUserDefinedAttribute(key));
             myPropertySheet.addProperty(property);
         }
