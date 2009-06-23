@@ -88,7 +88,7 @@ public class JGnucashViewer extends JFrame implements Application {
      */
     private static final Log LOGGER = LogFactory.getLog(JGnucashViewer.class);
 
-    GnucashFile myModel;
+    private GnucashFile myModel;
 
 
     private javax.swing.JPanel jContentPane = null;
@@ -673,8 +673,13 @@ public class JGnucashViewer extends JFrame implements Application {
 
                     @Override
                     public boolean isEnabled() {
-                        accountAction.setAccount(getSelectedAccount());
-                        return accountAction.isEnabled();
+                        try {
+                            accountAction.setAccount(getSelectedAccount());
+                            return accountAction.isEnabled();
+                        } catch (Exception e) {
+                            LOGGER.error("cannot query isEnabled for AccountAction", e);
+                            return false;
+                        }
                     }
 
                     @Override
@@ -694,8 +699,12 @@ public class JGnucashViewer extends JFrame implements Application {
 
                     @Override
                     public void actionPerformed(final ActionEvent aE) {
-                        accountAction.setAccount(getSelectedAccount());
-                        accountAction.actionPerformed(aE);
+                        try {
+                            accountAction.setAccount(getSelectedAccount());
+                            accountAction.actionPerformed(aE);
+                        } catch (Exception e) {
+                            LOGGER.error("cannot execute AccountAction", e);
+                        }
                     }
 
                 });

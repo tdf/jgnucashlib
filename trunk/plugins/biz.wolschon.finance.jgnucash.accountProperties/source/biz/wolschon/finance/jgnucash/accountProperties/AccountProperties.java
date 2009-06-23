@@ -35,6 +35,8 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -46,10 +48,14 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-import javax.xml.bind.JAXBException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
@@ -58,6 +64,7 @@ import biz.wolschon.finance.jgnucash.actions.AccountAction;
 import com.l2fprod.common.propertysheet.DefaultProperty;
 import com.l2fprod.common.propertysheet.Property;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
+import com.l2fprod.common.propertysheet.PropertySheetTableModel;
 
 /**
  * (c) 2009 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
@@ -69,6 +76,11 @@ import com.l2fprod.common.propertysheet.PropertySheetPanel;
  * @author  <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public class AccountProperties implements AccountAction {
+
+    /**
+     * Our logger for debug- and error-output.
+     */
+    private static final Log LOGGER = LogFactory.getLog(AccountProperties.class);
 
     /**
      * The account we open.
@@ -133,6 +145,16 @@ public class AccountProperties implements AccountAction {
     private JButton myCloseButton;
 
     /**
+     * Popup-menu on properties.
+     */
+    private JPopupMenu myPropertyMenu;
+
+    /**
+     * The menu-item in the {@link #myPropertyMenu} to remove a custom attribute.
+     */
+    private JMenuItem myRemoveMenuItem;
+
+    /**
      * Initialize.
      */
     public AccountProperties() {
@@ -154,6 +176,10 @@ public class AccountProperties implements AccountAction {
     @Override
     public void setAccount(final GnucashAccount anAccount) {
         myAccount = (GnucashWritableAccount) anAccount;
+        if (myAccount != null) {
+            LOGGER.debug("setAccount(" +  myAccount.getName() + ")");
+            updateCustomAttributesPanel();
+        }
     }
 
     /**
@@ -290,9 +316,26 @@ public class AccountProperties implements AccountAction {
                             myAccount.setUserDefinedAttribute(prop.getName(),
                                     prop.getValue().toString());
                         } catch (Exception e) {
-                            // TODO: handle exception
+                            LOGGER.error("error in writing userDefinedAttribute", e);
                         }
                     }
+                }
+
+            });
+            myPropertySheet.getTable().addMouseListener(new MouseAdapter() {
+
+                /* (non-Javadoc)
+                 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+                 */
+                @Override
+                public void mouseClicked(final MouseEvent aE) {
+                    LOGGER.debug("mouse clicked isPoupTrigger=" + aE.isPopupTrigger()
+                            + " button=" + aE.getButton());
+                    if (aE.isPopupTrigger() || aE.getButton() == MouseEvent.BUTTON3) {
+                        JPopupMenu menu = getPropertyPopup();
+                        menu.show(myPropertySheet, aE.getX(), aE.getY());
+                    }
+                    super.mouseClicked(aE);
                 }
 
             });
@@ -319,9 +362,20 @@ public class AccountProperties implements AccountAction {
      * Update the PropertySheet.
      */
     private void updateCustomAttributesPanel() {
+        if (myPropertySheet == null) {
+            LOGGER.debug("updateCustomAttributesPanel() myPropertySheet is null");
+            return;
+        }
         Property[] properties = myPropertySheet.getProperties();
-        for (Property property : properties) {
-            myPropertySheet.removeProperty(property);
+        if (properties != null) {
+            LOGGER.debug("updateCustomAttributesPanel() "
+                    + properties.length + " attributes to remove from panel");
+            for (Property property : properties) {
+                myPropertySheet.removeProperty(property);
+            }
+        } else {
+            LOGGER.debug("updateCustomAttributesPanel() "
+                    + "no attributes to remove from panel");
         }
 
         Collection<String> keys = myAccount.getUserDefinedAttributeKeys();
@@ -331,8 +385,13 @@ public class AccountProperties implements AccountAction {
             property.setDisplayName(key);
             property.setEditable(true);
             //property.setCategory("");
+            property.setType(String.class);
             property.setValue(myAccount.getUserDefinedAttribute(key));
             myPropertySheet.addProperty(property);
+        }
+        if (myPropertySheet.getProperties().length > 0
+                && myPropertySheet.getProperties()[0].getName().equals("dummy")) {
+            myPropertySheet.removeProperty(myPropertySheet.getProperties()[0]);
         }
     }
 
@@ -384,11 +443,13 @@ public class AccountProperties implements AccountAction {
                 @Override
                 public void actionPerformed(final ActionEvent aE) {
                     try {
+                        LOGGER.debug("adding user-defined attribute '"
+                                + getCustomAttributeName().getText() + "' to '"
+                                + getCustomAttributeValue().getText() + "'");
                         (myAccount).setUserDefinedAttribute(getCustomAttributeName().getText(), getCustomAttributeValue().getText());
                         updateCustomAttributesPanel();
-                    } catch (JAXBException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                    } catch (Exception e) {
+                        LOGGER.error("error in updateCustomAttributesPanel", e);
                     }
                 }
 
@@ -398,4 +459,37 @@ public class AccountProperties implements AccountAction {
     }
 
 
+    /**
+     * @return Popup-menu on properties.
+     */
+    protected JPopupMenu getPropertyPopup() {
+        if (myPropertyMenu == null) {
+            myPropertyMenu = new JPopupMenu();
+            myPropertyMenu.add(getRemoveMenuItem());
+        }
+        return myPropertyMenu;
+    }
+
+    /**
+     * @return The menu-item in the {@link #myPropertyMenu} to remove a custom attribute.
+     */
+    private JMenuItem getRemoveMenuItem() {
+        if (myRemoveMenuItem == null) {
+            myRemoveMenuItem = new JMenuItem("remove");
+            myRemoveMenuItem.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(final ActionEvent aE) {
+                    int selectedRow = myPropertySheet.getTable().getSelectedRow();
+                    PropertySheetTableModel model = ((PropertySheetTableModel) myPropertySheet.getTable().getModel());
+                    LOGGER.debug("selected for deletion: #" + selectedRow + " of " + model.getProperties().length);
+                    Property property = model.getProperties()[selectedRow - 1];
+                    LOGGER.debug("selected for deletion: " + property.getName());
+                    model.removeProperty(property);
+                }
+
+            });
+        }
+        return myRemoveMenuItem;
+    }
 }

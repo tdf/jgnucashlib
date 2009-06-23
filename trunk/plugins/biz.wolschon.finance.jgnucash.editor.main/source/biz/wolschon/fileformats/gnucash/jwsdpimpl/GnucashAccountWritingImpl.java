@@ -63,12 +63,16 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
     /**
      * Our helper to implement the GnucashWritableObject-interface.
      */
-    private final GnucashWritableObjectHelper helper = new GnucashWritableObjectHelper(super.helper);
+    private GnucashWritableObjectHelper helper;
 
     /**
+     * {@inheritDoc}
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableObject#setUserDefinedAttribute(java.lang.String, java.lang.String)
      */
     public void setUserDefinedAttribute(final String name, final String value) throws JAXBException {
+        if (helper == null) {
+            helper = new GnucashWritableObjectHelper(super.helper);
+        }
         helper.setUserDefinedAttribute(name, value);
     }
 

@@ -49,7 +49,8 @@ public class GnucashWritableObjectHelper implements GnucashWritableObject {
      * {@inheritDoc}
      */
     public GnucashWritableFile getFile() {
-        return ((GnucashWritableObject) getGnucashObject()).getWritableGnucashFile();
+        return (GnucashWritableFile) getGnucashObject().getGnucashFile();
+        //return ((GnucashWritableObject) getGnucashObject()).getWritableGnucashFile();
     }
 
     /**
