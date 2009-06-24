@@ -467,9 +467,10 @@ public class GnucashFileImpl implements GnucashFile {
      *
      * @param pRootElement
      *            the new root-element
+     * @throws JAXBException if we cannot create a potentially missingg SLOTS-element in XML.
      */
     @SuppressWarnings("unchecked")
-    protected void setRootElement(final GncV2 pRootElement) {
+    protected void setRootElement(final GncV2 pRootElement) throws JAXBException {
         if (pRootElement == null) {
             throw new IllegalArgumentException(
                     "null not allowed for field this.rootElement");
@@ -479,6 +480,9 @@ public class GnucashFileImpl implements GnucashFile {
         // fill prices
 
         loadPriceDatabase(pRootElement);
+        if (pRootElement.getGncBook().getBookSlots() == null) {
+            pRootElement.getGncBook().setBookSlots((new ObjectFactory()).createSlotsType());
+        }
         myGnucashObject = new GnucashObjectImpl(pRootElement.getGncBook().getBookSlots(), this);
 
 

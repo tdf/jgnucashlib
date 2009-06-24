@@ -44,6 +44,9 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
     private static final Log LOGGER = LogFactory.getLog(GnucashAccountImpl.class);
 
 
+    /**
+     * Helper to implement the {@link GnucashObject}-interface.
+     */
     protected GnucashObjectImpl helper;
 
 
@@ -52,12 +55,16 @@ public class GnucashAccountImpl extends SimpleAccount implements GnucashAccount 
      * @param gncfile the file to register under
      * @see #jwsdpPeer
      * @see #file
+     * @throws JAXBException if there are issues with the XML-backend
      */
     public GnucashAccountImpl(final GncAccountType peer,
                               final GnucashFile gncfile) throws JAXBException {
         super(gncfile);
         jwsdpPeer = peer;
-        helper = new GnucashObjectImpl((peer.getActSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getActSlots(), gncfile);
+        if (peer.getActSlots() == null) {
+            peer.setActSlots(new ObjectFactory().createSlotsType());
+        }
+        helper = new GnucashObjectImpl(peer.getActSlots(), gncfile);
     }
 
 
