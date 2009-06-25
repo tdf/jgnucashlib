@@ -389,6 +389,7 @@ public class AccountProperties implements AccountAction {
             property.setValue(myAccount.getUserDefinedAttribute(key));
             myPropertySheet.addProperty(property);
         }
+        // remove the dummy-slots created in GnucashObjectImpl (cannot save empty xml-slots-entity)
         if (myPropertySheet.getProperties().length > 0
                 && myPropertySheet.getProperties()[0].getName().equals("dummy")) {
             myPropertySheet.removeProperty(myPropertySheet.getProperties()[0]);
