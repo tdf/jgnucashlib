@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
 <!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
-<plugin id="biz.wolschon.finance.jgnucash.wirecard" version="2.0.3"
+<plugin id="biz.wolschon.finance.jgnucash.wirecard" version="2.0.22"
 	class="biz.wolschon.finance.jgnucash.wirecard.PluginMain">
 	<requires>
 	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
 	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.mailImport"/>
 <!--	       <import plugin-id="biz.wolschon.finance.jgnucash.common"/> -->
 	</requires>
 	<runtime>
@@ -16,13 +17,18 @@
 		</library>
 	</runtime>
 	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
-	           point-id="Importer" id="PagoWeb">
+	           point-id="Importer" id="Wirecard">
 	   <parameter id="name"
 	           value="Wirecard-PDF"/>
 	   <parameter id="description"
 	           value="Import Wirecard pdf-documents."/>
 	   <parameter id="hasFixedAccount"
 	           value="true"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.wirecard.FileImport"/>
+     </extension>
+     <extension plugin-id="biz.wolschon.finance.jgnucash.mailImport"
+	           point-id="MailHandler" id="Wirecard">
 	   <parameter id="class"
 		       value="biz.wolschon.finance.jgnucash.wirecard.FileImport"/>
      </extension>

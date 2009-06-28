@@ -44,31 +44,31 @@ import biz.wolschon.finance.jgnucash.wirecard.importer.WirecardImporter;
  */
 public class FileImport implements ImporterPlugin {
 
-	/**
-	 * Automatically created logger for debug and error-output.
-	 */
-	private static final Logger LOG = Logger.getLogger(FileImport.class
-			.getName());
+    /**
+     * Automatically created logger for debug and error-output.
+     */
+    private static final Logger LOG = Logger.getLogger(FileImport.class
+            .getName());
 
 
-	/**
-	 * Just an overridden ToString to return this classe's name
-	 * and hashCode.
-	 * @return className and hashCode
-	 */
-	@Override
+    /**
+     * Just an overridden ToString to return this classe's name
+     * and hashCode.
+     * @return className and hashCode
+     */
+    @Override
     public String toString() {
-		return "FileImport@" + hashCode();
-	}
+        return "FileImport@" + hashCode();
+    }
 
-	/**
-	 * ${@inheritDoc}.
-	 */
-	@Override
-	public String runImport(final GnucashWritableFile aWritableModel,
-			                final GnucashWritableAccount aCurrentAccount) throws Exception {
+    /**
+     * ${@inheritDoc}.
+     */
+    @Override
+    public String runImport(final GnucashWritableFile aWritableModel,
+                            final GnucashWritableAccount aCurrentAccount) throws Exception {
 
-		JFileChooser fc = new JFileChooser();
+        JFileChooser fc = new JFileChooser();
         fc.setMultiSelectionEnabled(true);
         fc.setFileFilter(new FileFilter() {
             @Override
@@ -111,21 +111,21 @@ public class FileImport implements ImporterPlugin {
 
         }
         return "";
-	}
+    }
 
-	/**
-	 * @return the configuration-file (need not exist yet)
-	 */
-	protected static File getConfigFile() {
-		return new File(getConfigFileDirectory(), ".wirecard.properties");
-	}
+    /**
+     * @return the configuration-file (need not exist yet)
+     */
+    protected static File getConfigFile() {
+        return new File(getConfigFileDirectory(), ".wirecard.properties");
+    }
 
-	/**
-	 * @return The directory where we store config-files.
-	 */
-	protected static File getConfigFileDirectory() {
-		return new File(System.getProperty("user.home", "~"), ".jgnucash");
-	}
+    /**
+     * @return The directory where we store config-files.
+     */
+    protected static File getConfigFileDirectory() {
+        return new File(System.getProperty("user.home", "~"), ".jgnucash");
+    }
 
 }
 

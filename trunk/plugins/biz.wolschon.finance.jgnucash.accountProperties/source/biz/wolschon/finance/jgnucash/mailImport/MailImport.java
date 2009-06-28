@@ -212,8 +212,12 @@ public class MailImport implements ImporterPlugin {
 
             });
         }
+        if (content instanceof InputStream && message.getContentType().toLowerCase().startsWith("text")) {
+          //TODO: call plugins
+        }
         if (content instanceof Multipart) {
             Multipart mp = (Multipart) content;
+            //TODO: call plugins
             for (int i = 0; i < mp.getCount(); i++) {
                 Part part = mp.getBodyPart(i);
                 String disposition = part.getDisposition();

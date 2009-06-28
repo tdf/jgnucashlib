@@ -11,7 +11,8 @@
 	<path id="plugin.classpath">
 		<path path="${basedir}/../../../jGnucashLib-GPL/build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
 		<path path="${basedir}/../../../jGnucashLib-GPL/build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
-		<fileset dir="${basedir}/../../../jGnucashLib-GPL/lib" includes="*.jar" />
+		<path path="${basedir}/../../../jGnucashLib-GPL/build/plugins/biz.wolschon.finance.jgnucash.mailImport/classes/"/>
+	    <fileset dir="${basedir}/../../../jGnucashLib-GPL/lib" includes="*.jar" />
 		<fileset dir="${basedir}/../..//lib" includes="*.jar" />
 		<fileset dir="${basedir}/lib" includes="**/*.jar" />
 	</path>

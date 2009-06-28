@@ -14,7 +14,10 @@
 			<export prefix="*" />
 		</library>
 	</runtime>
-		<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+    <extension-point id="MailHandler">
+		<parameter-def id="class" /> <!-- class must implement biz.wolschon.finance.jgnucash.mailImport.MailImportHandler -->
+	</extension-point>
+	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
 	           point-id="Importer" id="mailImport">
 	   <parameter id="name"
 	           value="import from email"/>
@@ -24,5 +27,5 @@
 	           value="false"/>
 	   <parameter id="class"
 		       value="biz.wolschon.finance.jgnucash.mailImport.MailImport"/>
-     </extension>
+    </extension>
 </plugin>

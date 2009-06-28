@@ -48,6 +48,7 @@ test  - runs some tests
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.editor.main" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.AbstractScriptablePlugin" target="${target}" />
 		<ant dir="plugins/biz.wolschon.finance.jgnucash.AbstractScriptableImporter" target="${target}" />
+	    <ant dir="plugins/biz.wolschon.finance.jgnucash.mailImport" target="${target}" />
 		<parallel  threadsperprocessor="1">
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporter" target="${target}" />
@@ -55,11 +56,9 @@ test  - runs some tests
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ssh" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.accountProperties" target="${target}" />
-		  <ant dir="plugins/biz.wolschon.finance.jgnucash.mailImport" target="${target}" />
 	
 <!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
-			
 <!-- the plugin for importing account-statements for wirecard credit-card-acceptance still has some hardcoded account-ids that you need to change -->
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.wirecard" target="${target}" />
 		</parallel>
