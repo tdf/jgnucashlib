@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/source"/>
+	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.mailImport/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.accountProperties/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.wirecard/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.ssh/source"/>

@@ -2,7 +2,7 @@
 <project name="jGnucashLib-Viewer" default="run" basedir=".">
 <!--<project name="jGnucashLib-Viewer" default="help" basedir=".">-->
 	<property name="app.name" value="jGnucashEditor" />
-	<property name="app.version" value="2.0.21" />
+	<property name="app.version" value="2.0.22" />
 
 	<property name="build.home" value="${basedir}/build" />
 	<property name="dist.home" value="${basedir}/dist" />
@@ -55,6 +55,7 @@ test  - runs some tests
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ssh" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.accountProperties" target="${target}" />
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.mailImport" target="${target}" />
 	
 <!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.pago" target="${target}" />
