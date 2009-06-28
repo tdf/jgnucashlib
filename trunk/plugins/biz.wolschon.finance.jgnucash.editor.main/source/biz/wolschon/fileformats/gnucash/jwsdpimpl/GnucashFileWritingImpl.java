@@ -317,10 +317,11 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
 
     /**
      *
+     * @throws JAXBException if there are issues with the underlying XML-model
      * @see biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl#setRootElement(biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2)
      */
     @Override
-    public void setRootElement(final GncV2 rootElement) {
+    public void setRootElement(final GncV2 rootElement) throws JAXBException {
      super.setRootElement(rootElement);
     }
 
@@ -1538,5 +1539,12 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
                 return;
             }
         }
+        // create new slot
+        Slot newSlot = getObjectFactory().createSlot();
+        newSlot.setSlotKey(aName);
+        newSlot.setSlotValue(getObjectFactory().createSlotTypeSlotValueType());
+        newSlot.getSlotValue().getContent().add(aValue);
+        newSlot.getSlotValue().setType("string");
+        getRootElement().getGncBook().getBookSlots().getSlot().add(newSlot);
     }
 }
