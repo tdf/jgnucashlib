@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -76,7 +77,21 @@ public class MailImport implements MailImportHandler {
                                        final String aSubject,
                                        final Message aMsg,
                                        final Multipart aMessage) throws MessagingException {
-        if (aSubject.startsWith("Settlement Note for time period") && aMessage.getCount() > 1) {
+        Address[] from = aMsg.getFrom();
+        if (from.length != 1 || from[0].toString().equals("treasury@wireard.com")) {
+            LOG.fine("not a wirecard-mail, wrong sender");
+            return false;
+        }
+
+        if (!aSubject.startsWith("Settlement Note for time period")
+            &&
+            !aSubject.contains("Reserve Balance Note for")
+            &&
+            !aSubject.contains("Ihre Wirecard Technologies AG Rechnung:")) {
+            LOG.fine("not a wirecard-mail, wrong subject");
+            return false;
+        }
+        if (aMessage.getCount() > 1) {
             int count = aMessage.getCount();
             for (int i = 0; i < count; i++) {
                 BodyPart bodyPart = aMessage.getBodyPart(i);
