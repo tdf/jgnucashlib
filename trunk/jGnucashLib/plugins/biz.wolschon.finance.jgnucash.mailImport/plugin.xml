@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="biz.wolschon.finance.jgnucash.mailImport" version="2.0.22"
+	class="biz.wolschon.finance.jgnucash.mailImport.PluginMain">
+	<requires>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main"/>
+	</requires>
+	<runtime>
+		<library id="core" path="classes/" type="code">
+			<doc caption="API documentation">
+				<doc-ref path="api/index.html" caption="javadoc" />
+			</doc>
+			<export prefix="*" />
+		</library>
+	</runtime>
+    <extension-point id="MailHandler">
+		<parameter-def id="class" /> <!-- class must implement biz.wolschon.finance.jgnucash.mailImport.MailImportHandler -->
+	</extension-point>
+	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+	           point-id="Importer" id="mailImport">
+	   <parameter id="name"
+	           value="import from email"/>
+	   <parameter id="description"
+	           value="Scan mailbox and import transactions"/>
+	   <parameter id="hasFixedAccount"
+	           value="false"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.mailImport.MailImport"/>
+    </extension>
+</plugin>
