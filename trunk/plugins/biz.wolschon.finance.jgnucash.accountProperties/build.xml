@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="biz.wolschon.finance.jgnucash.mailImport plug-in build file"
+<project name="biz.wolschon.finance.jgnucash.accountProperties plug-in build file"
          default="help"
-         basedir=".">
+         basedir="."> 
 	<jpf-info manifest="${basedir}/plugin.xml"
 	          propertyid="plugin.id"
 	          propertyversion="plugin.version" />
