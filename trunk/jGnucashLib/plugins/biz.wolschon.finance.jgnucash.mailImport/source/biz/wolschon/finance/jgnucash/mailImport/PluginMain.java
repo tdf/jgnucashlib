@@ -75,7 +75,7 @@ public class PluginMain extends org.java.plugin.Plugin {
         }
         Collection<MailImportHandler> retval = new LinkedList<MailImportHandler>();
         PluginManager manager = getInstance().getManager();
-        Collection<Extension> availableExtensions = manager.getRegistry().getExtensionPoint("MailHandler").getConnectedExtensions();
+        Collection<Extension> availableExtensions = manager.getRegistry().getExtensionPoint(getInstance().getDescriptor().getId(), "MailHandler").getConnectedExtensions();
         for (Extension extension : availableExtensions) {
             Parameter className = extension.getParameter("class");
             try {
