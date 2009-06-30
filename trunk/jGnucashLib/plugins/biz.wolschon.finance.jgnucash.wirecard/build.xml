@@ -6,14 +6,13 @@
 	          propertyid="plugin.id"
 	          propertyversion="plugin.version" />
 	<property name="plugin.home"
-	          value="${basedir}/../../../jGnucashLib-GPL/build/plugins/${plugin.id}" />
+	          value="${basedir}/../../build/plugins/${plugin.id}" />
 
 	<path id="plugin.classpath">
-		<path path="${basedir}/../../../jGnucashLib-GPL/build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
-		<path path="${basedir}/../../../jGnucashLib-GPL/build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
-		<path path="${basedir}/../../../jGnucashLib-GPL/build/plugins/biz.wolschon.finance.jgnucash.mailImport/classes/"/>
-	    <fileset dir="${basedir}/../../../jGnucashLib-GPL/lib" includes="*.jar" />
-		<fileset dir="${basedir}/../..//lib" includes="*.jar" />
+		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.viewer.main/classes/"/>
+		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.editor.main/classes/"/>
+		<path path="${basedir}/../../build/plugins/biz.wolschon.finance.jgnucash.mailImport/classes/"/>
+	    <fileset dir="${basedir}/../../lib" includes="*.jar" />
 		<fileset dir="${basedir}/lib" includes="**/*.jar" />
 	</path>
 	<jpf-path pathidref="plugin.classpath" pluginid="${plugin.id}">

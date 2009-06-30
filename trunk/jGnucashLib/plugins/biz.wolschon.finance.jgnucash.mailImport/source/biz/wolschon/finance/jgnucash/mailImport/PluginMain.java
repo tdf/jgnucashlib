@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 
 import org.java.plugin.PluginManager;
 import org.java.plugin.registry.Extension;
+import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.Extension.Parameter;
 
 
@@ -73,9 +74,15 @@ public class PluginMain extends org.java.plugin.Plugin {
         if (myHandlers != null) {
             return myHandlers;
         }
+        LOG.info("loading MailImportHandlers...");
         Collection<MailImportHandler> retval = new LinkedList<MailImportHandler>();
         PluginManager manager = getInstance().getManager();
-        Collection<Extension> availableExtensions = manager.getRegistry().getExtensionPoint(getInstance().getDescriptor().getId(), "MailHandler").getConnectedExtensions();
+        ExtensionPoint extensionPoint = manager.getRegistry().getExtensionPoint(getInstance().getDescriptor().getId(), "mailHandler");
+        LOG.info("loading MailImportHandlers... extensionPoint=("
+                + getInstance().getDescriptor().getId() + "/mailHandler" + ") ="
+                + extensionPoint);
+        Collection<Extension> availableExtensions = extensionPoint.getConnectedExtensions();
+        LOG.info("loading MailImportHandlers... #availableExtensions=" + availableExtensions.size());
         for (Extension extension : availableExtensions) {
             Parameter className = extension.getParameter("class");
             try {

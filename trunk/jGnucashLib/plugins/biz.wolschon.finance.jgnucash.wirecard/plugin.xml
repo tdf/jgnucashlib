@@ -17,7 +17,7 @@
 		</library>
 	</runtime>
 	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
-	           point-id="Importer" id="Wirecard">
+	           point-id="Importer" id="WirecardImporter">
 	   <parameter id="name"
 	           value="Wirecard-PDF"/>
 	   <parameter id="description"
@@ -28,8 +28,8 @@
 		       value="biz.wolschon.finance.jgnucash.wirecard.FileImport"/>
      </extension>
      <extension plugin-id="biz.wolschon.finance.jgnucash.mailImport"
-	           point-id="MailHandler" id="Wirecard">
+	           point-id="mailHandler" id="WirecardMail">
 	   <parameter id="class"
-		       value="biz.wolschon.finance.jgnucash.wirecard.FileImport"/>
+		       value="biz.wolschon.finance.jgnucash.wirecard.MailImport"/>
      </extension>
 </plugin>

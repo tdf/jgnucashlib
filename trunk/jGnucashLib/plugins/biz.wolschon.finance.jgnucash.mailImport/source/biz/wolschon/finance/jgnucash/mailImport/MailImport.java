@@ -239,6 +239,27 @@ public class MailImport implements ImporterPlugin {
         LOG.info("Message: " + message.getSubject());
         LOG.info("disposition: " + message.getDisposition());
         LOG.info("contentType: " + message.getContentType());
+        if (message.isSet(Flag.SEEN)) {
+            LOG.info("Flagged: SEEN");
+        }
+        if (message.isSet(Flag.DRAFT)) {
+            LOG.info("Flagged: DRAFT");
+        }
+        if (message.isSet(Flag.ANSWERED)) {
+            LOG.info("Flagged: ANSWERED");
+        }
+        if (message.isSet(Flag.USER)) {
+            LOG.info("Flagged: USER");
+        }
+        if (message.isSet(Flag.FLAGGED)) {
+            LOG.info("Flagged: FLAGGED");
+        }
+        if (message.isSet(Flag.RECENT)) {
+            LOG.info("Flagged: RECENT");
+        }
+        if (message.isSet(Flag.DELETED)) {
+            LOG.info("Flagged: DELETED");
+        }
         Flag[] systemFlags = message.getFlags().getSystemFlags();
         for (Flag flag : systemFlags) {
             LOG.info("system-flag: " + flag.toString());
