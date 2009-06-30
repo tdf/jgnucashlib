@@ -232,12 +232,21 @@ public class MailImport implements ImporterPlugin {
                                final GnucashWritableAccount aCurrentAccount,
                                final GnucashWritableFile aWritableModel) throws MessagingException,
                                                IOException, JAXBException {
+        LOG.fine("=========================================");
         if (message.isSet(Flag.DELETED)) {
             return;
         }
         LOG.info("Message: " + message.getSubject());
         LOG.info("disposition: " + message.getDisposition());
         LOG.info("contentType: " + message.getContentType());
+        Flag[] systemFlags = message.getFlags().getSystemFlags();
+        for (Flag flag : systemFlags) {
+            LOG.info("system-flag: " + flag.toString());
+        }
+        String[] userFlags = message.getFlags().getUserFlags();
+        for (String flag : userFlags) {
+            LOG.info("user-flag: " + flag);
+        }
         Object readTextContent = message.getContent();
         Object content = readTextContent;
         LOG.info("content: " + content.getClass().getName());
@@ -249,8 +258,9 @@ public class MailImport implements ImporterPlugin {
             content = new MimeMultipart(new InputStreamDataSource(message));
         }
         if (content instanceof InputStream && message.getContentType().toLowerCase().startsWith("text")) {
-          // call plugins for text/plain -messages too
+  // call plugins for text/plain -messages too
             Collection<MailImportHandler> mailHandlers = PluginMain.getMailHandlers();
+            LOG.fine("handling as text/* via our #" + mailHandlers.size() + " plugins...");
             for (MailImportHandler mailImportHandler : mailHandlers) {
                 if (mailImportHandler.handleTextMail(aWritableModel, message.getSubject(), message, readTextContent(message))) {
                     message.setFlag(Flag.SEEN, true);
@@ -264,6 +274,7 @@ public class MailImport implements ImporterPlugin {
             Multipart mp = (Multipart) content;
             // call plugins
             Collection<MailImportHandler> mailHandlers = PluginMain.getMailHandlers();
+            LOG.fine("handling as multipart via our #" + mailHandlers.size() + " plugins...");
             for (MailImportHandler mailImportHandler : mailHandlers) {
                 if (mailImportHandler.handleMultiPartMail(aWritableModel, message.getSubject(), message, mp)) {
                     message.setFlag(Flag.SEEN, true);

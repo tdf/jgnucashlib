@@ -77,6 +77,7 @@ public class MailImport implements MailImportHandler {
                                        final String aSubject,
                                        final Message aMsg,
                                        final Multipart aMessage) throws MessagingException {
+        LOG.fine("checking if this is a wirecard-mail...");
         Address[] from = aMsg.getFrom();
         if (from.length != 1 || from[0].toString().equals("treasury@wireard.com")) {
             LOG.fine("not a wirecard-mail, wrong sender");
