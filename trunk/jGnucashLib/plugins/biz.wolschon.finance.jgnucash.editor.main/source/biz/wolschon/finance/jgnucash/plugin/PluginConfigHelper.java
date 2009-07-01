@@ -35,6 +35,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -83,6 +84,27 @@ public final class PluginConfigHelper {
             }
         }
         return null;
+    }
+
+
+    /**
+     * Find all accounts that have a value for the given
+     * key in their user-defined properties.
+     * @param aModel the book to operate on
+     * @param aKey the key to look for
+     * @return an account or null
+     */
+    @SuppressWarnings("unchecked")
+    public static Collection<GnucashWritableAccount> getAllAccountsWithKey(final GnucashWritableFile aModel,
+                                                           final String aKey) {
+        Collection<GnucashWritableAccount> retval = new HashSet<GnucashWritableAccount>();
+        Collection<? extends GnucashWritableAccount> accounts = aModel.getWritableAccounts();
+        for (GnucashWritableAccount gnucashAccount : accounts) {
+            if (gnucashAccount.getUserDefinedAttribute(aKey) != null) {
+                retval.add(gnucashAccount);
+            }
+        }
+        return retval;
     }
 
     /**
