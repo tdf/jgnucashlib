@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -27,14 +29,22 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
+import biz.wolschon.finance.jgnucash.plugin.PluginConfigHelper;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
  * This class parses Wirecard-reports (clearing and account-statement)
  * and inserts transactions for them.<br/>
- * TODO: set account-names/ids in a config-file
  */
 public class WirecardImporter {
+
+
+    /**
+     * Automatically created logger for debug and error-output.
+     */
+    private static final Logger LOG = Logger.getLogger(WirecardImporter.class
+            .getName());
+
     /**
      * The date-format used in the pago-files.
      */
@@ -101,11 +111,11 @@ public class WirecardImporter {
         }
     }
     /**
-     * @param aBook
-     * @param aBuffer
-     * @throws IOException
-     * @throws JAXBException
-     * @throws ParseException
+     * @param aBook the book to import into
+     * @param aBuffer where to read from
+     * @throws IOException if we annot read parts
+     * @throws JAXBException issues with the XML-backend
+     * @throws ParseException if we cannot parse parts
      */
     private static void importReserveStatement(final GnucashWritableFile aBook,
                                                final BufferedReader aBuffer) throws IOException, JAXBException, ParseException {
@@ -139,22 +149,25 @@ public class WirecardImporter {
         splits = line.split(" ");
         FixedPointNumber total = new FixedPointNumber(splits[splits.length - 1]);
 
-        String sicherheitseinbehalt = "f982b88d02990008053d54d06ebd7049";
-        if (currency.equals("USD")) {
-            sicherheitseinbehalt = "259c916fcf62fd414d2b0ec27f252544";
-        }
+        GnucashWritableAccount sicherheitseinbehalt = PluginConfigHelper.getOrConfigureAccountWithKey(aBook, "wirecard.sicherheitseinbehalt." + currency, "thisAccount",
+                "Please select the account for the accumulated 'Sicherheits-Einbehalt' for currency '" + currency + "'");
+//        String sicherheitseinbehalt = "f982b88d02990008053d54d06ebd7049";
+//        if (currency.equals("USD")) {
+//            sicherheitseinbehalt = "259c916fcf62fd414d2b0ec27f252544";
+//        }
 
 
         GnucashWritableTransaction trans = aBook.createWritableTransaction();
         trans.setDatePosted(date);
-        trans.setDescription("TEST Saldo = " + total);
-        GnucashWritableAccount account = aBook.getAccountByID(sicherheitseinbehalt);
+        trans.setDescription("TEST Saldo = " + total + " eur"); // total is given in euro in the document even if for other currencies :/
+        GnucashWritableAccount account = sicherheitseinbehalt; //aBook.getAccountByID(sicherheitseinbehalt);
         if (!account.getBalance(date).equals(total)) {
             trans.setDescription(trans.getDescription() + " NAK");
         } else {
             trans.setDescription(trans.getDescription() + " OK");
         }
-        GnucashWritableTransactionSplit split = trans.createWritingSplit(account);
+        //GnucashWritableTransactionSplit split =
+        trans.createWritingSplit(account);
 
     }
 
@@ -302,20 +315,19 @@ public class WirecardImporter {
                 }
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Cannot parse invoice-number", e);
         }
 
 
-        String auszahlungAccount = "0682d0d40fefc9af74cae75372b0159d";
-        String auszahlungAccountUSD = "eeda2c814e012144d7e0c240a6a0a3e8";
-//        String zahlungenUSDAccount = "3ae589ac215cfdba454569ed652e5113";
-//        String Sicherheitseinbehalt = "f982b88d02990008053d54d06ebd7049";
-//        String SicherheitseinbehaltUSD = "259c916fcf62fd414d2b0ec27f252544";
-//        String disagio = "035c0d6f1d0f19e5b94a1fe532084e95";
-//        String disagioUSD = "28f9ed9929fc83e59082ceed5b77e596";
-//        String disagioVorsteuerUSD = "e6e5f9c028769215c42a55a3fe616842";
-        String targetAccount = "e1a8001a2a189134b6fda79647471f1c";
+//        String auszahlungAccount = "0682d0d40fefc9af74cae75372b0159d";
+//        String auszahlungAccountUSD = "eeda2c814e012144d7e0c240a6a0a3e8";
+////        String zahlungenUSDAccount = "3ae589ac215cfdba454569ed652e5113";
+////        String Sicherheitseinbehalt = "f982b88d02990008053d54d06ebd7049";
+////        String SicherheitseinbehaltUSD = "259c916fcf62fd414d2b0ec27f252544";
+////        String disagio = "035c0d6f1d0f19e5b94a1fe532084e95";
+////        String disagioUSD = "28f9ed9929fc83e59082ceed5b77e596";
+////        String disagioVorsteuerUSD = "e6e5f9c028769215c42a55a3fe616842";
+//        String targetAccount = "e1a8001a2a189134b6fda79647471f1c";
 
       GnucashWritableTransaction auszahlung = aBook.createWritableTransaction();
       auszahlung.setCurrencyID("EUR");
@@ -327,17 +339,24 @@ public class WirecardImporter {
       //auszahlungAccount -57,62 "UEBERTRAG/UEBERWEISUNG..."
       //auszahlungAccountUSD -179,20 -134,58 "179,20USD*0,7510=134,58EUR"
 
-      GnucashWritableTransactionSplit targetSplit = auszahlung.createWritingSplit(aBook.getAccountByID(targetAccount));
+    //TODO: test this
+      GnucashWritableAccount targetAccount = PluginConfigHelper.getOrConfigureAccountWithKey(aBook, "wirecard.targetAccount", "thisAccount",
+              "Please select the bank-account 'Auszahlung' is transfered to");
+      GnucashWritableTransactionSplit targetSplit = auszahlung.createWritingSplit(targetAccount);
       targetSplit.setDescription("Auszahlung");
       targetSplit.setValue(total);
       targetSplit.setQuantity(total);
 
       for (int j = 0; j < count; j++) {
-          String accountID = auszahlungAccount;
-          if (!currencies.get(j).equals("EUR")) {
-              accountID = auszahlungAccountUSD;
-          }
-          GnucashWritableAccount account = aBook.getAccountByID(accountID);
+//          String accountID = auszahlungAccount;
+//          if (!currencies.get(j).equals("EUR")) {
+//              accountID = auszahlungAccountUSD;
+//          }
+//          GnucashWritableAccount account = aBook.getAccountByID(accountID);
+          //TODO: test this
+          GnucashWritableAccount account = PluginConfigHelper.getOrConfigureAccountWithKey(aBook, "wirecard.auszahlung." + currencies.get(j), "thisAccount",
+                  "Please select the account to accumulate 'Auszahlung' in before transfer to the bank-account for currency '" + currencies.get(j) + "'");
+
           GnucashWritableTransactionSplit split = auszahlung.createWritingSplit(account);
           split.setDescription(invoiceAmount.get(j) + currencies.get(j)
                   + "*" + exchangeRates.get(j) + "=" + settlementAmount.get(j) + "EUR");
@@ -361,9 +380,12 @@ public class WirecardImporter {
     }
 
     /**
-     * @param aString
-     * @return
-     * @throws IOException
+     * Throws an IllegalArgumentException if the next line reat is
+     * not equal to the given one.
+     * @param aBuffer the reader to read the line from
+     * @param aString the string the line must be equal to
+     * @return the given line
+     * @throws IOException if we cannot read
      */
     private static String lineMustEqual(final BufferedReader aBuffer, final String aString) throws IOException {
         String line = aBuffer.readLine();
@@ -374,8 +396,8 @@ public class WirecardImporter {
     }
 
     /**
-     * @param aBuffer
-     * @throws IOException
+     * @param aBuffer the reader to read from
+     * @throws IOException may happen
      */
     private static void lineMustBeNull(final BufferedReader aBuffer)
                                                                     throws IOException {
@@ -390,9 +412,9 @@ public class WirecardImporter {
      * Import a *_PAVI*.pdf -file converted to text using pdftotext containing an account-statement.
      * @param aBook our data-model
      * @param aBuffer the file to import conveted to plaintext
-     * @throws IOException
-     * @throws ParseException
-     * @throws JAXBException
+     * @throws IOException if we cannot read parts
+     * @throws ParseException if we cannot parse parts of the account-statement
+     * @throws JAXBException issues with the XML-backend
      */
     public static void importAccountStatement(final GnucashWritableFile aBook, final BufferedReader aBuffer) throws IOException, ParseException, JAXBException {
 
