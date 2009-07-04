@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.activation.DataSource;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -123,6 +124,28 @@ public class MailImport implements ImporterPlugin {
     private static final Logger LOG = Logger.getLogger(MailImport.class.getName());
 
     /**
+     * All folders of the mail-store.
+     */
+    private List<String> myFolders = null;
+
+    /**
+     * @return all folders, cached
+     * @param aStore our mail-store
+     * @throws MessagingException if we cannot fetch the folders
+     */
+    public List<String> getFolders(final Store aStore) throws MessagingException {
+        if (myFolders == null) {
+            LOG.info("listing folders...");
+            JOptionPane.showMessageDialog(null, "There is no mail-folder configured it it does not exist.\n"
+                    + "Listing folders after pressing OK...\n"
+                    + "THIS MAY TAKE A WHILE!");
+            myFolders = listFolders(((Store) myFolders).getDefaultFolder());
+        }
+
+        return myFolders;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -146,59 +169,111 @@ public class MailImport implements ImporterPlugin {
             String passwd = JOptionPane.showInputDialog("imap-password:");
             store.connect(server, user, passwd);
 
-            String folderName = aWritableModel.getUserDefinedAttribute("imap.folder");
-            Folder folder = null;
-            if (folderName != null) {
-                folder = store.getFolder(folderName);
-            }
-//            listFolders(store.getDefaultFolder());
-
-            List<String> folders = null;
-            while (folder == null || !folder.exists()) {
-                if (folders == null) {
-                    LOG.info("listing folders...");
-                    JOptionPane.showMessageDialog(null, "There is no mail-folder configured it it does not exist.\n"
-                            + "Listing folders after pressing OK...\n"
-                            + "THIS MAY TAKE A WHILE!");
-                    folders = listFolders(store.getDefaultFolder());
-                }
-                final JDialog selectFolderDialog = new JDialog((JFrame) null, "Select mail folder");
-                selectFolderDialog.getContentPane().setLayout(new BorderLayout());
-                final JList folderListBox = new JList(new Vector<String>(folders));
-                JButton okButton = new JButton("OK");
-                okButton.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(final ActionEvent aE) {
-                        if (folderListBox.getSelectedIndices() != null) {
-                            if (folderListBox.getSelectedIndices().length == 1) {
-                                selectFolderDialog.setVisible(false);
-                            }
-                        }
-                    }
-
-                });
-                selectFolderDialog.getContentPane().add(new JScrollPane(folderListBox), BorderLayout.CENTER);
-                selectFolderDialog.getContentPane().add(okButton, BorderLayout.SOUTH);
-                selectFolderDialog.setModal(true);
-                selectFolderDialog.pack();
-                selectFolderDialog.setVisible(true);
-                folderName = folderListBox.getSelectedValue().toString();
-                aWritableModel.setUserDefinedAttribute("imap.folder", folderName);
-                folder = store.getFolder(folderName);
-            }
+            Folder folder = getInputFolder(aWritableModel, store);
+            Folder doneFolder = getDoneFolder(aWritableModel, store);
             folder.open(Folder.READ_WRITE);
-            //Folder outfolder = store.getFolder("Inbox/0-Wiederansicht/abzurechnen/erledigt");
+            doneFolder.open(Folder.READ_WRITE);
             LOG.info("mail folder opened");
 
             Message[] messages = folder.getMessages();
             for (Message message : messages) {
-                importMessage(message, aCurrentAccount, aWritableModel);
+                if (importMessage(message, aCurrentAccount, aWritableModel)) {
+                    message.setFlag(Flag.SEEN, true);
+                    folder.copyMessages(new Message[]{message}, doneFolder);
+                    message.setFlag(Flags.Flag.DELETED, true);
+                }
             }
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Cannot scan mail-folder", e);
         }
         return null;
+    }
+
+    /**
+     * @param aWritableModel
+     * @param store
+     * @return
+     * @throws MessagingException
+     * @throws JAXBException
+     */
+    private Folder getInputFolder(final GnucashWritableFile aWritableModel,
+                                  Store store) throws MessagingException,
+                                              JAXBException {
+        String folderName = aWritableModel.getUserDefinedAttribute("imap.folder");
+        Folder folder = null;
+        if (folderName != null) {
+            folder = store.getFolder(folderName);
+        }
+        while (folder == null || !folder.exists()) {
+            final JDialog selectFolderDialog = new JDialog((JFrame) null, "Select mail folder");
+            selectFolderDialog.getContentPane().setLayout(new BorderLayout());
+            final JList folderListBox = new JList(new Vector<String>(getFolders(store)));
+            JButton okButton = new JButton("OK");
+            okButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(final ActionEvent aE) {
+                    if (folderListBox.getSelectedIndices() != null) {
+                        if (folderListBox.getSelectedIndices().length == 1) {
+                            selectFolderDialog.setVisible(false);
+                        }
+                    }
+                }
+
+            });
+            selectFolderDialog.getContentPane().add(new JScrollPane(folderListBox), BorderLayout.CENTER);
+            selectFolderDialog.getContentPane().add(okButton, BorderLayout.SOUTH);
+            selectFolderDialog.setModal(true);
+            selectFolderDialog.pack();
+            selectFolderDialog.setVisible(true);
+            folderName = folderListBox.getSelectedValue().toString();
+            aWritableModel.setUserDefinedAttribute("imap.folder", folderName);
+            folder = store.getFolder(folderName);
+        }
+        return folder;
+    }
+
+    /**
+     * @param aWritableModel stores our config
+     * @param aStore our mail-store
+     * @throws MessagingException issued with email
+     * @throws JAXBException issued with the model
+     */
+    private Folder getDoneFolder(final GnucashWritableFile aWritableModel,
+                               final Store aStore) throws MessagingException,
+                                                 JAXBException {
+        String doneFolderName = aWritableModel.getUserDefinedAttribute("imap.donefolder");
+        Folder doneFolder = null;
+        if (doneFolderName != null) {
+            doneFolder = aStore.getFolder(doneFolderName);
+        }
+        while (doneFolder == null || !doneFolder.exists()) {
+            final JDialog selectFolderDialog = new JDialog((JFrame) null, "Select mail folder to move processed mails to");
+            selectFolderDialog.getContentPane().setLayout(new BorderLayout());
+            final JList folderListBox = new JList(new Vector<String>(getFolders(aStore)));
+            JButton okButton = new JButton("OK");
+            okButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(final ActionEvent aE) {
+                    if (folderListBox.getSelectedIndices() != null) {
+                        if (folderListBox.getSelectedIndices().length == 1) {
+                            selectFolderDialog.setVisible(false);
+                        }
+                    }
+                }
+
+            });
+            selectFolderDialog.getContentPane().add(new JScrollPane(folderListBox), BorderLayout.CENTER);
+            selectFolderDialog.getContentPane().add(okButton, BorderLayout.SOUTH);
+            selectFolderDialog.setModal(true);
+            selectFolderDialog.pack();
+            selectFolderDialog.setVisible(true);
+            doneFolderName = folderListBox.getSelectedValue().toString();
+            aWritableModel.setUserDefinedAttribute("imap.donefolder", doneFolderName);
+            doneFolder = aStore.getFolder(doneFolderName);
+        }
+        return doneFolder;
     }
 
     /**
@@ -224,17 +299,18 @@ public class MailImport implements ImporterPlugin {
      * @param message the message to import or to ignore
      * @param aCurrentAccount the currently selected account in the JGnucashEditor
      * @param aWritableModel the gnucash-file
+     * @return true if the message has been handled successfully
      * @throws MessagingException in case of mail- issues
      * @throws IOException in case of io-issues
      * @throws JAXBException in case of XML-issues with the plugins
      */
-    private void importMessage(final Message message,
+    private boolean importMessage(final Message message,
                                final GnucashWritableAccount aCurrentAccount,
                                final GnucashWritableFile aWritableModel) throws MessagingException,
                                                IOException, JAXBException {
         LOG.fine("=========================================");
         if (message.isSet(Flag.DELETED)) {
-            return;
+            return false;
         }
         LOG.info("Message: " + message.getSubject());
         LOG.info("disposition: " + message.getDisposition());
@@ -284,10 +360,7 @@ public class MailImport implements ImporterPlugin {
             LOG.fine("handling as text/* via our #" + mailHandlers.size() + " plugins...");
             for (MailImportHandler mailImportHandler : mailHandlers) {
                 if (mailImportHandler.handleTextMail(aWritableModel, message.getSubject(), message, readTextContent(message))) {
-                    message.setFlag(Flag.SEEN, true);
-                  //folder.copyMessages(new Message[]{message}, outfolder);
-                    //message.setFlag(Flags.Flag.DELETED, true);
-                    return;
+                    return true;
                 }
             }
         }
@@ -298,10 +371,7 @@ public class MailImport implements ImporterPlugin {
             LOG.fine("handling as multipart via our #" + mailHandlers.size() + " plugins...");
             for (MailImportHandler mailImportHandler : mailHandlers) {
                 if (mailImportHandler.handleMultiPartMail(aWritableModel, message.getSubject(), message, mp)) {
-                    message.setFlag(Flag.SEEN, true);
-                  //folder.copyMessages(new Message[]{message}, outfolder);
-                    //message.setFlag(Flags.Flag.DELETED, true);
-                    return;
+                    return true;
                 }
             }
 //            for (int i = 0; i < mp.getCount(); i++) {
@@ -316,6 +386,7 @@ public class MailImport implements ImporterPlugin {
 //                }
 //            }
         }
+        return false;
     }
 
     /**
