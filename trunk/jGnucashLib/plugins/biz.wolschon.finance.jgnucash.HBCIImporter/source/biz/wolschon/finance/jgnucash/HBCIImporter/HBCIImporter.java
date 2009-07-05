@@ -16,15 +16,16 @@ package biz.wolschon.finance.jgnucash.HBCIImporter;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
+import javax.xml.bind.JAXBException;
 
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.structures.Saldo;
@@ -32,6 +33,7 @@ import org.kapott.hbci.structures.Saldo;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.finance.jgnucash.AbstractScriptableImporter.AbstractScriptableImporter;
+import biz.wolschon.finance.jgnucash.plugin.PluginConfigHelper;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -53,6 +55,17 @@ public class HBCIImporter extends AbstractScriptableImporter {
      */
     private static final Logger LOG = Logger.getLogger(HBCIImporter.class.getName());
 
+    /**
+     * Keys to the settings that absolutele must be set and have another value
+     * then in the default-properties.
+     */
+    private static final String[] ALLSETTINGS = new String[] {
+            HBCIImporter.SETTINGS_ACCOUNT,
+            HBCIImporter.SETTINGS_GNUCASHACCOUNT,
+            HBCIImporter.SETTINGS_PIN ,
+            HBCIImporter.SETTINGS_BANKCODE, HBCIImporter.SETTINGS_COUNTRY,
+            HBCIImporter.SETTINGS_ACCOUNT, HBCIImporter.SETTINGS_SERVER
+    };
 
     /**
      * Keys to the settings that absolutele must be set and have another value
@@ -128,18 +141,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
      */
     public void synchronizeAllTransactions() {
 
-        File pintanfile;
-        try {
-            pintanfile = File.createTempFile("pintan", "hbci");
-            pintanfile.deleteOnExit();
-            pintanfile.delete(); // the file MUST not exist
-        } catch (IOException e1) {
-            LOG.log(Level.SEVERE, "[IOException] Problem in "
-                       + getClass().getName(),
-                         e1);
-            // fall back to a default-filename
-            pintanfile = new File("/tmp/pintan." + Math.random());
-        }
+        File pintanfile = createPinTanFile();
 
         try {
             HBCICallback callback = new PropertiesHBCICallback(this
@@ -289,13 +291,32 @@ public class HBCIImporter extends AbstractScriptableImporter {
 
 
 
+    /**
+     * Create a temporary PinTan-file for HBCI4Java
+     * @return a file
+     */
+    private File createPinTanFile() {
+        File pintanfile;
+        try {
+            pintanfile = File.createTempFile("pintan", "hbci");
+            pintanfile.deleteOnExit();
+            pintanfile.delete(); // the file MUST not exist
+        } catch (IOException e1) {
+            LOG.log(Level.SEVERE, "[IOException] Problem in "
+                       + getClass().getName(),
+                         e1);
+            // fall back to a default-filename
+            pintanfile = new File("/tmp/pintan." + Math.random());
+        }
+        return pintanfile;
+    }
+
+
+
     @Override
     public String runImport(final GnucashWritableFile aWritableModel,
                             final GnucashWritableAccount aCurrentAccount)
                                                                    throws Exception {
-
-        // load the properties
-        Properties settings = new Properties();
         Properties defaultSettings = new Properties();
         defaultSettings
                 .load(getClass()
@@ -303,26 +324,56 @@ public class HBCIImporter extends AbstractScriptableImporter {
                         .getResourceAsStream(
                                 "biz/wolschon/finance/jgnucash/HBCIImporter/default_hbci.properties"));
 
+        // get all accounts that contain contact-information
+        // for an HBCI online-banking server of the respective
+        // bank
+        Collection<GnucashWritableAccount> hbciAccounts = PluginConfigHelper.getAllAccountsWithKey(aWritableModel, "hbci");
+        if (hbciAccounts != null && hbciAccounts.size() > 0) {
+            for (GnucashWritableAccount hbciAccount : hbciAccounts) {
+                LOG.info("synchronizing HBCI-account " + hbciAccount.getId() + "=\"" +hbciAccount.getName() + "\"");
+                setMyProperties(hbciAccount);
+                setMyAccount(hbciAccount);
+                boolean ok = askRequiresSettings(defaultSettings,
+                        hbciAccount, aWritableModel);
+                if (ok) {
+                    synchronizeAllTransactions();
+                }
+            }
+            return null;
+        }
+
+
+        GnucashWritableAccount hbciAccount = PluginConfigHelper.getOrConfigureAccountWithKey(aWritableModel, "hbci", "yes",
+                "Please select the account representing\n"
+                + " your bank-account in Gnucash.\n"
+                + "You can add additional accounts later by setting the user-defined poperty hbci=yes on them.");
+        if (hbciAccount == null) {
+            return null;
+        }
+
+
+        ////////////////////////////////
+        // try to import an old config-file
+        // into the new format of account-properties
+        Properties settings = new Properties();
         File configfile = getConfigFile();
         if (configfile.exists()) {
             settings.load(new FileReader(configfile));
+            for (String key : ALLSETTINGS) {
+                String value = settings.getProperty(key, "");
+                hbciAccount.setUserDefinedAttribute(key, value);
+            }
         }
 
-        // check the config-file
-        boolean ok = askRequiresSettings(settings, defaultSettings, configfile,
-                aCurrentAccount, aWritableModel);
-        // user-attributes
+
+        // ask all missing settings
+        boolean ok = askRequiresSettings(defaultSettings,
+                hbciAccount, aWritableModel);
 
         if (ok) {
             // run the actual import.
-            setMyProperties(settings);
-            GnucashWritableAccount account = aWritableModel.getAccountByID(settings
-                            .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT));
-            if (account == null) {
-                settings.remove(HBCIImporter.SETTINGS_GNUCASHACCOUNT);
-                return runImport(aWritableModel, aCurrentAccount);
-            }
-            setMyAccount(account);
+            setMyAccount(hbciAccount);
+            setMyProperties(hbciAccount);
             synchronizeAllTransactions();
         }
 
@@ -330,80 +381,65 @@ public class HBCIImporter extends AbstractScriptableImporter {
     }
 
     /**
+     * Clear our settings and add only the attributes
+     * of the given account to the settings.
+     * @param aHbciAccount the account
+     */
+    private void setMyProperties(final GnucashWritableAccount aHbciAccount) {
+        Properties prop = new Properties();
+        Collection<String> keys = aHbciAccount.getUserDefinedAttributeKeys();
+        for (String key : keys) {
+            String value = aHbciAccount.getUserDefinedAttribute(key);
+            prop.setProperty(key, value);
+        }
+        super.setMyProperties(prop);
+    }
+
+
+
+    /**
      * @param settings
      *            settings currently in effect
      * @param defaultSettings
      *            default-values for settings
-     * @param configfile
-     *            the file to save a changed config to
      * @param aCurrentAccount
      *            the currently selected account (may be null)
-     * @param aWritableModel
+     * @param aWritableModel the current file we are working on
      * @return true if all is ready for action
      * @throws IOException
      *             if we cannot write the config-file
+     * @throws JAXBException on issues with the backend
      */
-    private boolean askRequiresSettings(final Properties settings,
-                                        final Properties defaultSettings,
-                                        final File configfile,
+    private boolean askRequiresSettings(final Properties defaultSettings,
                                         final GnucashWritableAccount aCurrentAccount,
                                         final GnucashWritableFile aWritableModel)
-                                                                                     throws IOException {
-        if (settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT) == null
-                || settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
-                        .trim().length() == 0
-                || settings
-                        .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
-                        .equalsIgnoreCase(
-                                defaultSettings
-                                        .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT))
-                || aWritableModel.getAccountByID(settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
-                        .trim()) == null) {
-            if (aCurrentAccount != null) {
-                // the user cannot be expected to write down account-ids,
-                // so for this one setting we are going to help him
-                settings.setProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT,
-                        aCurrentAccount.getId());
-                settings.store(new FileWriter(configfile),
-                        "automatically created default-values");
-            } else {
-                JOptionPane
-                        .showMessageDialog(
-                                null,
-                                "Please select the account representing\n"
-                                        + " your bank-account in Gnucash and try again.\n"
-                                        + "A config-file will then automatically be generated for you.");
-                return false;
-            }
-        }
-
+                                                                                     throws IOException, JAXBException {
         boolean ok = true;
         for (int i = 0; i < REQUIREDSETTINGS.length; i++) {
             String key = REQUIREDSETTINGS[i];
-            if (settings.getProperty(key) == null
-                    || settings.getProperty(key).trim().length() == 0
-                    || settings.getProperty(key).equalsIgnoreCase(
+            String value = aCurrentAccount.getUserDefinedAttribute(key);
+            if (value == null
+                    || value.trim().length() == 0
+                    || value
+                    .equalsIgnoreCase(
                             defaultSettings.getProperty(key))) {
+
+                if (value == null) {
+                    value = defaultSettings.getProperty(key);
+                }
                 String input = JOptionPane.showInputDialog("Please enter\n"
                         + REQUIREDSETTINGNAMES[i]
-                        + "\nYou can later edit these values in\n"
-                        + configfile.getAbsolutePath(), settings.getProperty(
-                        key, ""));
+                        + "\nYou can later edit these values the properties of the account\n"
+                        + aCurrentAccount.getName()
+                        + value);
                 if (input != null && input.trim().length() > 0) {
-                    settings.setProperty(key, input);
-                    settings.store(new FileWriter(configfile),
-                            "automatically created default-values");
+                    aCurrentAccount.setUserDefinedAttribute(key, input);
                 } else {
                     ok = false;
                 }
-                // JOptionPane.showMessageDialog(null,
-                // "Please edit\n" + configfile.getAbsolutePath()
-                // + "\nand add a meaningfull value for '" + key + "'.",
-                // "Config-File missing.",
-                // JOptionPane.INFORMATION_MESSAGE);
-                // return null;
             }
-        } // TODO: we may better save bankcode, ... in the gnucash-account as
+        } // for
+
         return ok;
     }
 
