@@ -63,8 +63,9 @@ public class HBCIImporter extends AbstractScriptableImporter {
             HBCIImporter.SETTINGS_ACCOUNT,
             HBCIImporter.SETTINGS_GNUCASHACCOUNT,
             HBCIImporter.SETTINGS_PIN ,
-            HBCIImporter.SETTINGS_BANKCODE, HBCIImporter.SETTINGS_COUNTRY,
-            HBCIImporter.SETTINGS_ACCOUNT, HBCIImporter.SETTINGS_SERVER
+            HBCIImporter.SETTINGS_BANKCODE,
+            HBCIImporter.SETTINGS_COUNTRY,
+            HBCIImporter.SETTINGS_SERVER
     };
 
     /**
