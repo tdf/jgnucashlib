@@ -55,6 +55,7 @@ test  - runs some tests
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.PaypalImporter" target="${target}" />
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ssh" target="${target}" />
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.mysql" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.accountProperties" target="${target}" />
 	
 <!-- the plugin for importing account-statements for pago credit-card-acceptance still has some hardcoded account-ids that you need to change -->

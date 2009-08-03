@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plugin PUBLIC "-//JPF//Java Plug-in Manifest 1.0" "http://jpf.sourceforge.net/plugin_1_0.dtd">
+<plugin id="biz.wolschon.finance.jgnucash.mysql" version="2.0.22"
+	class="biz.wolschon.finance.jgnucash.mysql.PluginMain">
+	<requires>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.viewer.main"/>
+	       <import plugin-id="biz.wolschon.finance.jgnucash.editor.main"/>
+	</requires>
+	<runtime>
+		<library id="core" path="classes/" type="code">
+			<doc caption="API documentation">
+				<doc-ref path="api/index.html" caption="javadoc" />
+			</doc>
+			<export prefix="*" />
+		</library>
+	</runtime>
+	<extension plugin-id="biz.wolschon.finance.jgnucash.editor.main"
+	           point-id="DataSource" id="mysql">
+	   <parameter id="name"
+	           value="MySQL"/>
+	   <parameter id="description"
+	           value="Open a gnucash-database in MySQL."/>
+	   <parameter id="supportsWriting"
+	           value="false"/>
+	   <parameter id="supportsWritingTo"
+	           value="false"/>
+	   <parameter id="class"
+		       value="biz.wolschon.finance.jgnucash.mysql.MySQLDataSource"/>
+     </extension>
+
+</plugin>
