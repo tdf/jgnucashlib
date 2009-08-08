@@ -67,8 +67,30 @@ public class GnucashAccountsTreeModel implements TreeModel {
          * @param aFile where we get our data from
          */
         public GnucashAccountTreeRootEntry(final GnucashFile aFile) {
-            super(aFile.getRootAccounts().iterator().next());
+            super(getRootAccount(aFile));
             file = aFile;
+        }
+        /**
+         * @param aFile where we get our data from
+         * @return the root-account checked for null
+         */
+        private static GnucashAccount getRootAccount(final GnucashFile aFile) {
+            if (aFile == null) {
+                throw new IllegalArgumentException("null file given");
+            }
+            Collection<? extends GnucashAccount> rootAccounts = aFile.getRootAccounts();
+            if (rootAccounts.size() == 0) {
+                throw new IllegalArgumentException("file nas no root-account");
+            }
+            if (rootAccounts.size() > 1) {
+                throw new IllegalArgumentException("file nas more then one root-account");
+            }
+            GnucashAccount root = rootAccounts.iterator().next();
+            if (root == null) {
+                throw new IllegalArgumentException("root-account is null");
+            }
+            return root;
+
         }
         /**
          * @return where we get our data from
