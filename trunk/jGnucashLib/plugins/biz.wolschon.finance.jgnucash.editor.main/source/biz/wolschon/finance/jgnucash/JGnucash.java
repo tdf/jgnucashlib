@@ -688,13 +688,21 @@ public class JGnucash extends JGnucashViewer {
                     "null not allowed for field this.model");
         }
 
-        super.setModel(newModel);
-        model = newModel;
-        hasChanged = false;
-
-        getFileSaveAsMenuItem().setEnabled(true);
-        getFileSaveMenuItem().setEnabled(true);
-        getImportMenu().setEnabled(true);
+        boolean ok = false;
+        GnucashWritableFile oldModel = model;
+        try {
+            model = newModel;
+            super.setModel(newModel);
+            ok = true;
+            hasChanged = false;
+            getFileSaveAsMenuItem().setEnabled(true);
+            getFileSaveMenuItem().setEnabled(true);
+            getImportMenu().setEnabled(true);
+        } finally {
+            if (!ok) {
+                model = oldModel;
+            }
+        }
     }
     /**
      * The actions we have on Splits.
