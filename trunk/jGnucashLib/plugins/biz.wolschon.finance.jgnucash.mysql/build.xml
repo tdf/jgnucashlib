@@ -51,6 +51,7 @@ Use top-level project build file to build application.
 			<fileset dir="${basedir}/lib"
 			         includes="**/*.jar"/>
 		</unjar>
+		<delete file="${plugin.home}/classes/META-INF/MANIFEST.MF"/>
 		<copy todir="${plugin.home}/classes">
 			<fileset dir="${basedir}/source"
 			         includes="**/*"
