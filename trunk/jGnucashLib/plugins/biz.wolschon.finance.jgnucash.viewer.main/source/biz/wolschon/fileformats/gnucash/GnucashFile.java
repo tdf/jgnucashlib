@@ -117,7 +117,7 @@ public interface GnucashFile extends GnucashObject {
     /**
      * @return all accounts
      */
-    Collection<GnucashAccount> getAccounts();
+    Collection<? extends GnucashAccount> getAccounts();
 
     /**
      *
