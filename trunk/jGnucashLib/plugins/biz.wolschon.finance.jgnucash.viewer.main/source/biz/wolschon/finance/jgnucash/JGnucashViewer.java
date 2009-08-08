@@ -602,12 +602,6 @@ public class JGnucashViewer extends JFrame implements Application {
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             setModel(createModelFromFile(f));
-            getAccountsTree().setModel(
-                    new GnucashAccountsTreeModel(getModel()));
-            getTaxReportPanel().setBooks(getModel());
-            setSelectedAccount(null);
-            setTitle(TITLE);
-            jSplitPane.setDividerLocation(0.5);
             return true;
         } catch (Exception e1) {
            LOGGER.error("cannot load file '" + f.getAbsoluteFile() + "'", e1);
@@ -640,6 +634,12 @@ public class JGnucashViewer extends JFrame implements Application {
                     "null not allowed for field this.model");
         }
         myModel = model;
+        getAccountsTree().setModel(
+                new GnucashAccountsTreeModel(myModel));
+        getTaxReportPanel().setBooks(myModel);
+        setSelectedAccount(null);
+        setTitle(TITLE);
+        jSplitPane.setDividerLocation(0.5);
     }
 
     /**
