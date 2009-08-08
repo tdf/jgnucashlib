@@ -67,7 +67,7 @@ public class GnucashAccountsTreeModel implements TreeModel {
          * @param aFile where we get our data from
          */
         public GnucashAccountTreeRootEntry(final GnucashFile aFile) {
-            super(null);
+            super(aFile.getRootAccounts().iterator().next());
             file = aFile;
         }
         /**
