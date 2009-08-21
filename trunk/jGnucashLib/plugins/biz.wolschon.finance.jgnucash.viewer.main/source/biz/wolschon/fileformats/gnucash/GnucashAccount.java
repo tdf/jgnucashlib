@@ -203,7 +203,7 @@ public interface GnucashAccount extends Comparable {
      * @return all splits
      * @see ${@link GnucashTransactionSplit}
      */
-     List<GnucashTransactionSplit> getTransactionSplits();
+     List<? extends GnucashTransactionSplit> getTransactionSplits();
 
      /**
       * The returned list ist sorted by the natural order of the Transaction-Splits.

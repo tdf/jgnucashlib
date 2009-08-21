@@ -308,24 +308,28 @@ public class TransactionsPanel extends JPanel {
                    new ListSelectionListener() {
                        public void valueChanged(
                                final javax.swing.event.ListSelectionEvent e) {
-                           updateSelectionSummaryAccountList();
-                           updateSelectionSummary();
-                           if (getTransactionTable().getSelectedRowCount() == 1) {
-                               GnucashTransactionSplit transactionSplit = model.getTransactionSplit(getTransactionTable().getSelectedRow());
+                           try {
+                            updateSelectionSummaryAccountList();
+                               updateSelectionSummary();
+                               if (getTransactionTable().getSelectedRowCount() == 1) {
+                                   GnucashTransactionSplit transactionSplit = model.getTransactionSplit(getTransactionTable().getSelectedRow());
 //                               setTransaction(transactionSplit.getTransaction());
 
-                               getSingleTransactionPanel().setTransaction(transactionSplit.getTransaction());
-                               getSingleTransactionPanel().setVisible(true);
-                               getSelectionSummaryPanel().setVisible(false);
-                               getSummaryPanel().setPreferredSize(getSingleTransactionPanel().getPreferredSize());
-                               //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
-                           } else {
-                               getSingleTransactionPanel().setVisible(false);
-                               getSingleTransactionPanel().setTransaction(null);
-                               getSelectionSummaryPanel().setVisible(true);
-                               getSummaryPanel().setPreferredSize(getSelectionSummaryPanel().getPreferredSize());
-                               //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
-                           }
+                                   getSingleTransactionPanel().setTransaction(transactionSplit.getTransaction());
+                                   getSingleTransactionPanel().setVisible(true);
+                                   getSelectionSummaryPanel().setVisible(false);
+                                   getSummaryPanel().setPreferredSize(getSingleTransactionPanel().getPreferredSize());
+                                   //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
+                               } else {
+                                   getSingleTransactionPanel().setVisible(false);
+                                   getSingleTransactionPanel().setTransaction(null);
+                                   getSelectionSummaryPanel().setVisible(true);
+                                   getSummaryPanel().setPreferredSize(getSelectionSummaryPanel().getPreferredSize());
+                                   //((CardLayout) getSelectionSummaryPanel().getLayout()).next(getSummaryPanel());
+                               }
+                        } catch (Exception e1) {
+                            LOGGER.error("", e1);
+                        }
                        };
                    });
            setModel(new GnucashSimpleAccountTransactionsTableModel());
@@ -408,30 +412,35 @@ public class TransactionsPanel extends JPanel {
            // get all accounts of all splits
            int count = model.getRowCount();
 
-           for (int i=0; i<count; i++) {
+           for (int i = 0; i<count; i++) {
                GnucashTransactionSplit transactionSplit =
                    model.getTransactionSplit(i);
 
                try {
-                   Collection<? extends GnucashTransactionSplit> splits =
-                       transactionSplit.getTransaction().getSplits();
-                   for (GnucashTransactionSplit split : splits) {
-                       try {
-                           GnucashAccount account = split.getAccount();
-                           if (account != null) {
-                               if (!accounts.contains(account)) {
-                                   accounts.add(account);
+                   GnucashTransaction transaction = transactionSplit.getTransaction();
+                   if (transaction == null) {
+                       LOGGER.error("Split has no transaction");
+                   } else {
+                       Collection<? extends GnucashTransactionSplit> splits =
+                           transaction.getSplits();
+                       for (GnucashTransactionSplit split : splits) {
+                           try {
+                               GnucashAccount account = split.getAccount();
+                               if (account != null) {
+                                   if (!accounts.contains(account)) {
+                                       accounts.add(account);
+                                   }
                                }
+                           } catch (Exception x) {
+                               System.err.println("Ignoring account in "
+                                       + "TransactionPanel::updateSelectionSummary"
+                                       + "AccountList() because of:");
+                               x.printStackTrace(System.err);
                            }
-                       } catch( Exception x) {
-                           System.err.println("Ignoring account in "
-                                   + "TransactionPanel::updateSelectionSummary"
-                                   + "AccountList() because of:");
-                           x.printStackTrace(System.err);
                        }
                    }
-               } catch (JAXBException e) {
-                   LOGGER.error("[JAXBException] Problem in "
+               } catch (Exception e) {
+                   LOGGER.error("Problem in "
                               + getClass().getName(),
                                 e);
                }
@@ -458,13 +467,13 @@ public class TransactionsPanel extends JPanel {
        }
 
 
-       DefaultComboBoxModel model = new DefaultComboBoxModel();
+       DefaultComboBoxModel aModel = new DefaultComboBoxModel();
        for (GnucashAccount account : accounts) {
-           model.addElement(account);
+           aModel.addElement(account);
        }
 
        JComboBox list = getSelectionSummaryAccountComboBox();
-       list.setModel(model);
+       list.setModel(aModel);
        list.setSelectedIndex(-1);
    }
 
@@ -505,7 +514,7 @@ public class TransactionsPanel extends JPanel {
     * If the user has selected an account to display a summary for,
     * we return All splits of the selected transactions that are
     * for that account. Else we return all selected Splits.
-    * If no Splits are selected, we use all splits as the selected<
+    * If no Splits are selected, we use all splits as the selected
     * ones.
     * @return the splits of the selected/all transactions featuring this/the
     *         selected account.
@@ -540,7 +549,6 @@ public class TransactionsPanel extends JPanel {
     * Update the text in the selectionSummaryLabel
     * to show summary-information about the currently
     * selected transactions.
-    * @throws JAXBException if we have issues accessing the XML-Backend.
     */
    private void updateSelectionSummary() {
 

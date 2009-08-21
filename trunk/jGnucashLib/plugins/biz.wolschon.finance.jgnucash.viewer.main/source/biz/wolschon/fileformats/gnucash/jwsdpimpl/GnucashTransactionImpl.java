@@ -117,6 +117,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
     /**
      * The result is in the currency of the transaction.
      * @throws JAXBException on issues with the XML-backend
+     * @return the balance of the sum of all splits
      * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getBalance()
      */
     public FixedPointNumber getBalance() throws JAXBException {
@@ -175,7 +176,6 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      * @see biz.wolschon.fileformats.gnucash.GnucashTransaction#getNegatedBalanceFormatet()
      */
     public String getNegatedBalanceFormatet() throws NumberFormatException, JAXBException {
-
         return getCurrencyFormat().format(getNegatedBalance());
     }
     /**

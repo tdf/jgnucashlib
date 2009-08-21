@@ -15,7 +15,9 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl;
 import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.Locale;
+
 import javax.xml.bind.JAXBException;
+
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
@@ -42,7 +44,7 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
     /**
      * the transaction this split belongs to.
      */
-    private GnucashTransaction myTransaction;
+    private final GnucashTransaction myTransaction;
 
 
     /**
@@ -56,8 +58,8 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
             final GncTransactionType.TrnSplitsType.TrnSplitType peer,
             final GnucashTransaction transaction) throws JAXBException {
         super((peer.getSplitSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getSplitSlots(), transaction.getGnucashFile());
-        this.jwsdpPeer = peer;
-        this.myTransaction = transaction;
+        jwsdpPeer = peer;
+        myTransaction = transaction;
 
         GnucashAccount account = getAccount();
         if (account == null) {
@@ -73,8 +75,9 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
                    + "' described '"
                    + getTransaction().getDescription()
                    + "'");
-        } else
+        } else {
             account.addTransactionSplit(this);
+        }
 
 
         String lot = getLotID();
@@ -144,7 +147,7 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
             "null not allowed for field this.jwsdpPeer");
         }
 
-        this.jwsdpPeer = newPeer;
+        jwsdpPeer = newPeer;
     }
     /**
      *
@@ -283,12 +286,13 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
     }
     /**
      * The value is in the currency of the account!
-     * @param locale
-     * @return
+     * @param locale the locale to format to
+     * @return the formated number
      */
     public String getQuantityFormatet(final Locale locale) {
-        if (getTransaction().getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY))
+        if (getTransaction().getCurrencyNameSpace().equals(GnucashAccount.CURRENCYNAMESPACE_CURRENCY)) {
             return NumberFormat.getNumberInstance(locale).format(getQuantity());
+        }
 
         NumberFormat nf = NumberFormat.getCurrencyInstance(locale);
         nf.setCurrency(Currency.getInstance(getAccount().getCurrencyID()));
@@ -313,12 +317,13 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
 
 
     /**
-     *
+     * {@inheritDoc}
      * @see biz.wolschon.fileformats.gnucash.GnucashTransactionSplit#getDescription()
      */
     public String getDescription() {
-    	if (jwsdpPeer.getSplitMemo() == null)
-    		return "";
+        if (jwsdpPeer.getSplitMemo() == null) {
+            return "";
+        }
         return jwsdpPeer.getSplitMemo();
     }
 
@@ -326,6 +331,7 @@ public class GnucashTransactionSplitImpl extends GnucashObjectImpl implements Gn
      *
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("[GnucashTransactionSplitImpl:");

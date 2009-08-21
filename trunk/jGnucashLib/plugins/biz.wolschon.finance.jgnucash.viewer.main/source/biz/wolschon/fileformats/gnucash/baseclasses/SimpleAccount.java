@@ -69,7 +69,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
      * @see ${@link GnucashTransaction}
      */
      public List<GnucashTransaction> getTransactions() {
-         List<GnucashTransactionSplit> splits = getTransactionSplits();
+         List<? extends GnucashTransactionSplit> splits = getTransactionSplits();
          List<GnucashTransaction> retval = new ArrayList<GnucashTransaction>(splits.size());
 
          for (Object element : splits) {
@@ -139,7 +139,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
      */
     public String getQualifiedName() {
         GnucashAccount acc = getParentAccount();
-        if (acc == null) {
+        if (acc == null || acc.getId() == getId()) {
             if (getParentAccountId() == null) {
                 return getName();
             }

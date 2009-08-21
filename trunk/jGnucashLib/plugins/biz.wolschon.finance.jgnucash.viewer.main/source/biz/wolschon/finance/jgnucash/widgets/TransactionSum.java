@@ -315,7 +315,7 @@ public class TransactionSum extends JPanel {
             sum = sum.add(buildSum(child, aTargetAccountsIDs, currencyNameSpace, currencyID, alreadyHandled));
         }
 
-        List<GnucashTransactionSplit> splits
+        List<? extends GnucashTransactionSplit> splits
                                           = aSourceAccount.getTransactionSplits();
         for (GnucashTransactionSplit split : splits) {
             GnucashTransaction transaction = split.getTransaction();

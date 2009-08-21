@@ -77,7 +77,7 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
      */
     public int getRowCount() {
 
-        List<GnucashTransactionSplit> transactionSplits = getTransactionSplits();
+        List<? extends GnucashTransactionSplit> transactionSplits = getTransactionSplits();
         if (transactionSplits == null) {
             return 0;
         }
@@ -87,7 +87,7 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
     /**
      * @return the splits that affect this account.
      */
-    public List<GnucashTransactionSplit> getTransactionSplits() {
+    public List<? extends GnucashTransactionSplit> getTransactionSplits() {
         if (account == null) {
             return new LinkedList<GnucashTransactionSplit>();
         }
@@ -210,8 +210,14 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
             pw.close();
             message += trace.getBuffer();
 
+            final String message2 = message;
             System.err.println(message);
-            JOptionPane.showMessageDialog(null, message);
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    JOptionPane.showMessageDialog(null, message2);
+                }
+            };
+            new Thread(runnable).start();
             return "ERROR";
         }
     }

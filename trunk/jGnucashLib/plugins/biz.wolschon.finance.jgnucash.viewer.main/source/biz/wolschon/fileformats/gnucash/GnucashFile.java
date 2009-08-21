@@ -124,7 +124,7 @@ public interface GnucashFile extends GnucashObject {
      * @param id if null, gives all account that have no parent
      * @return all accounts with that parent in no particular order
      */
-    Collection<GnucashAccount> getAccountsByParentID(String id);
+    Collection<? extends GnucashAccount> getAccountsByParentID(String id);
 
     /**
      * @param id the unique id of the invoice to look for
