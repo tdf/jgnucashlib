@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.viewer.main/source"/>
-	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.mysql/src"/>
+	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.mysql/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.mailImport/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.accountProperties/source"/>
 	<classpathentry kind="src" path="plugins/biz.wolschon.finance.jgnucash.wirecard/source"/>
@@ -67,5 +67,9 @@
 	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.ssh/lib/jsch-20081209.jar"/>
 	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.accountProperties/lib/l2fprod-common-sheet.jar"/>
 	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.mysql/lib/mysql-connector-java-5.0.7-bin.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.mysql/lib/spring-beans.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.mysql/lib/spring-core.jar"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.mysql/lib/spring-jdbc.jar" sourcepath="D:/Data/downloads/spring-framework-2.5.6.SEC01-with-dependencies/spring-framework-2.5.6.SEC01/src"/>
+	<classpathentry kind="lib" path="plugins/biz.wolschon.finance.jgnucash.mysql/lib/spring-tx.jar"/>
 	<classpathentry kind="output" path="classes.eclipse"/>
 </classpath>

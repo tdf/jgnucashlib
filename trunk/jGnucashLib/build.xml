@@ -86,7 +86,7 @@ test  - runs some tests
 		<java jar="${build.home}/lib/jpf-boot.jar"
 		      dir="${build.home}"
 		      fork="true"
-			  jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"
+			jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044"
 		      />
 			<!-- jvmargs="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044" -->
 	</target>

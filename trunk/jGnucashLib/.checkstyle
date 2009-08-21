@@ -7,7 +7,10 @@
         <file-match-pattern match-pattern="." include-pattern="true"/>
     </fileset>
     <filter name="FilesFromPackage" enabled="true">
-        <filter-data value="src.gnucashlib.readonly/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated"/>
+        <filter-data value="plugins/biz.wolschon.finance.jgnucash.viewer.main/source/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated"/>
+        <filter-data value="plugins/biz.wolschon.finance.jgnucash.viewer.main/source/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated/impl"/>
+        <filter-data value="plugins/biz.wolschon.finance.jgnucash.viewer.main/source/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated/impl/runtime"/>
+        <filter-data value="plugins/biz.wolschon.finance.jgnucash.AbstractScriptablePlugin/source/biz/wolschon/finance/jgnucash/AbstractScriptablePlugin/ScriptEditor"/>
     </filter>
     <filter name="NonSrcDirs" enabled="true"/>
 </fileset-config>
