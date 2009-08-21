@@ -88,13 +88,13 @@ public interface GnucashWritableFile extends GnucashFile, GnucashWritableObject 
      *
      * @return a read-only collection of all accounts that have no parent
      */
-    Collection getWritableRootAccounts();
+    Collection<? extends GnucashWritableAccount> getWritableRootAccounts();
 
     /**
      *
      * @return a read-only collection of all accounts
      */
-    Collection getWritableAccounts();
+    Collection<? extends GnucashWritableAccount> getWritableAccounts();
 
 
     /**
@@ -121,7 +121,7 @@ public interface GnucashWritableFile extends GnucashFile, GnucashWritableObject 
      * @param type the type to look for
      * @return A changable version of all accounts of that type.
      */
-    Collection<GnucashWritableAccount> getAccountsByType(String type);
+    Collection<? extends GnucashWritableAccount> getAccountsByType(String type);
 
     /**
      * @see GnucashFile#getAccountByID(String)

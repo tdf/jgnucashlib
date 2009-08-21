@@ -23,7 +23,6 @@ import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileWritingImpl;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashObject;
 
 
@@ -53,7 +52,7 @@ public interface GnucashWritableTransaction extends GnucashTransaction {
      * The gnucash-file is the top-level class to contain everything.
      * @return the file we are associated with
      */
-    GnucashFileWritingImpl getWritingFile();
+    GnucashWritableFile getWritingFile();
 
     /**
      * @param dateEntered the day (time is ignored)
@@ -76,7 +75,7 @@ public interface GnucashWritableTransaction extends GnucashTransaction {
 
 
     void setDescription(final String desc);
-    
+
     void setTransactionNumber(String string);
 
 
@@ -122,7 +121,7 @@ public interface GnucashWritableTransaction extends GnucashTransaction {
      * @throws JAXBException on xml-problems
      */
     GnucashWritableTransactionSplit createWritingSplit(GnucashAccount account) throws JAXBException;
-    
+
     /**
      * Create a new split, already atached to this transaction.
      * @param account the account for the new split
@@ -181,7 +180,7 @@ public interface GnucashWritableTransaction extends GnucashTransaction {
      */
     void removePropertyChangeListener(
             PropertyChangeListener listener);
-	
+
     /**
      * @param name the name of the user-defined attribute
      * @param value the value or null if not set
@@ -189,5 +188,5 @@ public interface GnucashWritableTransaction extends GnucashTransaction {
      * @see {@link GnucashObject#getUserDefinedAttribute(String)}
      */
     void setUserDefinedAttribute(final String name, final String value) throws JAXBException;
-	
+
 }

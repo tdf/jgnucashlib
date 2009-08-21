@@ -81,7 +81,7 @@ public class GnucashTransactionSplitWritingImpl extends
      */
     public GnucashTransactionSplitWritingImpl(final GnucashTransactionWritingImpl transaction,
                                               final GnucashAccount account) throws JAXBException {
-        this(transaction, account, transaction.getWritingFile().createGUID());
+        this(transaction, account, (transaction.getWritingFile()).createGUID());
     }
 
     /**
@@ -138,7 +138,7 @@ public class GnucashTransactionSplitWritingImpl extends
         transaction.getSplits();
 
         GnucashFileWritingImpl gnucashFileImpl = transaction.getWritingFile();
-        ObjectFactory factory = (gnucashFileImpl).getObjectFactory();
+        ObjectFactory factory = gnucashFileImpl.getObjectFactory();
 
 
         GncTransactionType.TrnSplitsType.TrnSplitType split = gnucashFileImpl.createGncTransactionTypeTrnSplitsTypeTrnSplitType();
@@ -376,9 +376,11 @@ public class GnucashTransactionSplitWritingImpl extends
     @SuppressWarnings("unchecked")
     public void setLotID(final String lotID) throws JAXBException {
 
-        ObjectFactory factory = ((GnucashTransactionWritingImpl)getTransaction()).getWritingFile().getObjectFactory();
+        GnucashTransactionWritingImpl transaction = (GnucashTransactionWritingImpl) getTransaction();
+        GnucashFileWritingImpl writingFile = transaction.getWritingFile();
+        ObjectFactory factory = writingFile.getObjectFactory();
 
-        if(getJwsdpPeer().getSplitLot()==null) {
+        if (getJwsdpPeer().getSplitLot() == null) {
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType.TrnSplitsType.TrnSplitType.SplitLotType lot = factory.createGncTransactionTypeTrnSplitsTypeTrnSplitTypeSplitLotType();
             getJwsdpPeer().setSplitLot(lot);
         }

@@ -209,6 +209,9 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
         // if editing is possible, install a jcomboBox as an editor for the accounts
         if (aModel != null && aModel instanceof SingleWritableTransactionTableModel) {
             GnucashTransaction transaction = aModel.getTransaction();
+            if (transaction == null) {
+                throw new IllegalArgumentException("Given model has no transaction");
+            }
             JComboBox accountsCombo = new JComboBox() {
 
                 /**
