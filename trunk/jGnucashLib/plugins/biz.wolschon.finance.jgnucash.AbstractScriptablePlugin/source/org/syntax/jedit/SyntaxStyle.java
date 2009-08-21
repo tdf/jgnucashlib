@@ -9,8 +9,11 @@
 
 package org.syntax.jedit;
 
-import java.awt.*;
-import java.util.StringTokenizer;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Toolkit;
 
 /**
  * A simple text style class. It can specify the color, italic flag,
@@ -71,11 +74,13 @@ public class SyntaxStyle
 	 */
 	public Font getStyledFont(Font font)
 	{
-		if(font == null)
-			throw new NullPointerException("font param must not"
+		if(font == null) {
+            throw new NullPointerException("font param must not"
 				+ " be null");
-		if(font.equals(lastFont))
-			return lastStyledFont;
+        }
+		if(font.equals(lastFont)) {
+            return lastStyledFont;
+        }
 		lastFont = font;
 		lastStyledFont = new Font(font.getFamily(),
 			(bold ? Font.BOLD : 0)
@@ -89,11 +94,13 @@ public class SyntaxStyle
 	 */
 	public FontMetrics getFontMetrics(Font font)
 	{
-		if(font == null)
-			throw new NullPointerException("font param must not"
+		if(font == null) {
+            throw new NullPointerException("font param must not"
 				+ " be null");
-		if(font.equals(lastFont) && fontMetrics != null)
-			return fontMetrics;
+        }
+		if(font.equals(lastFont) && fontMetrics != null) {
+            return fontMetrics;
+        }
 		lastFont = font;
 		lastStyledFont = new Font(font.getFamily(),
 			(bold ? Font.BOLD : 0)
@@ -120,7 +127,8 @@ public class SyntaxStyle
 	/**
 	 * Returns a string representation of this object.
 	 */
-	public String toString()
+	@Override
+    public String toString()
 	{
 		return getClass().getName() + "[color=" + color +
 			(italic ? ",italic" : "") +
@@ -128,9 +136,9 @@ public class SyntaxStyle
 	}
 
 	// private members
-	private Color color;
-	private boolean italic;
-	private boolean bold;
+	private final Color color;
+	private final boolean italic;
+	private final boolean bold;
 	private Font lastFont;
 	private Font lastStyledFont;
 	private FontMetrics fontMetrics;

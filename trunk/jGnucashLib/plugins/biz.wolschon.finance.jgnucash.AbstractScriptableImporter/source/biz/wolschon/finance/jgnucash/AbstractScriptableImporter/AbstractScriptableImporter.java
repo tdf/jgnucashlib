@@ -506,7 +506,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         final String WARNING = "[did not happen in " + getPluginName().toUpperCase() + "-account";
 
         // TODO: ein getTransactionSplits(fromDate, toDate) wäre praktisch
-        List<GnucashTransactionSplit> splits = getMyAccount()
+        List<? extends GnucashTransactionSplit> splits = getMyAccount()
                 .getTransactionSplits();
         for (GnucashTransactionSplit split : splits) {
             if (split.getTransaction().getDatePosted().getTime() < from) {
@@ -636,7 +636,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         long to = date.getTime() + 2 * dateDeltaMillis;
 
         // TODO: ein getTransactionSplits(fromDate, toDate) wäre praktisch
-        List<GnucashTransactionSplit> splits = getMyAccount()
+        List<? extends GnucashTransactionSplit> splits = getMyAccount()
                 .getTransactionSplits();
         for (GnucashTransactionSplit split : splits) {
             if (split.getTransaction().getDatePosted().getTime() < from) {

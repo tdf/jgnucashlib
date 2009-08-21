@@ -403,11 +403,11 @@ SOL.EST 2VJ.05 96,00
 
 
 
-    public boolean doesTransactionExist(Date buchungstag, Date valuta, String vorgang, String buchungstext, FixedPointNumber umsatzInEur) {
-        List<GnucashTransactionSplit> splits = getAccount().getTransactionSplits();
+    public boolean doesTransactionExist(final Date buchungstag, final Date valuta, final String vorgang, final String buchungstext, final FixedPointNumber umsatzInEur) {
+        List<? extends GnucashTransactionSplit> splits = getAccount().getTransactionSplits();
         for (GnucashTransactionSplit split : splits) {
 
-            if(isSameTransaction(split, buchungstag, valuta, vorgang, buchungstext, umsatzInEur)) {
+            if (isSameTransaction(split, buchungstag, valuta, vorgang, buchungstext, umsatzInEur)) {
                 return true;
             }
         }

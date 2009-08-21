@@ -27,7 +27,6 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -43,16 +42,13 @@ import java.util.StringTokenizer;
 
 import javax.net.ssl.HttpsURLConnection;
 
-
-//import ballard.http.Client;
-//import ballard.http.HttpConfiguration;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
  * created: 16.05.2005 <br/>
  * THIS IS VERY OLD CODE AND HAS BEEN REPLACED BY THE SCRIPTABLE HBCI-Importer.<br/>
- * 
+ *
  *
  * Implementation of CVSImporter that knows the CSV-format of the Commdirect Bank AG
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
@@ -62,14 +58,15 @@ public class ComdirectCSVImporter extends CSVImporter {
 
 
 
-	private static final String COMDIRECT_LOGIN_URL = "https://brokerage.comdirect.de/servlet/de.comdirect.usecase.login.LoginInputServlet";
-	private static final String COMDIRECT_CSV_EXPORT_URL = "https://brokerage.comdirect.de/brokerage/konto/umsaetze_export.jsp";
-	/**
-	 * @param account
-	 */
-	public ComdirectCSVImporter(final GnucashWritableAccount account) {
-		super(account);
-	}
+    private static final String COMDIRECT_LOGIN_URL = "https://brokerage.comdirect.de/servlet/de.comdirect.usecase.login.LoginInputServlet";
+    private static final String COMDIRECT_CSV_EXPORT_URL = "https://brokerage.comdirect.de/brokerage/konto/umsaetze_export.jsp";
+
+    /**
+     * @param account
+     */
+    public ComdirectCSVImporter(final GnucashWritableAccount account) {
+        super(account);
+    }
 
     /**
      *
@@ -200,19 +197,20 @@ public class ComdirectCSVImporter extends CSVImporter {
 //
 //        System.out.print("parsing login-page");
 //
-            int loginFormStart= pageStr.indexOf("<form name=\"login\" id=\"login\"");
+            int loginFormStart = pageStr.indexOf("<form name=\"login\" id=\"login\"");
 
             String action = getAction(pageStr, loginFormStart);
 
-            if(loginFormStart==-1) {
+            if (loginFormStart == -1) {
                 System.err.println("\n\n===================================\npage:\n"+pageStr);
 //                http.close();
                 throw new IllegalStateException("No login-form detected!!");
             }
 
-            int loginFormEnd= pageStr.indexOf("</form", loginFormStart);
-            if(loginFormEnd==-1)
+            int loginFormEnd = pageStr.indexOf("</form", loginFormStart);
+            if (loginFormEnd==-1) {
                 loginFormEnd = pageStr.length();
+            }
 
             System.out.println("\n\n===================================\nlogin-part of page:\n"+pageStr.substring(loginFormStart, loginFormEnd));
 
@@ -272,50 +270,52 @@ public class ComdirectCSVImporter extends CSVImporter {
 
         int actionIndex = pageStr.indexOf("action=\"", loginFormStart);
 
-        if(actionIndex==-1) {
-         System.err.println("canot find 'action=' for form-tag! '"+pageStr.substring(loginFormStart, Math.min(pageStr.length(), loginFormStart+300))+"'");
+        if (actionIndex == -1) {
+         System.err.println("canot find 'action=' for form-tag! '"
+                 + pageStr.substring(loginFormStart, Math.min(pageStr.length(), loginFormStart + 300))
+                 + "'");
          return null;
         }
 
         actionIndex += "action=\"".length();
         // just defensive prgramming
-        if(pageStr.charAt(actionIndex)=='\'')
+        if (pageStr.charAt(actionIndex) == '\'') {
             actionIndex++;
+        }
 
 
         int actionEndIndex = pageStr.indexOf("\"", actionIndex);
 
-        if(actionEndIndex==-1) {
-         System.err.println("canot find closing of 'action=' for form-tag! '"+pageStr.substring(loginFormStart, Math.min(pageStr.length(), loginFormStart+300))+"'");
+        if (actionEndIndex == -1) {
+         System.err.println("canot find closing of 'action=' for form-tag! '" + pageStr.substring(loginFormStart, Math.min(pageStr.length(), loginFormStart + 300)) + "'");
          return null;
         }
 
 
         String action = pageStr.substring(actionIndex, actionEndIndex);
 
-		System.out.println("getAction()='"+action+"'");
+        System.out.println("getAction()='" + action + "'");
 
 
-		return action;
-	}
+        return action;
+    }
 
-	/**
-	 * @param requestLoginPageURL
-	 * @param loginBodyString may ne null. if not null a POST-request is done with this content
-	 * @throws IOException
-	 */
-	private String getURLContent(URL requestLoginPageURL, Map cookies, String loginBodyString) throws IOException {
+    /**
+     * @param requestLoginPageURL
+     * @param loginBodyString may ne null. if not null a POST-request is done with this content
+     * @throws IOException
+     */
+    private String getURLContent(final URL requestLoginPageURL, final Map cookies, final String loginBodyString) throws IOException {
 
-        System.err.println("Requesting URL: "+requestLoginPageURL);
+        System.err.println("Requesting URL: " + requestLoginPageURL);
 
-
-        HttpsURLConnection connection = (HttpsURLConnection)requestLoginPageURL.openConnection();
+        HttpsURLConnection connection = (HttpsURLConnection) requestLoginPageURL.openConnection();
 
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; U; Linux i686; de; rv:1.6) Gecko/20040113");
 
-        if(lastURL!=null) {
+        if (lastURL != null) {
             connection.addRequestProperty("Referer", lastURL.toString());
-            System.out.println("sending Referer: "+lastURL.toString());
+            System.out.println("sending Referer: " + lastURL.toString());
         }
 
         lastURL = requestLoginPageURL;
@@ -325,26 +325,27 @@ public class ComdirectCSVImporter extends CSVImporter {
         String cookiestring = "";
         for (Iterator iter = cookies.entrySet().iterator(); iter.hasNext();) {
             Map.Entry element = (Map.Entry) iter.next();
-            System.err.println("sending cookie: "+element.getKey().toString()+"=>"+element.getValue().toString());
+            System.err.println("sending cookie: " + element.getKey().toString() + "=>" + element.getValue().toString());
 
-            if(cookiestring.length()>0)
-                cookiestring+=";";
-            cookiestring+=element.getKey().toString()+"="+element.getValue().toString();
-		}
-        if(cookiestring.length()>0) {
+            if (cookiestring.length() > 0) {
+                cookiestring += ";";
+            }
+            cookiestring += element.getKey().toString() + "=" + element.getValue().toString();
+        }
+        if (cookiestring.length() > 0) {
             connection.addRequestProperty("Cookie", cookiestring);
-            System.err.println("sending cookie-header: "+cookiestring);
+            System.err.println("sending cookie-header: " + cookiestring);
         }
 
 
         // send POST-content
 
-        if(loginBodyString != null) {
+        if (loginBodyString != null) {
             connection.setRequestMethod("POST");
-            byte body[] = loginBodyString.getBytes();
-            connection.addRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
-            connection.addRequestProperty( "Content-Length", ""+body.length );
-            System.err.println("sending post-body: '"+loginBodyString+"'");
+            byte[] body = loginBodyString.getBytes();
+            connection.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            connection.addRequestProperty("Content-Length", "" + body.length);
+            System.err.println("sending post-body: '" + loginBodyString + "'");
             connection.setDoOutput(true);
             connection.connect();
             OutputStream out = connection.getOutputStream();
@@ -358,17 +359,18 @@ public class ComdirectCSVImporter extends CSVImporter {
 
 
 
-        System.err.println("ContentType: "+connection.getContentType());
-        System.err.println("ContentLength: "+connection.getContentLength());
-        System.err.println("ResponseCode: "+connection.getResponseCode());
+        System.err.println("ContentType: "   + connection.getContentType());
+        System.err.println("ContentLength: " + connection.getContentLength());
+        System.err.println("ResponseCode: "  + connection.getResponseCode());
 
         String encoding = connection.getContentEncoding();
-        System.err.println("encoding: "+encoding);
-        if(encoding == null || encoding.trim().length()==0)
+        System.err.println("encoding: " + encoding);
+        if (encoding == null || encoding.trim().length() == 0) {
             encoding = "ISO-8859-15";
+        }
 
-        for (Iterator iter = connection.getHeaderFields().entrySet().iterator(); iter.hasNext();) {
-            Map.Entry entry = (Map.Entry) iter.next();
+        for (Object element : connection.getHeaderFields().entrySet()) {
+            Map.Entry entry = (Map.Entry) element;
             System.err.println("header field: '"+entry.getKey()+"'=>'"+entry.getValue()+"'");
 
             if(entry.getKey() != null && entry.getKey().equals("Set-Cookie")) {
@@ -376,8 +378,9 @@ public class ComdirectCSVImporter extends CSVImporter {
                 String name2value = (String)cookie.get(0);
 
                 int index = name2value.indexOf(';');
-                if(index>-1)
+                if(index>-1) {
                     name2value = name2value.substring(0, index);
+                }
 
                 index = name2value.indexOf('=');
 
@@ -404,8 +407,9 @@ public class ComdirectCSVImporter extends CSVImporter {
         StringWriter sw = new StringWriter();
         char buf[] = new char[255];
         int len = -1;
-        while((len = reader.read(buf)) != -1)
+        while((len = reader.read(buf)) != -1) {
             sw.write(buf, 0, len);
+        }
         reader.close();
         connection.disconnect();
 
@@ -417,8 +421,9 @@ public class ComdirectCSVImporter extends CSVImporter {
             index += JSREDIRECT.length();
 
             // just defensive prgramming
-            if(retval.charAt(index)=='\'')
+            if(retval.charAt(index)=='\'') {
                 index++;
+            }
 
             String newurl = retval.substring(index, retval.indexOf('\'', index));
 
@@ -475,8 +480,9 @@ public class ComdirectCSVImporter extends CSVImporter {
 
             transactionIdIndex += SEARCHSTRING.length();
 //          just defensive prgramming
-            if(pageStr.charAt(transactionIdIndex)=='\"')
+            if(pageStr.charAt(transactionIdIndex)=='\"') {
                 transactionIdIndex++;
+            }
 
 
 		    int transactionIdIndexEnd = pageStr.indexOf("\"", transactionIdIndex);
@@ -537,8 +543,9 @@ public class ComdirectCSVImporter extends CSVImporter {
 
         while((line = linesReader.readLine()) != null) {
             try {
-                if(line.trim().length()==0)
+                if(line.trim().length()==0) {
                     continue;
+                }
 
                 if(line.startsWith("\"Kontostand:\"\t\"") || line.startsWith("\"Neuer Kontosaldo\"\t\"")) {
                     StringTokenizer tokenizer = new StringTokenizer(line, "\t", false);
@@ -546,8 +553,9 @@ public class ComdirectCSVImporter extends CSVImporter {
                     token = tokenizer.nextToken().trim();
                     token = extractToken(tokenizer);
                     token = token.trim();
-                    if(token.startsWith("+"))
+                    if(token.startsWith("+")) {
                         token = token.substring(1);
+                    }
                     balance = currencyFormat.parse(token.replaceFirst(" EUR", "")).doubleValue();
 
                     System.err.println("if all is well we should end up with a balance of: "+balance);
@@ -555,26 +563,33 @@ public class ComdirectCSVImporter extends CSVImporter {
                     continue;
                 }
 
-                if(line.equalsIgnoreCase("\"comdirect bank AG\""))
+                if(line.equalsIgnoreCase("\"comdirect bank AG\"")) {
                     continue;
+                }
 
-                if(line.startsWith("\"UMSÄTZE:"))
+                if(line.startsWith("\"UMSÄTZE:")) {
                     continue;
+                }
 
-                if(line.equals("\"Umsätze Girokonto\"\t\" - Zeitraum: Neue Umsätze\""))
-                        continue;
-
-                if(line.startsWith("\"Kunden-Nummer:"))
+                if(line.equals("\"Umsätze Girokonto\"\t\" - Zeitraum: Neue Umsätze\"")) {
                     continue;
+                }
 
-                if(line.startsWith("\"BLZ:"))
+                if(line.startsWith("\"Kunden-Nummer:")) {
                     continue;
+                }
 
-                if(line.startsWith("\"Verf"))
+                if(line.startsWith("\"BLZ:")) {
                     continue;
+                }
 
-                if(line.startsWith("\"Buchungstag"))
+                if(line.startsWith("\"Verf")) {
                     continue;
+                }
+
+                if(line.startsWith("\"Buchungstag")) {
+                    continue;
+                }
 
 
                 if(line.indexOf('\"', 1)==line.length()-1) {
@@ -591,8 +606,9 @@ public class ComdirectCSVImporter extends CSVImporter {
 
 
                 // we reached the end?
-                if(line.startsWith("\"Alter Kontosaldo\""))
+                if(line.startsWith("\"Alter Kontosaldo\"")) {
                     break;
+                }
 
 				Object tokens[] = csvLineFormat.parse(line);
 				Date buchungstag = buchungstagFormat.parse((String)tokens[0]);
@@ -615,8 +631,9 @@ public class ComdirectCSVImporter extends CSVImporter {
         double realBalance = getAccount().getBalance(date).doubleValue();
         if(balance != realBalance) {
             System.err.println("Problem!! balance should now be "+currencyFormat.format(balance)+" but is "+currencyFormat.format(realBalance));
-        } else
+        } else {
             System.out.println("Balance is OK should be "+currencyFormat.format(balance)+", is "+currencyFormat.format(realBalance));
+        }
 	}
 
 	/**
@@ -639,8 +656,9 @@ public class ComdirectCSVImporter extends CSVImporter {
 	 */
 	private String extractToken(StringTokenizer tokenizer) throws IOException{
         String token = tokenizer.nextToken().trim();
-		if(token.startsWith("\"") && token.endsWith("\""))
+		if(token.startsWith("\"") && token.endsWith("\"")) {
             token = token.substring(1, token.length()-1).trim();
+        }
         return token;
 	}
 
