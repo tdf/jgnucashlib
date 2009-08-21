@@ -39,7 +39,8 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.xml.bind.JAXBException;
 
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.apache.axis.utils.ClassUtils;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.finance.jgnucash.mysql.impl.GnucashDatabase;
@@ -69,7 +70,8 @@ public class MySQLDataSource implements DataSourcePlugin {
             .getName());
 
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
      * @see biz.wolschon.finance.jgnucash.plugin.DataSourcePlugin#loadFile()
      */
     @Override
@@ -79,18 +81,32 @@ public class MySQLDataSource implements DataSourcePlugin {
             com.mysql.jdbc.Driver driver = new com.mysql.jdbc.Driver();
             //Class.forName("com.mysql.jdbc.Driver").newInstance();
 
-            SimpleDriverDataSource dataSource = new SimpleDriverDataSource(driver, "jdbc:mysql://localhost/gnucash", "root", "");
-//            DriverManagerDataSource dataSource = new DriverManagerDataSource();
-//            dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-//            dataSource.setUrl("jdbc:mysql://localhost/gnucash");
-//            dataSource.setUsername("root");
-//            dataSource.setPassword("");
+//            SimpleDriverDataSource dataSource = new SimpleDriverDataSource(driver, "jdbc:mysql://localhost/gnucash", "root", "");
+            DriverManagerDataSource dataSource = new DriverManagerDataSource();
+            ClassUtils.setDefaultClassLoader(getClassLoader());
+            try {
+                dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+            } catch (Exception e) {
+                e.printStackTrace(); //ignored
+            }
+            dataSource.setUrl("jdbc:mysql://localhost/gnucash");
+            dataSource.setUsername("root");
+            dataSource.setPassword("");
 
             return new GnucashDatabase(dataSource);
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Cannot open database-connection", e);
         }
         return null;
+    }
+
+    /**
+     * @return the class-loader that can load the database-driver.
+     * @throws ClassNotFoundException no driver
+     */
+    private ClassLoader getClassLoader() throws ClassNotFoundException{
+        //return PluginMain.getMyInstance().getManager().getPluginClassLoader(PluginMain.getMyInstance().getDescriptor());
+        return Class.forName("com.mysql.jdbc.Driver").getClassLoader();
     }
 
      /* (non-Javadoc)

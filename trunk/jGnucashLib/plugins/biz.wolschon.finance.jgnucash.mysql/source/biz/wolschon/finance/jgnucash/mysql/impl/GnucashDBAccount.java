@@ -32,12 +32,9 @@
 package biz.wolschon.finance.jgnucash.mysql.impl;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.Collection;
-import java.util.Currency;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
@@ -47,6 +44,7 @@ import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
+import biz.wolschon.fileformats.gnucash.baseclasses.SimpleAccount;
 import biz.wolschon.numbers.FixedPointNumber;
 
 /**
@@ -55,10 +53,10 @@ import biz.wolschon.numbers.FixedPointNumber;
  * GnucashDBAccount<br/>
  * created: 06.08.2009 <br/>
  *<br/><br/>
- * <b>TODO: describe the purpose of this class.</b>
+ * <b>This class represents an account in a Gnucash 2.3.3 -database</b>
  * @author  <a href="mailto:Marcus@Wolschon.biz">fox</a>
  */
-public class GnucashDBAccount implements GnucashWritableAccount {
+public class GnucashDBAccount extends SimpleAccount implements GnucashWritableAccount {
 
     /**
      * Automatically created logger for debug and error-output.
@@ -66,10 +64,10 @@ public class GnucashDBAccount implements GnucashWritableAccount {
     private static final Logger LOG = Logger.getLogger(GnucashDBAccount.class
             .getName());
 
-    /**
-     * Helper to support PropertyChangeListeners.
-     */
-    private final PropertyChangeSupport myPropertyChangeSupport = new PropertyChangeSupport(this);
+//    /**
+//     * Helper to support PropertyChangeListeners.
+//     */
+//    private final PropertyChangeSupport myPropertyChangeSupport = new PropertyChangeSupport(this);
 
     /**
      * The {@link GnucashDatabase} we belong to.
@@ -89,15 +87,17 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      */
     protected GnucashDBAccount(final GnucashDatabase aGnucashFile,
                                final String aGuid,
+                               final String aParentGUID,
                                final String aName,
                                final String aAccountType,
                                final String aAccountCode,
                                final String aComodityID,
                                final int aComoditySCU,
                                final boolean aComodityNonStandardSCU) {
-        super();
+        super(aGnucashFile);
         myGnucashFile = aGnucashFile;
         myGUID = aGuid;
+        myParentGUID = aParentGUID;
         myName = aName;
         myAccountType = aAccountType;
         myAccountCode = aAccountCode;
@@ -106,7 +106,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
         myComodityNonStandardSCU = aComodityNonStandardSCU;
     }
 
-    private String myParentGUID;
+    private final String myParentGUID;
     private final String myName;
     private final String myAccountType;
     private final String myAccountCode;
@@ -114,31 +114,31 @@ public class GnucashDBAccount implements GnucashWritableAccount {
     private final String myComodityID;
     private final int myComoditySCU;
     private final boolean myComodityNonStandardSCU;
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#addPropertyChangeListener(java.beans.PropertyChangeListener)
-     */
-    @Override
-    public void addPropertyChangeListener(final PropertyChangeListener aListener) {
-        myPropertyChangeSupport.addPropertyChangeListener(aListener);
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
-     */
-    @Override
-    public void addPropertyChangeListener(final String aPropertyName,
-                                          final PropertyChangeListener aListener) {
-        myPropertyChangeSupport.addPropertyChangeListener(aPropertyName, aListener);
-    }
-
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#addPropertyChangeListener(java.beans.PropertyChangeListener)
+//     */
+//    @Override
+//    public void addPropertyChangeListener(final PropertyChangeListener aListener) {
+//        myPropertyChangeSupport.addPropertyChangeListener(aListener);
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#addPropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+//     */
+//    @Override
+//    public void addPropertyChangeListener(final String aPropertyName,
+//                                          final PropertyChangeListener aListener) {
+//        myPropertyChangeSupport.addPropertyChangeListener(aPropertyName, aListener);
+//    }
+//
     /**
      * {@inheritDoc}.
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#getBalanceChange(java.util.Date, java.util.Date)
      */
     @Override
-    public FixedPointNumber getBalanceChange(Date aFrom, Date aTo) {
+    public FixedPointNumber getBalanceChange(final Date aFrom, final Date aTo) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -162,23 +162,22 @@ public class GnucashDBAccount implements GnucashWritableAccount {
 
     }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
-     */
-    @Override
-    public void removePropertyChangeListener(String aPropertyName,
-                                             PropertyChangeListener aListener) {
-        // TODO Auto-generated method stub
-
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#removePropertyChangeListener(java.lang.String, java.beans.PropertyChangeListener)
+//     */
+//    @Override
+//    public void removePropertyChangeListener(String aPropertyName,
+//                                             PropertyChangeListener aListener) {
+//
+//    }
 
     /**
      * {@inheritDoc}.
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#removePropertyChangeListener(java.beans.PropertyChangeListener)
      */
     @Override
-    public void removePropertyChangeListener(PropertyChangeListener aListener) {
+    public void removePropertyChangeListener(final PropertyChangeListener aListener) {
         // TODO Auto-generated method stub
 
     }
@@ -188,7 +187,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setAccountCode(java.lang.String)
      */
     @Override
-    public void setAccountCode(String aCode) {
+    public void setAccountCode(final String aCode) {
         // TODO Auto-generated method stub
 
     }
@@ -198,7 +197,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setCurrencyID(java.lang.String)
      */
     @Override
-    public void setCurrencyID(String aId) {
+    public void setCurrencyID(final String aId) {
         // TODO Auto-generated method stub
 
     }
@@ -208,7 +207,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setCurrencyNameSpace(java.lang.String)
      */
     @Override
-    public void setCurrencyNameSpace(String aId) {
+    public void setCurrencyNameSpace(final String aId) {
         // TODO Auto-generated method stub
 
     }
@@ -218,7 +217,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setDescription(java.lang.String)
      */
     @Override
-    public void setDescription(String aDesc) {
+    public void setDescription(final String aDesc) {
         // TODO Auto-generated method stub
 
     }
@@ -228,7 +227,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setName(java.lang.String)
      */
     @Override
-    public void setName(String aName) {
+    public void setName(final String aName) {
         // TODO Auto-generated method stub
 
     }
@@ -250,7 +249,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      */
     @Override
     public void setParentAccountId(final String aNewparent) {
-        myParentGUID = aNewparent;
+        //TODO
     }
 
     /**
@@ -258,7 +257,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setType(java.lang.String)
      */
     @Override
-    public void setType(String aType) {
+    public void setType(final String aType) {
         // TODO Auto-generated method stub
 
     }
@@ -268,7 +267,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableAccount#setUserDefinedAttribute(java.lang.String, java.lang.String)
      */
     @Override
-    public void setUserDefinedAttribute(String aName, String aValue)
+    public void setUserDefinedAttribute(final String aName, final String aValue)
                                                                     throws JAXBException {
         // TODO Auto-generated method stub
 
@@ -293,128 +292,116 @@ public class GnucashDBAccount implements GnucashWritableAccount {
         return myAccountCode;
     }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance()
-     */
-    @Override
-    public FixedPointNumber getBalance() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance()
+//     */
+//    @Override
+//    public FixedPointNumber getBalance() {
+//        return null;
+//    }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance(java.util.Date)
-     */
-    @Override
-    public FixedPointNumber getBalance(Date aDate) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance(java.util.Date)
+//     */
+//    @Override
+//    public FixedPointNumber getBalance(Date aDate) {
+//        return null;
+//    }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance(java.util.Date, java.util.Collection)
-     */
-    @Override
-    public FixedPointNumber getBalance(final Date aDate,
-                                       final Collection<GnucashTransactionSplit> aAfter) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance(java.util.Date, java.util.Collection)
+//     */
+//    @Override
+//    public FixedPointNumber getBalance(final Date aDate,
+//                                       final Collection<GnucashTransactionSplit> aAfter) {
+//        return null;
+//    }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance(biz.wolschon.fileformats.gnucash.GnucashTransactionSplit)
-     */
-    @Override
-    public FixedPointNumber getBalance(GnucashTransactionSplit aLastIncludesSplit) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalance(biz.wolschon.fileformats.gnucash.GnucashTransactionSplit)
+//     */
+//    @Override
+//    public FixedPointNumber getBalance(GnucashTransactionSplit aLastIncludesSplit) {
+//        return null;
+//    }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceFormated()
-     */
-    @Override
-    public String getBalanceFormated() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceFormated()
+//     */
+//    @Override
+//    public String getBalanceFormated() {
+//        return null;
+//    }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceFormated(java.util.Locale)
-     */
-    @Override
-    public String getBalanceFormated(Locale aLocale) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive()
-     */
-    @Override
-    public FixedPointNumber getBalanceRecursive() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive(java.util.Date, java.util.Currency)
-     */
-    @Override
-    public FixedPointNumber getBalanceRecursive(Date aDate, Currency aCurrency) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive(java.util.Date)
-     */
-    @Override
-    public FixedPointNumber getBalanceRecursive(Date aDate) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive(java.util.Date, java.lang.String, java.lang.String)
-     */
-    @Override
-    public FixedPointNumber getBalanceRecursive(Date aDate,
-                                                String aCurrencyNameSpace,
-                                                String aCurrencyName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursiveFormated()
-     */
-    @Override
-    public String getBalanceRecursiveFormated() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursiveFormated(java.util.Date)
-     */
-    @Override
-    public String getBalanceRecursiveFormated(final Date aDate) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceFormated(java.util.Locale)
+//     */
+//    @Override
+//    public String getBalanceFormated(Locale aLocale) {
+//        return null;
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive()
+//     */
+//    @Override
+//    public FixedPointNumber getBalanceRecursive() {
+//        return null;
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive(java.util.Date, java.util.Currency)
+//     */
+//    @Override
+//    public FixedPointNumber getBalanceRecursive(Date aDate, Currency aCurrency) {
+//        return null;
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive(java.util.Date)
+//     */
+//    @Override
+//    public FixedPointNumber getBalanceRecursive(Date aDate) {
+//        return null;
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursive(java.util.Date, java.lang.String, java.lang.String)
+//     */
+//    @Override
+//    public FixedPointNumber getBalanceRecursive(Date aDate,
+//                                                String aCurrencyNameSpace,
+//                                                String aCurrencyName) {
+//        return null;
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursiveFormated()
+//     */
+//    @Override
+//    public String getBalanceRecursiveFormated() {
+//        return null;
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getBalanceRecursiveFormated(java.util.Date)
+//     */
+//    @Override
+//    public String getBalanceRecursiveFormated(final Date aDate) {
+//        return null;
+//    }
 
     /**
      * {@inheritDoc}.
@@ -432,8 +419,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      */
     @Override
     public String getCurrencyID() {
-        // TODO Auto-generated method stub
-        return null;
+        return myGnucashFile.getCommodityByID(myComodityID).getMnemonic();
     }
 
     /**
@@ -442,8 +428,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      */
     @Override
     public String getCurrencyNameSpace() {
-        // TODO Auto-generated method stub
-        return null;
+        return myGnucashFile.getCommodityByID(myComodityID).getNamespace();
     }
 
     /**
@@ -490,7 +475,7 @@ public class GnucashDBAccount implements GnucashWritableAccount {
     @Override
     public GnucashAccount getParentAccount() {
         String id = getParentAccountId();
-        if (id == null) {
+        if (id == null || id.equals(getId())) {
             return null;
         }
         return getWritableGnucashFile().getAccountByID(id);
@@ -505,15 +490,15 @@ public class GnucashDBAccount implements GnucashWritableAccount {
         return myParentGUID;
     }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getQualifiedName()
-     */
-    @Override
-    public String getQualifiedName() {
-        // TODO Auto-generated method stub
-        return getName();
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getQualifiedName()
+//     */
+//    @Override
+//    public String getQualifiedName() {
+//        // TODO Auto-generated method stub
+//        return getName();
+//    }
 
     /**
      * {@inheritDoc}.
@@ -538,9 +523,10 @@ public class GnucashDBAccount implements GnucashWritableAccount {
      * @see biz.wolschon.fileformats.gnucash.GnucashAccount#getTransactionSplits()
      */
     @Override
-    public List<GnucashTransactionSplit> getTransactionSplits() {
-        // TODO Auto-generated method stub
-        return null;
+    public List<? extends GnucashTransactionSplit> getTransactionSplits() {
+        LOG.info("getTransactionSplits()");
+        String sql = "select * from splits where account_guid = ?";
+        return myGnucashFile.getJDBCTemplate().query(sql, new SplitRowMapper(myGnucashFile), getId());
     }
 
     /**
@@ -582,25 +568,25 @@ public class GnucashDBAccount implements GnucashWritableAccount {
         return null;
     }
 
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#hasTransactions()
-     */
-    @Override
-    public boolean hasTransactions() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}.
-     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#hasTransactionsRecursive()
-     */
-    @Override
-    public boolean hasTransactionsRecursive() {
-        // TODO Auto-generated method stub
-        return false;
-    }
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#hasTransactions()
+//     */
+//    @Override
+//    public boolean hasTransactions() {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
+//
+//    /**
+//     * {@inheritDoc}.
+//     * @see biz.wolschon.fileformats.gnucash.GnucashAccount#hasTransactionsRecursive()
+//     */
+//    @Override
+//    public boolean hasTransactionsRecursive() {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
 
     /**
      * {@inheritDoc}.

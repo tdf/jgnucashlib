@@ -1,6 +1,6 @@
 /**
- * AccountRowMapper.javaTransactionMenuAction.java
- * created: 05.08.2009
+ * CurrencyRowMapper.javaTransactionMenuAction.java
+ * created: 11.08.2009
  * (c) 2008 by <a href="http://Wolschon.biz">Wolschon Softwaredesign und Beratung</a>
  * This file is part of jgnucashLib-GPL by Marcus Wolschon <a href="mailto:Marcus@Wolscon.biz">Marcus@Wolscon.biz</a>.
  * You can purchase support for a sensible hourly rate or
@@ -41,19 +41,16 @@ import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 /**
  * (c) 2009 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
  * Project: jgnucashLib-GPL<br/>
- * AccountRowMapper<br/>
- * created: 05.08.2009 <br/>
+ * CurrencyRowMapper<br/>
+ * created: 11.08.2009 <br/>
  *<br/><br/>
- * <b>Map the result of a database-query to {@link GnucashDBAccount}-instances.</b>
+ * <b>Map the result of a database-query to {@link GnucashDBCommodity}-instances.</b>
  * @author  <a href="mailto:Marcus@Wolschon.biz">fox</a>
  */
-public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount> {
+public class CurrencyRowMapper implements ParameterizedRowMapper<GnucashDBCommodity> {
 
 
-    /**
-     *
-     */
-    public static final String COLUMNACCOUNTTYPE = "account_type";
+    public static final String DBTABLE = "commodities";
     /**
      * The {@link GnucashDatabase} we belong to.
      */
@@ -62,7 +59,7 @@ public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount
     /**
      * @param aGnucashFile The {@link GnucashDatabase} we belong to.
      */
-    protected AccountRowMapper(final GnucashDatabase aGnucashFile) {
+    protected CurrencyRowMapper(final GnucashDatabase aGnucashFile) {
         super();
         myGnucashFile = aGnucashFile;
     }
@@ -75,24 +72,15 @@ public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount
      * @see org.springframework.jdbc.core.simple.ParameterizedRowMapper#mapRow(java.sql.ResultSet, int)
      */
     @Override
-    public GnucashDBAccount mapRow(final ResultSet aResultSet,
-                                   final int aRowNumber)
+    public GnucashDBCommodity mapRow(final ResultSet aResultSet, final int aRowNumber)
                                                               throws SQLException {
-        GnucashDBAccount retval = new GnucashDBAccount(myGnucashFile,
+        GnucashDBCommodity retval = new GnucashDBCommodity(
                 aResultSet.getString("guid"),
-                aResultSet.getString("parent_guid"),
-                aResultSet.getString("name"),
-                aResultSet.getString(COLUMNACCOUNTTYPE),
-                aResultSet.getString("code"),
-                aResultSet.getString("commodity_guid"),
-                aResultSet.getInt("commodity_scu"),
-                aResultSet.getBoolean("non_std_scu"));
-        if (aResultSet.getString("parent_guid") != null) {
-            retval.setParentAccountId(aResultSet.getString("guid"));
-        }
-        if (aResultSet.getString("description") != null) {
-            retval.setDescription(aResultSet.getString("description"));
-        }
+                aResultSet.getString("namespace"),
+                aResultSet.getString("mnemonic"),
+                aResultSet.getString("fullname"),
+                aResultSet.getString("cusip"),
+                aResultSet.getInt("fraction"));
         return retval;
     }
 }

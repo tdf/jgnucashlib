@@ -1,6 +1,6 @@
 /**
- * AccountRowMapper.javaTransactionMenuAction.java
- * created: 05.08.2009
+ * SplitRowMapper.javaTransactionMenuAction.java
+ * created: 10.08.2009
  * (c) 2008 by <a href="http://Wolschon.biz">Wolschon Softwaredesign und Beratung</a>
  * This file is part of jgnucashLib-GPL by Marcus Wolschon <a href="mailto:Marcus@Wolscon.biz">Marcus@Wolscon.biz</a>.
  * You can purchase support for a sensible hourly rate or
@@ -36,24 +36,24 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 
+import biz.wolschon.numbers.FixedPointNumber;
+
 
 
 /**
  * (c) 2009 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
  * Project: jgnucashLib-GPL<br/>
- * AccountRowMapper<br/>
- * created: 05.08.2009 <br/>
+ * SplitRowMapper<br/>
+ * created: 10.08.2009 <br/>
  *<br/><br/>
- * <b>Map the result of a database-query to {@link GnucashDBAccount}-instances.</b>
+ * <b>Map the result of a database-query to {@link GnucashDBSplit}-instances.</b>
  * @author  <a href="mailto:Marcus@Wolschon.biz">fox</a>
  */
-public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount> {
+public class SplitRowMapper implements ParameterizedRowMapper<GnucashDBSplit> {
 
 
-    /**
-     *
-     */
-    public static final String COLUMNACCOUNTTYPE = "account_type";
+    public static final String ROWTRANSACTIONGUID = "tx_guid";
+    public static final String DBTABLE = "splits";
     /**
      * The {@link GnucashDatabase} we belong to.
      */
@@ -62,7 +62,7 @@ public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount
     /**
      * @param aGnucashFile The {@link GnucashDatabase} we belong to.
      */
-    protected AccountRowMapper(final GnucashDatabase aGnucashFile) {
+    protected SplitRowMapper(final GnucashDatabase aGnucashFile) {
         super();
         myGnucashFile = aGnucashFile;
     }
@@ -75,24 +75,23 @@ public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount
      * @see org.springframework.jdbc.core.simple.ParameterizedRowMapper#mapRow(java.sql.ResultSet, int)
      */
     @Override
-    public GnucashDBAccount mapRow(final ResultSet aResultSet,
-                                   final int aRowNumber)
+    public GnucashDBSplit mapRow(final ResultSet aResultSet, final int aRowNumber)
                                                               throws SQLException {
-        GnucashDBAccount retval = new GnucashDBAccount(myGnucashFile,
+        int vnum = aResultSet.getInt("value_num");
+        int vdenum = aResultSet.getInt("value_denom");
+        int qnum = aResultSet.getInt("quantity_num");
+        int qdenum = aResultSet.getInt("quantity_denom");
+        FixedPointNumber quantity = new FixedPointNumber(qnum + "/" + qdenum);
+        FixedPointNumber value = new FixedPointNumber(vnum + "/" + vdenum);
+        GnucashDBSplit retval = new GnucashDBSplit(myGnucashFile,
                 aResultSet.getString("guid"),
-                aResultSet.getString("parent_guid"),
-                aResultSet.getString("name"),
-                aResultSet.getString(COLUMNACCOUNTTYPE),
-                aResultSet.getString("code"),
-                aResultSet.getString("commodity_guid"),
-                aResultSet.getInt("commodity_scu"),
-                aResultSet.getBoolean("non_std_scu"));
-        if (aResultSet.getString("parent_guid") != null) {
-            retval.setParentAccountId(aResultSet.getString("guid"));
-        }
-        if (aResultSet.getString("description") != null) {
-            retval.setDescription(aResultSet.getString("description"));
-        }
+                aResultSet.getString(ROWTRANSACTIONGUID),
+                aResultSet.getString("lot_guid"),
+                aResultSet.getString("account_guid"),
+                aResultSet.getString("memo"),
+                aResultSet.getString("action"),
+                value,
+                quantity);
         return retval;
     }
 }

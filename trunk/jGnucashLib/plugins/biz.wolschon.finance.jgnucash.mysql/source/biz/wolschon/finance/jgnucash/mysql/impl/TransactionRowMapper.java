@@ -1,6 +1,6 @@
 /**
- * AccountRowMapper.javaTransactionMenuAction.java
- * created: 05.08.2009
+ * SplitRowMapper.javaTransactionMenuAction.java
+ * created: 11.08.2009
  * (c) 2008 by <a href="http://Wolschon.biz">Wolschon Softwaredesign und Beratung</a>
  * This file is part of jgnucashLib-GPL by Marcus Wolschon <a href="mailto:Marcus@Wolscon.biz">Marcus@Wolscon.biz</a>.
  * You can purchase support for a sensible hourly rate or
@@ -33,6 +33,9 @@ package biz.wolschon.finance.jgnucash.mysql.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 
@@ -41,19 +44,15 @@ import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 /**
  * (c) 2009 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
  * Project: jgnucashLib-GPL<br/>
- * AccountRowMapper<br/>
- * created: 05.08.2009 <br/>
+ * TransactionRowMapper<br/>
+ * created: 11.08.2009 <br/>
  *<br/><br/>
- * <b>Map the result of a database-query to {@link GnucashDBAccount}-instances.</b>
+ * <b>Map the result of a database-query to {@link GnucashDBTransaction}-instances.</b>
  * @author  <a href="mailto:Marcus@Wolschon.biz">fox</a>
  */
-public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount> {
+public class TransactionRowMapper implements ParameterizedRowMapper<GnucashDBTransaction> {
 
 
-    /**
-     *
-     */
-    public static final String COLUMNACCOUNTTYPE = "account_type";
     /**
      * The {@link GnucashDatabase} we belong to.
      */
@@ -62,10 +61,15 @@ public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount
     /**
      * @param aGnucashFile The {@link GnucashDatabase} we belong to.
      */
-    protected AccountRowMapper(final GnucashDatabase aGnucashFile) {
+    protected TransactionRowMapper(final GnucashDatabase aGnucashFile) {
         super();
         myGnucashFile = aGnucashFile;
     }
+
+    /**
+     * Example: "20090730220000".
+     */
+    private static final DateFormat MYDATEFORMAT = new SimpleDateFormat("yyyyMMdddHHmmss");
 
     /**
      * @param aResultSet the result-set who´s current result to map
@@ -75,23 +79,21 @@ public class AccountRowMapper implements ParameterizedRowMapper<GnucashDBAccount
      * @see org.springframework.jdbc.core.simple.ParameterizedRowMapper#mapRow(java.sql.ResultSet, int)
      */
     @Override
-    public GnucashDBAccount mapRow(final ResultSet aResultSet,
-                                   final int aRowNumber)
+    public GnucashDBTransaction mapRow(final ResultSet aResultSet, final int aRowNumber)
                                                               throws SQLException {
-        GnucashDBAccount retval = new GnucashDBAccount(myGnucashFile,
-                aResultSet.getString("guid"),
-                aResultSet.getString("parent_guid"),
-                aResultSet.getString("name"),
-                aResultSet.getString(COLUMNACCOUNTTYPE),
-                aResultSet.getString("code"),
-                aResultSet.getString("commodity_guid"),
-                aResultSet.getInt("commodity_scu"),
-                aResultSet.getBoolean("non_std_scu"));
-        if (aResultSet.getString("parent_guid") != null) {
-            retval.setParentAccountId(aResultSet.getString("guid"));
-        }
-        if (aResultSet.getString("description") != null) {
-            retval.setDescription(aResultSet.getString("description"));
+        GnucashDBTransaction retval;
+        try {
+            retval = new GnucashDBTransaction(myGnucashFile,
+                    aResultSet.getString("guid"),
+                    aResultSet.getString("currency_guid"),
+                    aResultSet.getString("num"),
+                    aResultSet.getString("description"),
+                    MYDATEFORMAT.parse(aResultSet.getString("post_date")),
+                    MYDATEFORMAT.parse(aResultSet.getString("enter_date")));
+        } catch (ParseException e) {
+            SQLException ex = new SQLException("invalid date");
+            ex.initCause(e);
+            throw ex;
         }
         return retval;
     }

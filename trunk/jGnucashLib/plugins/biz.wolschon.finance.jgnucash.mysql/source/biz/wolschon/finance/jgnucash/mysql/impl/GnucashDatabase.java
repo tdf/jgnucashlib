@@ -33,10 +33,15 @@ package biz.wolschon.finance.jgnucash.mysql.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 import javax.xml.bind.JAXBException;
@@ -82,6 +87,11 @@ public class GnucashDatabase implements GnucashWritableFile {
      * Our database. (Using Sping-DB)
      */
     private final SimpleJdbcTemplate myJDBCTemplate;
+
+    /**
+     * Cache for {@link #getAccountByID(String)}.
+     */
+    private final Map<String, WeakReference<GnucashWritableAccount>> myAccountByIDCache = new HashMap<String, WeakReference<GnucashWritableAccount>>();
 
     /**
      * @param aDataSource the database to connect to.
@@ -235,10 +245,31 @@ public class GnucashDatabase implements GnucashWritableFile {
      */
     @Override
     public GnucashWritableAccount getAccountByID(final String aGUID) {
-        LOG.info("getAccountByID()");
+        GnucashWritableAccount retval = null;
+        WeakReference<GnucashWritableAccount> ref = myAccountByIDCache.get(aGUID);
+        if (ref != null) {
+            retval = ref.get();
+        }
+        if (retval != null) {
+            return retval;
+        }
+        LOG.info("getAccountByID(aGUID=" + aGUID + ")");
         String sql = "select * from accounts where guid = ?";
-        return myJDBCTemplate.queryForObject(sql, new AccountRowMapper(this), aGUID);
-
+        try {
+            retval = myJDBCTemplate.queryForObject(sql, new AccountRowMapper(this), aGUID);
+            myAccountByIDCache.put(aGUID, new WeakReference<GnucashWritableAccount>(retval));
+            return retval;
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            Collection<? extends GnucashWritableAccount> writableRootAccounts = getWritableRootAccounts();
+            for (GnucashWritableAccount gnucashWritableAccount : writableRootAccounts) {
+                if (gnucashWritableAccount.getId().equals(aGUID)) {
+                    retval = gnucashWritableAccount;
+                    myAccountByIDCache.put(aGUID, new WeakReference<GnucashWritableAccount>(retval));
+                    return retval;
+                }
+            }
+            throw e;
+        }
     }
 
     /**
@@ -246,9 +277,16 @@ public class GnucashDatabase implements GnucashWritableFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableFile#getAccountByName(java.lang.String)
      */
     @Override
-    public GnucashWritableAccount getAccountByName(String aName) {
+    public GnucashWritableAccount getAccountByName(final String aName) {
         LOG.finest("getAccountByName()");
-        // TODO Auto-generated method stub
+        for (GnucashWritableAccount account : getWritableAccounts()) {
+            if (account.getName().equals(aName)) {
+                return account;
+            }
+            if (account.getQualifiedName().equals(aName)) {
+                return account;
+            }
+        }
         return null;
     }
 
@@ -256,11 +294,13 @@ public class GnucashDatabase implements GnucashWritableFile {
      * {@inheritDoc}
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableFile#getAccountsByType(java.lang.String)
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public Collection<GnucashWritableAccount> getAccountsByType(String aType) {
+    public Collection<? extends GnucashWritableAccount> getAccountsByType(final String aType) {
         LOG.finest("getAccountByType()");
-        // TODO Auto-generated method stub
-        return null;
+        LOG.info("getAccountByID()");
+        String sql = "select * from accounts where " + AccountRowMapper.COLUMNACCOUNTTYPE + " = ?";
+        return (Collection<? extends GnucashWritableAccount>) myJDBCTemplate.queryForObject(sql, new AccountRowMapper(this), aType);
     }
 
     /**
@@ -337,9 +377,10 @@ public class GnucashDatabase implements GnucashWritableFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableFile#getTransactionByID(java.lang.String)
      */
     @Override
-    public GnucashWritableTransaction getTransactionByID(String aId) {
-        // TODO Auto-generated method stub
-        return null;
+    public GnucashWritableTransaction getTransactionByID(final String aId) {
+        LOG.info("getTransactionByID()");
+        String sql = "select * from transactions where guid = ?";
+        return myJDBCTemplate.queryForObject(sql, new TransactionRowMapper(this), aId);
     }
 
     /**
@@ -369,7 +410,7 @@ public class GnucashDatabase implements GnucashWritableFile {
     @Override
     public Collection<? extends GnucashWritableAccount> getWritableRootAccounts() {
         LOG.info("getWritableRootAccounts()");
-
+//TODO: the root-element MAY exist in the "accounts"-table (> v2.3.3=), but it need not (v2.3.3)
         String sql = "select root_account_guid as guid, "
             + "NULL as parent_guid, "
             + "\"Root Account\" as name, "
@@ -390,10 +431,10 @@ public class GnucashDatabase implements GnucashWritableFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashWritableFile#getWritableTransactions()
      */
     @Override
-    public Collection<GnucashWritableTransaction> getWritableTransactions() {
+    public Collection<? extends GnucashWritableTransaction> getWritableTransactions() {
         LOG.info("getWritableTransactions()");
-        // TODO Auto-generated method stub
-        return null;
+        String sql = "select * from transactions";
+        return myJDBCTemplate.query(sql, new TransactionRowMapper(this));
     }
 
     /**
@@ -454,9 +495,12 @@ public class GnucashDatabase implements GnucashWritableFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getAccountByIDorName(java.lang.String, java.lang.String)
      */
     @Override
-    public GnucashAccount getAccountByIDorName(String aId, String aName) {
-        // TODO Auto-generated method stub
-        return null;
+    public GnucashAccount getAccountByIDorName(final String aId, final String aName) {
+        GnucashAccount retval = getAccountByID(aId);
+        if (retval == null) {
+            retval = getAccountByName(aName);
+        }
+        return retval;
     }
 
     /**
@@ -464,9 +508,12 @@ public class GnucashDatabase implements GnucashWritableFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getAccountByIDorNameEx(java.lang.String, java.lang.String)
      */
     @Override
-    public GnucashAccount getAccountByIDorNameEx(String aId, String aName) {
-        // TODO Auto-generated method stub
-        return null;
+    public GnucashAccount getAccountByIDorNameEx(final String aId, final String aName) {
+        GnucashAccount retval = getAccountByID(aId);
+        if (retval == null) {
+            retval = getAccountByNameEx(aName);
+        }
+        return retval;
     }
 
     /**
@@ -474,9 +521,21 @@ public class GnucashDatabase implements GnucashWritableFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getAccountByNameEx(java.lang.String)
      */
     @Override
-    public GnucashAccount getAccountByNameEx(String aName) {
+    public GnucashAccount getAccountByNameEx(final String aNameRegEx) {
         LOG.info("getAccountByNameEx()");
-        // TODO Auto-generated method stub
+        GnucashAccount foundAccount = getAccountByName(aNameRegEx);
+        if (foundAccount != null) {
+            return foundAccount;
+        }
+        Pattern pattern = Pattern.compile(aNameRegEx);
+
+
+        for (GnucashAccount account : getWritableAccounts()) {
+            Matcher matcher = pattern.matcher(account.getName());
+            if (matcher.matches()) {
+                return account;
+            }
+        }
         return null;
     }
 
@@ -495,10 +554,10 @@ public class GnucashDatabase implements GnucashWritableFile {
      * @see biz.wolschon.fileformats.gnucash.GnucashFile#getAccountsByParentID(java.lang.String)
      */
     @Override
-    public Collection<GnucashAccount> getAccountsByParentID(String aId) {
+    public Collection<? extends GnucashAccount> getAccountsByParentID(final String aId) {
         LOG.info("getAccountsByParentID()");
-        // TODO Auto-generated method stub
-        return null;
+        String sql = "select * from accounts where parent_guid = ?";
+        return getJDBCTemplate().query(sql, new AccountRowMapper(this), aId);
     }
 
     /**
@@ -710,6 +769,19 @@ public class GnucashDatabase implements GnucashWritableFile {
         LOG.info("getUserDefinedAttribute()");
         // TODO Auto-generated method stub
 
+    }
+
+    protected GnucashDBCommodity getCommodityByName(final String aNamespace, final String aMnemonic) {
+        LOG.finest("getAccountByType()");
+        LOG.info("getAccountByID()");
+        String sql = "select * from " + CurrencyRowMapper.DBTABLE + " where namespace = ? AND mnemonic = ?";
+        return myJDBCTemplate.queryForObject(sql, new CurrencyRowMapper(this), aNamespace, aMnemonic);
+    }
+    protected GnucashDBCommodity getCommodityByID(final String aGUID) {
+        LOG.finest("getAccountByType()");
+        LOG.info("getAccountByID()");
+        String sql = "select * from " + CurrencyRowMapper.DBTABLE + " where guid = ?";
+        return myJDBCTemplate.queryForObject(sql, new CurrencyRowMapper(this), aGUID);
     }
 
 }

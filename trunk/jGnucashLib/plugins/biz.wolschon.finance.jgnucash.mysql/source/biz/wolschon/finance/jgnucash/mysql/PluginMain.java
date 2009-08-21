@@ -39,6 +39,17 @@ public class PluginMain extends org.java.plugin.Plugin {
     private static final Logger LOG = Logger.getLogger(PluginMain.class
             .getName());
 
+    /**
+     * Singleton-instance.
+     */
+    private static PluginMain myInstance;
+
+    /**
+     * @return the Singleton-instance.
+     */
+    public static PluginMain getMyInstance() {
+        return myInstance;
+    }
 
     /**
      * Just an overridden ToString to return this classe's name
@@ -56,7 +67,7 @@ public class PluginMain extends org.java.plugin.Plugin {
      */
     @Override
     protected void doStart() throws Exception {
-        // ignored
+        myInstance = this;
     }
 
     /**
