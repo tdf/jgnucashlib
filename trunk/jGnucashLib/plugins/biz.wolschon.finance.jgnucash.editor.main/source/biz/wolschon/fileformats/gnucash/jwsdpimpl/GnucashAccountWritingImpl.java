@@ -28,6 +28,9 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
@@ -60,6 +63,12 @@ import biz.wolschon.numbers.FixedPointNumber;
  */
 public class GnucashAccountWritingImpl extends GnucashAccountImpl implements GnucashWritableAccount {
 
+
+    /**
+     * Our logger for debug- and error-ourput.
+     */
+    private static final Log LOGGER = LogFactory.getLog(GnucashAccountWritingImpl.class);
+
     /**
      * Our helper to implement the GnucashWritableObject-interface.
      */
@@ -73,6 +82,11 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         if (helper == null) {
             helper = new GnucashWritableObjectHelper(super.helper);
         }
+        LOGGER.debug("GnucashAccountWritingImpl[account-id="
+                + getId() + " name="
+                + getName() + "].setUserDefinedAttribute(name="
+                + name + ", value="
+                + value + ")");
         helper.setUserDefinedAttribute(name, value);
     }
 

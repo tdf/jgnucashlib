@@ -73,8 +73,13 @@ public class GnucashWritableObjectHelper implements GnucashWritableObject {
         List<Slot> slots = getGnucashObject().getSlots().getSlot();
         for (Slot slot : slots) {
             if (slot.getSlotKey().equals(name)) {
+                LOGGER.debug("GnucashWritableObjectHelper.setUserDefinedAttribute(name="
+                        + name + ", value="
+                        + value + ") - overwriting existing slot ");
+
                 slot.getSlotValue().getContent().clear();
                 slot.getSlotValue().getContent().add(value);
+                getFile().setModified(true);
                 return;
             }
         }
@@ -85,10 +90,13 @@ public class GnucashWritableObjectHelper implements GnucashWritableObject {
         newValue.setType("string");
         newValue.getContent().add(value);
         newSlot.setSlotValue(newValue);
+        LOGGER.debug("GnucashWritableObjectHelper.setUserDefinedAttribute(name="
+                + name + ", value="
+                + value + ") - adding new slot ");
+
         slots.add(newSlot);
 
         getFile().setModified(true);
-
     }
 
 
