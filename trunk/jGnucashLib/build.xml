@@ -52,6 +52,7 @@ test  - runs some tests
 		<parallel  threadsperprocessor="1">
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ComdirectCSVImporter" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporter" target="${target}" />
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporterNew" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.PaypalImporter" target="${target}" />
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ssh" target="${target}" />

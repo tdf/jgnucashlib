@@ -1,6 +1,6 @@
 /**
  * HBCIImporter.java
- * Created on 26.07.2008
+ * Created on 28.04.2009
  * (c) 2005 by "Wolschon Softwaredesign und Beratung".
  *
  * Permission is granted to use, modify,
@@ -10,22 +10,22 @@
  * use, modify, publish and sub-license this code to other parties myself.
  * -----------------------------------------------------------
  * major Changes:
- * 26.07.2008 - initial version ...
+ * 28.04.2009 - initial version ...
  */
-package biz.wolschon.finance.jgnucash.HBCIImporter;
+package biz.wolschon.finance.jgnucash.HBCIImporterNew;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+import org.kapott.hbci.GV_Result.GVRKUms.BTag;
 import org.kapott.hbci.callback.HBCICallback;
 import org.kapott.hbci.structures.Saldo;
 
@@ -39,7 +39,7 @@ import biz.wolschon.numbers.FixedPointNumber;
  * account.
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
-public class HBCIImporter extends AbstractScriptableImporter {
+public class HBCISaldoImporter extends AbstractScriptableImporter {
 
     /**
      * Internally HBCI4Java represents monetary values as cent,
@@ -51,7 +51,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
     /**
      * Automatically created logger for debug and error-output.
      */
-    private static final Logger LOG = Logger.getLogger(HBCIImporter.class.getName());
+    private static final Logger LOG = Logger.getLogger(HBCISaldoImporter.class.getName());
 
 
     /**
@@ -148,7 +148,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
             org.kapott.hbci.manager.HBCIUtils.init(null, null, callback);
 
             org.kapott.hbci.manager.HBCIUtils.setParam("log.loglevel.default",
-                    "" + org.kapott.hbci.manager.HBCIUtils.LOG_WARN);
+                    "" + org.kapott.hbci.manager.HBCIUtils.LOG_DEBUG2);
 
             org.kapott.hbci.manager.HBCIUtils.setParam("client.passport.default", "PinTan");
 
@@ -201,76 +201,17 @@ public class HBCIImporter extends AbstractScriptableImporter {
             } else {
 
                 if (result instanceof org.kapott.hbci.GV_Result.GVRKUms) {
-                    org.kapott.hbci.GV_Result.GVRKUms r = (org.kapott.hbci.GV_Result.GVRKUms) result;
-                    org.kapott.hbci.GV_Result.GVRKUms.UmsLine[] flatData = r
-                            .getFlatData();
+                    //org.kapott.hbci.GV_Result.GVRKUms r = (org.kapott.hbci.GV_Result.GVRKUms) result;
+                    BTag[] dataPerDay = ((org.kapott.hbci.GV_Result.GVRKUms) result).getDataPerDay();
+//                    org.kapott.hbci.GV_Result.GVRKUms.UmsLine[] flatData = r
+//                            .getFlatData();
 
-                    Date lastImportedDate = null;
-                    StringBuilder finalMessage = new StringBuilder();
-                    for (int i = 0; i < flatData.length; i++) {
-
-                        StringBuilder message = new StringBuilder();
-                        for (String element : flatData[i].usage) {
-                            message.append('\n').append(element);
-                        }
-                        message.replace(0, 1, "");
-
-                        Date valutaDate = flatData[i].valuta;
-                        FixedPointNumber value = new FixedPointNumber(flatData[i].value
-                                .getLongValue())
-                                .divideBy(CENTPEREURO);
-                        if (!isTransactionPresent(valutaDate, value, message.toString())) {
-
-                            LOG.info("--------------importing------------------------------");
-                            LOG.info("value=" + value);
-                            LOG.info("saldo=" + flatData[i].saldo.value.getLongValue());
-                            System.err.println("saldo at " + flatData[i].saldo.timestamp);
-                            System.err.println("saldo=" + flatData[i].saldo.value.getLongValue() + " (" + flatData[i].saldo.value.getCurr()  + ")=" + flatData[i].saldo.value.getDoubleValue());
-                            LOG.info("date=" + flatData[i].valuta);
-                            LOG.info("UmsLine[" + i + "] Message="
-                                    + message.toString());
-                            // import this transaction
-                            importTransaction(flatData[i].valuta,
-                                    (new FixedPointNumber(flatData[i].value
-                                            .getLongValue()))
-                                            .divideBy(CENTPEREURO),
-                                    message.toString());
-
-                            finalMessage.append(flatData[i].valuta).append(" ")
-                                    .append(value.toString())
-                                    .append(" - ").append(message.toString())
-                                    .append("\n");
-
-                            // create a saldo-transaction for the last imported
-                            // transaction of each day
-                            if (lastImportedDate != null
-                                    && !lastImportedDate
-                                            .equals(flatData[i].valuta)) {
-                                Saldo saldo = flatData[i - 1].saldo;
-                                long saldoInCent = saldo.value
-                                                      .getLongValue();
-                                createSaldoEntry((new FixedPointNumber(saldoInCent)).divideBy(CENTPEREURO),
-                                                      saldo.timestamp);
-                                markNonExistingTransactions(lastImportedDate);
-                            }
-                            lastImportedDate = flatData[i].valuta;
-                        }
-                    }
-
-                    // create a saldo-transaction after the last imported
-                    // transaction
-                    if (lastImportedDate != null) {
-                        Saldo saldo = flatData[flatData.length - 1].saldo;
-                        long saldoInCent = saldo.value
-                                              .getLongValue();
-                        createSaldoEntry((new FixedPointNumber(saldoInCent)).divideBy(CENTPEREURO),
+                    for (BTag tag : dataPerDay) {
+                        Saldo saldo = tag.end;
+                        createSaldoEntry((new FixedPointNumber(saldo.value
+                                              .getLongValue())).divideBy(CENTPEREURO),
                                               saldo.timestamp);
-                        markNonExistingTransactions(lastImportedDate);
-                    }
-                    if (finalMessage.length() > 0) {
-                        JOptionPane.showMessageDialog(null,
-                                "Imorted Transactions:\n"
-                                        + finalMessage.toString());
+
                     }
                 } else {
                     LOG.warning("result is no on org.kapott.hbci.GV_Result.GVRKUms but a  ["
@@ -281,7 +222,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
             } // accs != null
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error synchronizing transactions from HBCI.", e);
+            LOG.log(Level.SEVERE, "Error synchronizing saldi from HBCI.", e);
         } finally {
             pintanfile.delete();
         }
@@ -289,7 +230,6 @@ public class HBCIImporter extends AbstractScriptableImporter {
 
 
 
-    @Override
     public String runImport(final GnucashWritableFile aWritableModel,
                             final GnucashWritableAccount aCurrentAccount)
                                                                    throws Exception {
@@ -310,19 +250,14 @@ public class HBCIImporter extends AbstractScriptableImporter {
 
         // check the config-file
         boolean ok = askRequiresSettings(settings, defaultSettings, configfile,
-                aCurrentAccount, aWritableModel);
+                aCurrentAccount);
         // user-attributes
 
         if (ok) {
             // run the actual import.
             setMyProperties(settings);
-            GnucashWritableAccount account = aWritableModel.getAccountByID(settings
-                            .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT));
-            if (account == null) {
-                settings.remove(HBCIImporter.SETTINGS_GNUCASHACCOUNT);
-                return runImport(aWritableModel, aCurrentAccount);
-            }
-            setMyAccount(account);
+            setMyAccount(aWritableModel.getAccountByID(settings
+                            .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)));
             synchronizeAllTransactions();
         }
 
@@ -338,7 +273,6 @@ public class HBCIImporter extends AbstractScriptableImporter {
      *            the file to save a changed config to
      * @param aCurrentAccount
      *            the currently selected account (may be null)
-     * @param aWritableModel
      * @return true if all is ready for action
      * @throws IOException
      *             if we cannot write the config-file
@@ -346,8 +280,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
     private boolean askRequiresSettings(final Properties settings,
                                         final Properties defaultSettings,
                                         final File configfile,
-                                        final GnucashWritableAccount aCurrentAccount,
-                                        final GnucashWritableFile aWritableModel)
+                                        final GnucashWritableAccount aCurrentAccount)
                                                                                      throws IOException {
         if (settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT) == null
                 || settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
@@ -356,9 +289,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
                         .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
                         .equalsIgnoreCase(
                                 defaultSettings
-                                        .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT))
-                || aWritableModel.getAccountByID(settings.getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT)
-                        .trim()) == null) {
+                                        .getProperty(HBCIImporter.SETTINGS_GNUCASHACCOUNT))) {
             if (aCurrentAccount != null) {
                 // the user cannot be expected to write down account-ids,
                 // so for this one setting we are going to help him
@@ -411,7 +342,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
 
     @Override
     public String getPluginName() {
-        return "hbci";
+        return "hbci-saldi";
     }
 
 }
