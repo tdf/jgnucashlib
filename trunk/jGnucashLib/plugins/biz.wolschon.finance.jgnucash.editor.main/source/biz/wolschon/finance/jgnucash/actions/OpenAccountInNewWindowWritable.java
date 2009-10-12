@@ -169,7 +169,7 @@ public class OpenAccountInNewWindowWritable implements AccountAction,
      */
     @Override
     public void actionPerformed(final ActionEvent aE) {
-                WritableTransactionsPanel newPanel = new WritableTransactionsPanel();
+        WritableTransactionsPanel newPanel = new WritableTransactionsPanel();
         newPanel.setAccount(myAccount);
         if (myTransaction != null) {
             newPanel.setTransaction(myTransaction);

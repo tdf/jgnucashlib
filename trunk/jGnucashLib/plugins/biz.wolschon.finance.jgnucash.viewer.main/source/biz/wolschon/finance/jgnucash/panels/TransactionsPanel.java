@@ -26,6 +26,7 @@ import javax.swing.JTable;
 import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.xml.bind.JAXBException;
 
@@ -142,12 +143,17 @@ public class TransactionsPanel extends JPanel {
         getTransactionTable().getColumn("date").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.dateFormat.format(new Date())) + 5);
         getTransactionTable().getColumn("+").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(10000)));
         getTransactionTable().getColumn("-").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-10000)));
-        getTransactionTable().getColumn("balance").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-10000)));
+        TableColumn balanceColumn = getTransactionTable().getColumn("balance");
+        if (balanceColumn != null) {
+            balanceColumn.setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-10000)));
+        }
 
         getTransactionTable().getColumn("date").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.dateFormat.format(new Date())) + 5);
         getTransactionTable().getColumn("+").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(1000000)));
         getTransactionTable().getColumn("-").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-1000000)));
-        getTransactionTable().getColumn("balance").setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-1000000)));
+        if (balanceColumn != null) {
+            balanceColumn.setMaxWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-1000000)));
+        }
 
         getTransactionTable().getColumn("transaction").setCellRenderer(new DesriptionCellRenderer());
         getTransactionTable().getColumn("description").setCellRenderer(new DesriptionCellRenderer());

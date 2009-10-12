@@ -79,9 +79,18 @@ import biz.wolschon.finance.jgnucash.panels.WritableTransactionsPanel;
  */
 public class JGnucash extends JGnucashViewer {
 
+    /**
+     * empty constructor for GUI-designers.
+     * DO NOT CALL.
+     */
     public JGnucash() {
     }
 
+    /**
+     * Use this constructor.
+     * @param manager the plugin-manager to use for loading plugins attached to extension-points of the main-plugin
+     * @param descriptor the descriptor for the main-plugin
+     */
     public JGnucash(final PluginManager manager, final PluginDescriptor descriptor) {
         this();
         setPluginManager(manager);
@@ -178,8 +187,14 @@ public class JGnucash extends JGnucashViewer {
      */
     private JMenuBar menuBar;
 
+    /**
+     * The "help"-menu.
+     */
     private JMenu helpMenu;
 
+    /**
+     * The "help->PluginReport" menu-item.
+     */
     private JMenuItem helpPluginReport;
 
     /**
@@ -214,7 +229,8 @@ public class JGnucash extends JGnucashViewer {
         pluginDescriptor = aPluginDescriptor;
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
      * @see biz.wolschon.finance.jgnucash.JGnucashViewer#getHelpMenu()
      */
     @Override
@@ -235,8 +251,9 @@ public class JGnucash extends JGnucashViewer {
         if (helpPluginReport == null) {
             helpPluginReport = new JMenuItem();
             helpPluginReport.setText("Plugin Report");
-            helpPluginReport.addActionListener(new ActionListener(){
+            helpPluginReport.addActionListener(new ActionListener() {
 
+                @SuppressWarnings("unchecked")
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     PluginManager manager = getPluginManager();
@@ -295,7 +312,8 @@ public class JGnucash extends JGnucashViewer {
     }
 
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
      * @see biz.wolschon.finance.jgnucash.JGnucashViewer#getJMenuBar()
      */
     @Override
@@ -310,10 +328,12 @@ public class JGnucash extends JGnucashViewer {
     }
 
     /**
-     * This method initializes FileMenu.
+     * This method initializes FileMenu
+     * including all menu-items added by plugins.
      *
      * @return javax.swing.JMenu
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected JMenu getFileMenu() {
         if (fileMenu == null) {
@@ -387,10 +407,12 @@ public class JGnucash extends JGnucashViewer {
 
 
     /**
-     * This method initializes import-menu..
+     * This method initializes import-menu with
+     * plugins.
      *
      * @return javax.swing.JMenu
      */
+    @SuppressWarnings("unchecked")
     protected JMenu getImportMenu() {
         if (importMenu == null) {
             importMenu = new JMenu();
@@ -444,10 +466,12 @@ public class JGnucash extends JGnucashViewer {
     }
 
     /**
-     * This method initializes import-menu..
+     * This method initializes import-menu
+     * with plugins.
      *
      * @return javax.swing.JMenu
      */
+    @SuppressWarnings("unchecked")
     protected JMenu getToolMenu() {
         if (toolMenu == null) {
             toolMenu = new JMenu();
@@ -555,20 +579,20 @@ public class JGnucash extends JGnucashViewer {
                 saveFile();
                 setTitle(f.getName());
             } catch (FileNotFoundException e) {
-				LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (file not found)", e);
-				JOptionPane.showMessageDialog(this, "Error",
-						"cannot save file '" + f.getAbsolutePath() + "' (file not found)",
-		                JOptionPane.ERROR_MESSAGE);
+                LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (file not found)", e);
+                JOptionPane.showMessageDialog(this, "Error",
+                        "cannot save file '" + f.getAbsolutePath() + "' (file not found)",
+                        JOptionPane.ERROR_MESSAGE);
             } catch (IOException e) {
-				LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (io-problem)", e);
-				JOptionPane.showMessageDialog(this, "Error",
-						"cannot save file '" + f.getAbsolutePath() + "' (io-problem)",
-		                JOptionPane.ERROR_MESSAGE);
+                LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (io-problem)", e);
+                JOptionPane.showMessageDialog(this, "Error",
+                        "cannot save file '" + f.getAbsolutePath() + "' (io-problem)",
+                        JOptionPane.ERROR_MESSAGE);
             } catch (JAXBException e) {
-				LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)", e);
-				JOptionPane.showMessageDialog(this, "Error",
-						"cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)",
-		                JOptionPane.ERROR_MESSAGE);
+                LOGGER.error("cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)", e);
+                JOptionPane.showMessageDialog(this, "Error",
+                        "cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)",
+                        JOptionPane.ERROR_MESSAGE);
             } finally {
                 setCursor(Cursor.getDefaultCursor());
             }
@@ -603,7 +627,7 @@ public class JGnucash extends JGnucashViewer {
     private void saveFile() {
         try {
             File oldfile = new File(getWritableModel().getFile().getAbsolutePath());
-            oldfile.renameTo(new File(oldfile.getName() + (new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.SS").format(new Date()))+".backup"));
+            oldfile.renameTo(new File(oldfile.getName() + (new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss.SS").format(new Date())) + ".backup"));
 
             getWritableModel().writeFile(getWritableModel().getFile());
             hasChanged = false;
@@ -635,8 +659,11 @@ public class JGnucash extends JGnucashViewer {
                     "cannot save file '" + f.getAbsolutePath() + "' (gnucash-format-problem)",
                     JOptionPane.ERROR_MESSAGE);
         }
-	}
+    }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void doExit() {
         if (hasChanged) {
@@ -659,9 +686,9 @@ public class JGnucash extends JGnucashViewer {
        return model;
    }
 
-	/**
-	 * ${@inheritDoc}.
-	 */
+   /**
+    * ${@inheritDoc}.
+    */
     @Override
     protected GnucashFile getModel() {
         return model;
@@ -724,14 +751,19 @@ public class JGnucash extends JGnucashViewer {
             myWritableSplitActions.add(new OpenAccountInNewTabWritable(getJTabbedPane()));
             myWritableSplitActions.add(new OpenAccountInNewWindowWritable());
         }
-        LOGGER.info("JGnucashEditor has " + (myWritableSplitActions == null ? "no" : myWritableSplitActions.size()) + " split-actions");
+        String actionsCount = "no";
+        if (myWritableSplitActions != null) {
+            actionsCount = "" + myWritableSplitActions.size();
+        }
+        LOGGER.info("JGnucashEditor has " + actionsCount + " split-actions");
         return myWritableSplitActions;
     }
 
 
     /**
-     * @return the {@link AccountAction} we have
+     * @return the {@link AccountAction} we have including the ones offered by plugins.
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected Collection<AccountAction> getAccountActions() {
         if (myAccountActions == null) {

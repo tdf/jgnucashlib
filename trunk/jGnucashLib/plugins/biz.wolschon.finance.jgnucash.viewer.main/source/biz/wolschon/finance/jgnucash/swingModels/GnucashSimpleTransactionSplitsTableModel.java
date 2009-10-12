@@ -25,44 +25,43 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 import javax.swing.event.TableModelListener;
 
-import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 
 /**
  * created: 15.05.2005 <br/>
  *
- * A TableModel that shows the transaction and balance of an Account.
+ * A TableModel that shows a given list of transaction.
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  *
  */
-public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransactionsSplitsTableModel {
+public class GnucashSimpleTransactionSplitsTableModel implements GnucashTransactionsSplitsTableModel {
 
     /**
      * The account who's transactions we are showing.
      */
-    private final GnucashAccount account;
+    private final List<? extends GnucashTransactionSplit> mySplits;
 
 
     /**
      * The columns we display.
      */
-    private final String[] defaultColumnNames = new String[] {"date", "transaction", "description", "+", "-", "balance"};
+    private final String[] defaultColumnNames = new String[] {"date", "transaction", "description", "+", "-"};
 
     /**
-     * @param anAccount the account whos splits to display.
+     * @param List<? extends GnucashTransactionSplit> the splits to display.
      */
-    public GnucashSimpleAccountTransactionsTableModel(final GnucashAccount anAccount) {
+    public GnucashSimpleTransactionSplitsTableModel(final List<? extends GnucashTransactionSplit> aList) {
         super();
-        account = anAccount;
+        mySplits = aList;
     }
 
     /**
      * the Table will be empty.
      *
      */
-    public GnucashSimpleAccountTransactionsTableModel() {
+    public GnucashSimpleTransactionSplitsTableModel() {
         super();
-        account = null;
+        mySplits = null;
     }
 
     /**
@@ -88,10 +87,10 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
      * @return the splits that affect this account.
      */
     public List<? extends GnucashTransactionSplit> getTransactionSplits() {
-        if (account == null) {
+        if (mySplits == null) {
             return new LinkedList<GnucashTransactionSplit>();
         }
-        return account.getTransactionSplits();
+        return mySplits;
     }
 
     /**
@@ -180,13 +179,6 @@ public class GnucashSimpleAccountTransactionsTableModel implements GnucashTransa
                  return currencyFormat.format(split.getQuantity());
                 } else {
                     return "";
-                }
-              }
-            case 5: { // balance
-                if (account != null) {
-                    return currencyFormat.format(account.getBalance(split));
-                } else {
-                    return currencyFormat.format(split.getAccount().getBalance(split));
                 }
               }
             default:

@@ -42,6 +42,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,7 +59,10 @@ import org.java.plugin.registry.ExtensionPoint;
 import org.java.plugin.registry.PluginDescriptor;
 
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
+import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
+import biz.wolschon.finance.jgnucash.models.GnucashAccountTransactionsTableModel;
+import biz.wolschon.finance.jgnucash.models.GnucashTransactionSplitsTableModel;
 import biz.wolschon.finance.jgnucash.plugin.TransactionMenuAction;
 import biz.wolschon.finance.jgnucash.swingModels.GnucashSimpleAccountTransactionsTableModel;
 
@@ -114,7 +118,8 @@ public class WritableTransactionsPanel extends TransactionsPanel {
             pluginName = aPluginName;
         }
 
-        /* (non-Javadoc)
+        /**
+         * {@inheritDoc}
          * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
          */
         @Override
@@ -178,12 +183,14 @@ public class WritableTransactionsPanel extends TransactionsPanel {
     private JPopupMenu myContextMenu;
 
     /**
-     * The main-entry-point to our plugin-api.(may be null to disable plugins.)
+     * The main-entry-point to our plugin-api.
+     * May be null to disable plugins.
      */
     private PluginManager pluginManager = null;
 
     /**
-     * The descriptor for our top-level application-plugin.(may be null to disable plugins.)
+     * The descriptor for our top-level application-plugin.
+     * May be null to disable plugins.
      */
     private PluginDescriptor pluginDescriptor = null;
     /**
@@ -212,7 +219,6 @@ public class WritableTransactionsPanel extends TransactionsPanel {
      }
 
 
-    //TODO: override tableModel to allow editing by the user of transaction-descriptions+dates and split-values for transactions with exactly 2 splits.
     /**
      * Automatically created logger for debug and error-output.
      */
@@ -235,6 +241,29 @@ public class WritableTransactionsPanel extends TransactionsPanel {
         return "WritableTransactionsPanel@" + hashCode();
     }
 
+
+    /**
+     * Give an account who's transactions to display.
+     * @param account if null, an empty table will be shown.
+     */
+    @Override
+    public void setAccount(final GnucashAccount account) {
+
+        if (account == null) {
+            setModel(new GnucashAccountTransactionsTableModel());
+        } else {
+            setModel(new GnucashAccountTransactionsTableModel(account));
+        }
+    }
+
+    /**
+     * Instead of displaying the transactions of an account,
+     * display the given (ordered) list of transactions.
+     * @param aTransactionList
+     */
+    public void setDisplayedTransactions(final List<GnucashTransactionSplit> aTransactionList) {
+        setModel(new GnucashTransactionSplitsTableModel(aTransactionList));
+    }
     /**
      * This method initializes ShowTransactionPanel.
      *
@@ -337,7 +366,8 @@ public class WritableTransactionsPanel extends TransactionsPanel {
 //
 //    //-------------------------------------------------------
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
      * @see biz.wolschon.finance.jgnucash.panels.TransactionsPanel#getTransactionTable()
      */
     @Override
@@ -421,5 +451,3 @@ public class WritableTransactionsPanel extends TransactionsPanel {
    }
 
 }
-
-
