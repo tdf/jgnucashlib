@@ -143,7 +143,12 @@ public class TransactionsPanel extends JPanel {
         getTransactionTable().getColumn("date").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.dateFormat.format(new Date())) + 5);
         getTransactionTable().getColumn("+").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(10000)));
         getTransactionTable().getColumn("-").setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-10000)));
-        TableColumn balanceColumn = getTransactionTable().getColumn("balance");
+        TableColumn balanceColumn = null;
+        try {
+            balanceColumn = getTransactionTable().getColumn("balance");
+        } catch (Exception e) {
+            // column is allowed to not exist
+        }
         if (balanceColumn != null) {
             balanceColumn.setPreferredWidth(SwingUtilities.computeStringWidth(metrics, GnucashSimpleAccountTransactionsTableModel.defaultCurrencyFormat.format(-10000)));
         }
