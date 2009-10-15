@@ -55,6 +55,7 @@ test  - runs some tests
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.HBCIImporterNew" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.PaypalImporter" target="${target}" />
 	      <ant dir="plugins/biz.wolschon.finance.jgnucash.splitter" target="${target}" />
+		  <ant dir="plugins/biz.wolschon.finance.jgnucash.simplesearch" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.ssh" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.mysql" target="${target}" />
 		  <ant dir="plugins/biz.wolschon.finance.jgnucash.accountProperties" target="${target}" />
