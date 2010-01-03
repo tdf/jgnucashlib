@@ -294,6 +294,44 @@
                 </xs:complexType>
               </xs:element>
 
+<!-- ===================== vendors ===================== -->
+
+              <xs:element name="gnc_GncVendor" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="vendor_guid">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="xs:string" use="required"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="vendor_name">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:minLength value="1"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="vendor_id" type="xs:string"/>
+                    <xs:element name="vendor_addr"     type="address"/>
+                    <xs:element name="vendor_taxincluded" type="xs:string"/>
+                    <xs:element name="vendor_active" type="xs:int"/>
+                    <xs:element name="vendor_currency">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element ref="cmdty_space"/>
+                          <xs:element ref="cmdty_id"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="vendor_use-tt" type="xs:int"/>
+                  </xs:sequence>
+                  <xs:attribute name="version" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
 <!-- ===================== customers, jobs and invoices ===================== -->
 
               <xs:element name="gnc_GncCustomer" minOccurs="0" maxOccurs="unbounded">
@@ -446,7 +484,7 @@
 
               <xs:element name="gnc_GncInvoice" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
-                  <xs:sequence>
+                  <xs:all>
                     <xs:element name="invoice_guid">
                       <xs:complexType>
                         <xs:simpleContent>
@@ -518,7 +556,31 @@
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
-                  </xs:sequence>
+
+                          <!-- invoices may have an associated customer -->
+                    <xs:element name="invoice_billto" minOccurs="0" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="owner_type">
+                            <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                <xs:enumeration value="gncCustomer"/>
+                              </xs:restriction>
+                            </xs:simpleType>
+                          </xs:element>
+                          <xs:element name="owner_id">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                 <xs:extension base="xs:string">
+                                  <xs:attribute name="type" type="xs:string" use="required"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:all>
                   <xs:attribute name="version" type="xs:string" use="required"/>
                 </xs:complexType>
               </xs:element>
@@ -559,6 +621,29 @@
                       </xs:simpleType>
                     </xs:element>
                     <xs:element name="entry_qty" type="xs:string" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="entry_b-acct" minOccurs="0" maxOccurs="1" >
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="xs:string" use="required"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="entry_b-price" type="xs:string" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="entry_bill" minOccurs="0" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="xs:string" use="required"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="entry_billable" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="entry_b-taxable" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="entry_b-taxincluded" type="xs:int" minOccurs="0" maxOccurs="1"/>
+                    <xs:element name="entry_b-pay" type="xs:string" minOccurs="0" maxOccurs="1"/>
                     <xs:element name="entry_i-acct" minOccurs="0" maxOccurs="1" >
                       <xs:complexType>
                         <xs:simpleContent>

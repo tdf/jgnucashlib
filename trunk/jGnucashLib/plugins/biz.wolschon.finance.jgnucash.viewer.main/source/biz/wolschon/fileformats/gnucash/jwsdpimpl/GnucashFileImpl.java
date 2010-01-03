@@ -8,6 +8,7 @@
  * major Changes:
  *  13.05.2005 - initial version
  *  11.11.2008 - using defaultCurrency from Gnucash-file
+ *  03.01.2010 - support GNCVendor
  * ...
  *
  */
@@ -57,6 +58,7 @@ import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncVendor;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncSchedxaction;
@@ -660,6 +662,9 @@ public class GnucashFileImpl implements GnucashFile {
             }
             if (bookElement instanceof BookElementsGncBudget) {
                 continue;
+            }
+            if (bookElement instanceof BookElementsGncGncVendor) {
+                continue; //TODO: create a Java-Class for vendors like we have for customers
             }
             throw new IllegalArgumentException("<gnc:book> contains unknown element [" + bookElement.getClass().getName() + "]");
         }

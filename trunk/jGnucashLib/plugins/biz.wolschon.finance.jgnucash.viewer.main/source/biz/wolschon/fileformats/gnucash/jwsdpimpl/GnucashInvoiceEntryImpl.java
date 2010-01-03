@@ -7,6 +7,7 @@
  * -----------------------------------------------------------
  * major Changes:
  *  13.05.2005 - initial version
+ *  03.01.2010 - support for invoice-entries without an invoice-id
  * ...
  *
  */
@@ -17,6 +18,8 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
 import javax.xml.bind.JAXBException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import biz.wolschon.fileformats.gnucash.GnucashInvoice;
 import biz.wolschon.fileformats.gnucash.GnucashInvoiceEntry;
@@ -33,6 +36,10 @@ import biz.wolschon.numbers.FixedPointNumber;
  */
 public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements GnucashInvoiceEntry {
 
+    /**
+     * Our logger for debug- and error-ourput.
+     */
+    private static final Log LOG = LogFactory.getLog(GnucashInvoiceEntryImpl.class);
 
 
     /**
@@ -48,6 +55,8 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
 
 
     /**
+     * This constructor is used when an invoice is created
+     * by java-code.
      * @param invoice The invoice we belong to.
      * @param peer the JWSDP-Object we are wrapping.
      * @throws JAXBException on problems with the xml-backend
@@ -59,11 +68,11 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
         myInvoice = invoice;
         jwsdpPeer = peer;
 
-        getInvoice().addEntry(this);
-
+       invoice.addEntry(this);
     }
 
     /**
+     * This code is used when an invoice is loaded from a file.
      * @param gncFile tne file we belong to
      * @param peer the JWSDP-object we are facading.
      * @throws JAXBException on problems with the xml-backend
@@ -75,15 +84,12 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
         super((peer.getEntrySlots() == null) ? new ObjectFactory().createSlotsType() : peer.getEntrySlots(), gncFile);
         jwsdpPeer = peer;
 
+        // an exception is thrown here if we have an invoice-ID but the invoice does not exist
         GnucashInvoice invoice = getInvoice();
-        if (invoice == null) {
-            throw new IllegalStateException("no invoice with id '"
-                             + getInvoiceID()
-                             + "' for invoiceEntry with id '"
-                             + getId()
-                             + "'");
+        if (invoice != null) {
+           // ...so we only need to handle the case of having no invoice-id at all
+           invoice.addEntry(this);
         }
-        invoice.addEntry(this);
     }
     /**
      * {@inheritDoc}
@@ -96,6 +102,11 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      * {@inheritDoc}
      */
     public String getInvoiceID() {
+        if (jwsdpPeer.getEntryInvoice() == null) {
+            LOG.error("file contains an invoice-entry with GUID="
+                    + getId() + "without an invoice-element");
+            return null;
+        }
         return jwsdpPeer.getEntryInvoice().getValue();
     }
 
@@ -110,13 +121,16 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      */
     public GnucashInvoice getInvoice() {
         if (myInvoice == null) {
-            myInvoice = getGnucashFile().getInvoiceByID(getInvoiceID());
-            if (myInvoice == null) {
-                throw new IllegalStateException("no invoice with id '"
-                                 + getInvoiceID()
-                                 + "' for invoiceEntry with id '"
-                                 + getId()
-                                 + "'");
+            String id = getInvoiceID();
+            if (id != null) {
+               myInvoice = getGnucashFile().getInvoiceByID(id);
+               if (myInvoice == null) {
+                   throw new IllegalStateException("no invoice with id '"
+                                    + getInvoiceID()
+                                    + "' for invoiceEntry with id '"
+                                    + getId()
+                                    + "'");
+               }
             }
         }
         return myInvoice;
