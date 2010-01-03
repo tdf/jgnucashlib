@@ -19,7 +19,7 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableObject;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType;
 
 
 /**
@@ -86,7 +86,7 @@ public class GnucashWritableObjectHelper implements GnucashWritableObject {
         ObjectFactory objectFactory = new ObjectFactory();
         Slot newSlot = objectFactory.createSlot();
         newSlot.setSlotKey(name);
-        SlotValueType newValue = objectFactory.createSlotTypeSlotValueType();
+        SlotValueType newValue = objectFactory.createSlotValueType();
         newValue.setType("string");
         newValue.getContent().add(value);
         newSlot.setSlotValue(newValue);

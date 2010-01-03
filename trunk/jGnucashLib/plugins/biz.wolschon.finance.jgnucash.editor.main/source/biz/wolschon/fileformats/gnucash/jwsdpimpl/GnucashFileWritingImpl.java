@@ -1542,7 +1542,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
         // create new slot
         Slot newSlot = getObjectFactory().createSlot();
         newSlot.setSlotKey(aName);
-        newSlot.setSlotValue(getObjectFactory().createSlotTypeSlotValueType());
+        newSlot.setSlotValue(getObjectFactory().createSlotValueType());
         newSlot.getSlotValue().getContent().add(aValue);
         newSlot.getSlotValue().setType("string");
         getRootElement().getGncBook().getBookSlots().getSlot().add(newSlot);

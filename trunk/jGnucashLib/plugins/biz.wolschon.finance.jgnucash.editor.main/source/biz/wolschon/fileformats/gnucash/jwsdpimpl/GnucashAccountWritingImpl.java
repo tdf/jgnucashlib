@@ -40,6 +40,7 @@ import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncAccountType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotsType;
 import biz.wolschon.numbers.FixedPointNumber;
 
@@ -157,7 +158,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         {
             Slot slot = factory.createSlot();
             slot.setSlotKey("placeholder");
-            SlotType.SlotValueType slottype = factory.createSlotTypeSlotValueType();
+            SlotValueType slottype = factory.createSlotValueType();
             slottype.setType("string");
             slottype.getContent().add("false");
             slot.setSlotValue(slottype);
@@ -167,7 +168,7 @@ public class GnucashAccountWritingImpl extends GnucashAccountImpl implements Gnu
         {
             Slot slot = factory.createSlot();
             slot.setSlotKey("notes");
-            SlotType.SlotValueType slottype = factory.createSlotTypeSlotValueType();
+            SlotValueType slottype = factory.createSlotValueType();
             slottype.setType("string");
             slottype.getContent().add("");
             slot.setSlotValue(slottype);

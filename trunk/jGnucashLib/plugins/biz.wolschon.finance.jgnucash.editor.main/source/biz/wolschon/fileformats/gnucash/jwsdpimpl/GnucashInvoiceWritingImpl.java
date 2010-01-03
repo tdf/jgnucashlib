@@ -260,7 +260,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
 
         {
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot slot = factory.createSlot();
-            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType value = factory.createSlotTypeSlotValueType();
+            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType value = factory.createSlotValueType();
             slot.setSlotKey("trans-txn-type");
             value.setType("string");
             value.getContent().add("I"); // I like invoice, P like payment
@@ -273,7 +273,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
 
         {
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot slot = factory.createSlot();
-            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType value = factory.createSlotTypeSlotValueType();
+            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType value = factory.createSlotValueType();
             slot.setSlotKey("trans-date-due");
             value.setType("timespec");
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.TsDate dueDateRef = factory.createTsDate();
@@ -288,12 +288,12 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
 
 {
     biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot slot = factory.createSlot();
-    biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType value = factory.createSlotTypeSlotValueType();
+    biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType value = factory.createSlotValueType();
     slot.setSlotKey("gncInvoice");
     value.setType("frame");
     {
         biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot subslot = factory.createSlot();
-        biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType subvalue = factory.createSlotTypeSlotValueType();
+        biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType subvalue = factory.createSlotValueType();
 
         subslot.setSlotKey("invoice-guid");
         subvalue.setType("guid");
@@ -342,12 +342,12 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
         //add owner-slot (job)
         {
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot slot = factory.createSlot();
-            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType value = factory.createSlotTypeSlotValueType();
+            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType value = factory.createSlotValueType();
             slot.setSlotKey("gncOwner");
             value.setType("frame");
             {
                 biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot subslot = factory.createSlot();
-                biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType subvalue = factory.createSlotTypeSlotValueType();
+                biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType subvalue = factory.createSlotValueType();
 
                 subslot.setSlotKey("owner-type");
                 subvalue.setType("integer");
@@ -359,7 +359,7 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
 
             {
                 biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot subslot = factory.createSlot();
-                biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType subvalue = factory.createSlotTypeSlotValueType();
+                biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType subvalue = factory.createSlotValueType();
 
                 subslot.setSlotKey("owner-guid");
                 subvalue.setType("guid");
@@ -376,12 +376,12 @@ public class GnucashInvoiceWritingImpl extends GnucashInvoiceImpl implements Gnu
 
         {
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot slot = factory.createSlot();
-            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType value = factory.createSlotTypeSlotValueType();
+            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType value = factory.createSlotValueType();
             slot.setSlotKey("gncInvoice");
             value.setType("frame");
             {
                 biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot subslot = factory.createSlot();
-                biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType subvalue = factory.createSlotTypeSlotValueType();
+                biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType subvalue = factory.createSlotValueType();
 
                 subslot.setSlotKey("invoice-guid");
                 subvalue.setType("guid");

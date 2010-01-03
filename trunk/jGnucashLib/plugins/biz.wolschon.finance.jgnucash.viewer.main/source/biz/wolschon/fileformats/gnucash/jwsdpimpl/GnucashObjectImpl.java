@@ -23,7 +23,7 @@ import biz.wolschon.fileformats.gnucash.GnucashFile;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotsType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType;
 
 
 
@@ -219,7 +219,7 @@ public class GnucashObjectImpl implements GnucashObject {
                 ObjectFactory objectFactory = new ObjectFactory();
                 Slot slot = objectFactory.createSlot();
                 slot.setSlotKey("dummy");
-                SlotValueType value = objectFactory.createSlotTypeSlotValueType();
+                SlotValueType value = objectFactory.createSlotValueType();
                 value.setType("string");
                 value.getContent().add("dummy");
                 slot.setSlotValue(value);

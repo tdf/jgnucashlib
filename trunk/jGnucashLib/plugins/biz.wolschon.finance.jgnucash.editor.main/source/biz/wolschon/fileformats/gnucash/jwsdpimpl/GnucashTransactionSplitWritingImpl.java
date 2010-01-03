@@ -396,7 +396,7 @@ public class GnucashTransactionSplitWritingImpl extends
         if (slots.getSlot()==null) {
             biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType slot = factory.createSlotType();
             slot.setSlotKey("trans-txn-type");
-            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType value = factory.createSlotTypeSlotValueType();
+            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType value = factory.createSlotValueType();
             value.setType("string");
             value.getContent().add("P");
             slot.setSlotValue(value);

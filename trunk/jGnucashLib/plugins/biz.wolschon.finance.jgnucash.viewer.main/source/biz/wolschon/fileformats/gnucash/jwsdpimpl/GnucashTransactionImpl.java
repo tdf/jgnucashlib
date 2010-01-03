@@ -257,7 +257,7 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
             }
 
 
-            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotType.SlotValueType slotvalue = slot.getSlotValue();
+            biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.SlotValueType slotvalue = slot.getSlotValue();
 
             SlotType subslot = (SlotType) slotvalue.getContent().get(0);
             if (!subslot.getSlotKey().equals("invoice-guid")) {

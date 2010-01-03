@@ -925,32 +925,37 @@
   </xs:element>
 
 
+  <xs:element name="slot_value">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="slot"/>
+        <xs:element ref="ts_date"/>
+        <xs:element ref="slot_value"/>
+      </xs:choice>
+      <xs:attribute name="type" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="list"/>
+            <xs:enumeration value="frame"/>
+            <xs:enumeration value="guid"/>
+            <xs:enumeration value="integer"/>
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="timespec"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
   <xs:element name="slot">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="slot_key" type="xs:string"/>
-        <xs:element name="slot_value">
-          <xs:complexType mixed="true">
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-              <xs:element ref="slot"/>
-              <xs:element ref="ts_date"/>
-            </xs:choice>
-            <xs:attribute name="type" use="required">
-              <xs:simpleType>
-                <xs:restriction base="xs:NMTOKEN">
-                  <xs:enumeration value="frame"/>
-                  <xs:enumeration value="guid"/>
-                  <xs:enumeration value="integer"/>
-                  <xs:enumeration value="string"/>
-                  <xs:enumeration value="timespec"/>
-                </xs:restriction>
-              </xs:simpleType>
-            </xs:attribute>
-          </xs:complexType>
-        </xs:element>
+        <xs:element ref="slot_value"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+
   <xs:element name="ts_date" type="xs:string"/>
 
   <xs:complexType name="gnc_budget">
