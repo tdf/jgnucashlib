@@ -991,7 +991,7 @@
   				</xs:attribute>
   			</xs:complexType>
   		</xs:element>
-  		<xs:element name="bgt_slots" type="slots_type"></xs:element>
+  		<xs:element name="bgt_slots" type="slots_type" minOccurs="0"></xs:element>
   	</xs:sequence>
   	<xs:attribute name="version" type="xs:string" use="required"></xs:attribute>
   </xs:complexType>
