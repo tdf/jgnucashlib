@@ -156,6 +156,8 @@ public class HBCIImporter extends AbstractScriptableImporter {
                     "client.passport.PinTan.filename", pintanfile.getAbsolutePath());
             org.kapott.hbci.manager.HBCIUtils.setParam(
                     "client.passport.PinTan.init", "1");
+            org.kapott.hbci.manager.HBCIUtils.setParam(
+                    "client.passport.PinTan.checkcert", "0");
 
             org.kapott.hbci.passport.HBCIPassport passport = org.kapott.hbci.passport.AbstractHBCIPassport
                     .getInstance();
