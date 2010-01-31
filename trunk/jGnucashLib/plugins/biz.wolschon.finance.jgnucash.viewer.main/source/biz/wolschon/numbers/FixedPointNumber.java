@@ -422,7 +422,9 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
                 /*if (d.scale()<4)
                     d.setScale(5);*/
                 int scale = Math.max(Math.max(5, value.scale()), d.scale());
-                value = value.divide(d, 5, BigDecimal.ROUND_HALF_UP);
+                if (d.compareTo(new BigDecimal(0)) != 0) {
+                    value = value.divide(d, scale, BigDecimal.ROUND_HALF_UP);
+                }
             }
 
             if (addMe != null) {

@@ -58,8 +58,8 @@ import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncVendor;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncVendor;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncSchedxaction;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncTemplateTransactions;
@@ -950,6 +950,17 @@ public class GnucashFileImpl implements GnucashFile {
                               e);
                 } catch (NullPointerException e) {
                     LOGGER.error("[NullPointerException] Problem in "
+                            + getClass().getName()
+                            + ".getLatestPrice(pCmdtySpace='"
+                            + pCmdtySpace
+                            + "', String pCmdtyId='"
+                            + pCmdtyId
+                            + "')! Ignoring a bad price-quote '"
+                            + priceQuote
+                            + "'",
+                              e);
+                } catch (ArithmeticException e) {
+                    LOGGER.error("[ArithmeticException] Problem in "
                             + getClass().getName()
                             + ".getLatestPrice(pCmdtySpace='"
                             + pCmdtySpace
