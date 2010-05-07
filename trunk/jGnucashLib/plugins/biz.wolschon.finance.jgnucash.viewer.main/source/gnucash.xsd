@@ -357,6 +357,21 @@
                     <xs:element name="cust_id" type="xs:string"/>
                     <xs:element name="cust_addr"     type="address"/>
                     <xs:element name="cust_shipaddr" type="address" />
+                    <xs:element name="cust_terms" minOccurs="0" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="type" use="required">
+                              <xs:simpleType>
+                                <xs:restriction base="xs:NMTOKEN">
+                                  <xs:enumeration value="guid"/>
+                                </xs:restriction>
+                              </xs:simpleType>
+                            </xs:attribute>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
                     <xs:element name="cust_notes" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="cust_taxincluded" type="xs:string"/>
                     <xs:element name="cust_active" type="xs:int"/>
