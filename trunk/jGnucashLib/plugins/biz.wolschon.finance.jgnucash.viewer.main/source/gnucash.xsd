@@ -357,6 +357,7 @@
                     <xs:element name="cust_id" type="xs:string"/>
                     <xs:element name="cust_addr"     type="address"/>
                     <xs:element name="cust_shipaddr" type="address" />
+                    <xs:element name="cust_notes" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="cust_terms" minOccurs="0" maxOccurs="1">
                       <xs:complexType>
                         <xs:simpleContent>
@@ -372,7 +373,6 @@
                         </xs:simpleContent>
                       </xs:complexType>
                     </xs:element>
-                    <xs:element name="cust_notes" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="cust_taxincluded" type="xs:string"/>
                     <xs:element name="cust_active" type="xs:int"/>
                     <xs:element name="cust_discount" type="xs:string"/>
@@ -387,6 +387,61 @@
                     </xs:element>
                     <xs:element name="cust_use-tt" type="xs:int"/>
                     <xs:element name="cust_taxtable" minOccurs="0" maxOccurs="1">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="type" use="required">
+                              <xs:simpleType>
+                                <xs:restriction base="xs:NMTOKEN">
+                                  <xs:enumeration value="guid"/>
+                                </xs:restriction>
+                              </xs:simpleType>
+                            </xs:attribute>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="slots_type" name="cust_slots" minOccurs="0" maxOccurs="1"/>
+                  </xs:sequence>
+                  <xs:attribute name="version" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+
+<!-- added in 2010-05-26 -->
+              <xs:element name="gnc_GncEmployee" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="employee_guid">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="xs:string" use="required"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="employee_username">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:minLength value="1"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="employee_id" type="xs:string"/>
+                    <xs:element name="employee_addr"     type="address"/>
+                    <xs:element name="employee_language" type="xs:string"/>
+                    <xs:element name="employee_active" type="xs:int"/>
+                    <xs:element name="employee_workday" type="xs:string"/>
+                    <xs:element name="employee_rate" type="xs:string"/>
+                    <xs:element name="employee_currency">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element ref="cmdty_space"/>
+                          <xs:element ref="cmdty_id"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="employee_ccard" minOccurs="0" maxOccurs="1">
                       <xs:complexType>
                         <xs:simpleContent>
                           <xs:extension base="xs:string">

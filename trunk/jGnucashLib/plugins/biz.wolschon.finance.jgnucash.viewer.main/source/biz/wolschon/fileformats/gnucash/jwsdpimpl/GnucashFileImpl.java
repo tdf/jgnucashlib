@@ -58,6 +58,7 @@ import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEmployee;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncVendor;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb;
@@ -665,6 +666,9 @@ public class GnucashFileImpl implements GnucashFile {
             }
             if (bookElement instanceof BookElementsGncGncVendor) {
                 continue; //TODO: create a Java-Class for vendors like we have for customers
+            }
+            if (bookElement instanceof BookElementsGncGncEmployee) {
+                continue; //TODO: create a Java-Class for employees like we have for customers
             }
             throw new IllegalArgumentException("<gnc:book> contains unknown element [" + bookElement.getClass().getName() + "]");
         }
