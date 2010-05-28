@@ -335,6 +335,50 @@
               </xs:element>
 <!-- ===================== customers, jobs and invoices ===================== -->
 
+              <xs:element name="gnc_GncBillTerm" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="billterm_guid">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="xs:string" use="required"/>
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="billterm_name">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:minLength value="1"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="billterm_desc" type="xs:string"/>
+                    <xs:element name="billterm_refcount"     type="xs:int"/>
+                    <xs:element name="billterm_invisible"     type="xs:int"/>
+                    <xs:element name="billterm_days" minOccurs="0" maxOccurs="1">
+                     <xs:complexType>
+                      <xs:sequence>
+                       <xs:element name="bt-days_due-days"     type="xs:int"/>
+                       <xs:element name="bt-days_disc-days"     type="xs:int"/>
+                      </xs:sequence>
+                     </xs:complexType>
+                    </xs:element>
+                    <xs:element name="billterm_proximo" minOccurs="0" maxOccurs="1">
+                     <xs:complexType>
+                      <xs:sequence>
+                       <xs:element name="bt-prox_due-day"     type="xs:int"/>
+                       <xs:element name="bt-prox_disc-day"     type="xs:int"/>
+                       <xs:element name="bt-prox_cutoff-day"     type="xs:int"/>
+                      </xs:sequence>
+                     </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="version" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+
               <xs:element name="gnc_GncCustomer" minOccurs="0" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:sequence>
@@ -429,7 +473,7 @@
                     </xs:element>
                     <xs:element name="employee_id" type="xs:string"/>
                     <xs:element name="employee_addr"     type="address"/>
-                    <xs:element name="employee_language" type="xs:string"/>
+                    <xs:element name="employee_language" type="xs:string" minOccurs="0" maxOccurs="1"/>
                     <xs:element name="employee_active" type="xs:int"/>
                     <xs:element name="employee_workday" type="xs:string"/>
                     <xs:element name="employee_rate" type="xs:string"/>
@@ -863,7 +907,10 @@
                 <xs:enumeration value="commodity"/>
                 <xs:enumeration value="gnc:GncCustomer"/>
                 <xs:enumeration value="gnc:GncEntry"/>
+                <xs:enumeration value="gnc:GncEmployee"/>
+                <xs:enumeration value="gnc:GncBillTerm"/>
                 <xs:enumeration value="gnc:GncInvoice"/>
+                <xs:enumeration value="gnc:GncVendor"/>
                 <xs:enumeration value="gnc:GncJob"/>
                 <xs:enumeration value="gnc:GncTaxTable"/>
                 <xs:enumeration value="schedxaction"/>

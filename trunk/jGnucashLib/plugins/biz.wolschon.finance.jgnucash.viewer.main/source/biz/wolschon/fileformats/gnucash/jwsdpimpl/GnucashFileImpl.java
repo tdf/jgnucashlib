@@ -57,6 +57,7 @@ import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncBillTerm;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEmployee;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
@@ -662,6 +663,9 @@ public class GnucashFileImpl implements GnucashFile {
                 continue;
             }
             if (bookElement instanceof BookElementsGncBudget) {
+                continue;
+            }
+            if (bookElement instanceof BookElementsGncGncBillTerm) {
                 continue;
             }
             if (bookElement instanceof BookElementsGncGncVendor) {
