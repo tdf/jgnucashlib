@@ -230,9 +230,10 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      *            effective date of the transaction
      * @param value
      *            Wert in der Währung des Kontos
+     * @return the transaction that involves this account.
      * @see #myAccount
      */
-    public void importTransaction(final Date date,
+    public GnucashWritableTransaction importTransaction(final Date date,
                                    final FixedPointNumber value,
                                    final String text) {
 
@@ -352,9 +353,11 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                 otherSplit.setQuantity(negatedValue);
                 otherSplit.setDescription(otherAccountText);
             }
+            return transaction;
         } catch (JAXBException e) {
             LOG.log(Level.SEVERE, "Exception while importing a transaction", e);
         }
+        return null;
     }
 
 
