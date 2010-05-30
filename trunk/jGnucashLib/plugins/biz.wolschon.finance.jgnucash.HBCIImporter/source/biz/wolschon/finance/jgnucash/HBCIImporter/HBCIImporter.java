@@ -31,6 +31,7 @@ import org.kapott.hbci.structures.Saldo;
 
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
+import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.finance.jgnucash.AbstractScriptableImporter.AbstractScriptableImporter;
 import biz.wolschon.numbers.FixedPointNumber;
 
@@ -232,11 +233,15 @@ public class HBCIImporter extends AbstractScriptableImporter {
                             LOG.info("UmsLine[" + i + "] Message="
                                     + message.toString());
                             // import this transaction
-                            importTransaction(flatData[i].valuta,
+                            GnucashWritableTransaction trans =
+                                importTransaction(flatData[i].valuta,
                                     (new FixedPointNumber(flatData[i].value
                                             .getLongValue()))
                                             .divideBy(CENTPEREURO),
                                     message.toString());
+
+                            //TODO: debug Saldo
+                            trans.setDescription(trans.getDescription() + " (HBCI-Saldo=" + flatData[i].saldo.value.getDoubleValue() + " " + flatData[i].saldo.value.getCurr() + ")");
 
                             finalMessage.append(flatData[i].valuta).append(" ")
                                     .append(value.toString())

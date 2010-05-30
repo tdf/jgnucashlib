@@ -357,20 +357,38 @@
                     <xs:element name="billterm_desc" type="xs:string"/>
                     <xs:element name="billterm_refcount"     type="xs:int"/>
                     <xs:element name="billterm_invisible"     type="xs:int"/>
+                    <xs:element name="billterm_parent" minOccurs="0" maxOccurs="1">
+                     <xs:complexType>
+                      <xs:simpleContent>
+                       <xs:extension base="xs:string">
+                        <xs:attribute name="type" type="xs:string" use="required"/>
+                       </xs:extension>
+                      </xs:simpleContent>
+                     </xs:complexType>
+                    </xs:element>
+                    <xs:element name="billterm_child" minOccurs="0" maxOccurs="unbounded">
+                     <xs:complexType>
+                      <xs:simpleContent>
+                       <xs:extension base="xs:string">
+                        <xs:attribute name="type" type="xs:string" use="required"/>
+                       </xs:extension>
+                      </xs:simpleContent>
+                     </xs:complexType>
+                    </xs:element>
                     <xs:element name="billterm_days" minOccurs="0" maxOccurs="1">
                      <xs:complexType>
                       <xs:sequence>
-                       <xs:element name="bt-days_due-days"     type="xs:int"/>
-                       <xs:element name="bt-days_disc-days"     type="xs:int"/>
+                       <xs:element name="bt-days_due-days"     type="xs:int" minOccurs="0" maxOccurs="1"/>
+                       <xs:element name="bt-days_disc-days"     type="xs:int" minOccurs="0" maxOccurs="1"/>
                       </xs:sequence>
                      </xs:complexType>
                     </xs:element>
                     <xs:element name="billterm_proximo" minOccurs="0" maxOccurs="1">
                      <xs:complexType>
                       <xs:sequence>
-                       <xs:element name="bt-prox_due-day"     type="xs:int"/>
-                       <xs:element name="bt-prox_disc-day"     type="xs:int"/>
-                       <xs:element name="bt-prox_cutoff-day"     type="xs:int"/>
+                       <xs:element name="bt-prox_due-day"     type="xs:int" minOccurs="0" maxOccurs="1"/>
+                       <xs:element name="bt-prox_disc-day"     type="xs:int" minOccurs="0" maxOccurs="1"/>
+                       <xs:element name="bt-prox_cutoff-day"     type="xs:int" minOccurs="0" maxOccurs="1"/>
                       </xs:sequence>
                      </xs:complexType>
                     </xs:element>
@@ -632,6 +650,15 @@
                           <xs:element ref="ts_date"/>
                         </xs:sequence>
                       </xs:complexType>
+                    </xs:element>
+                    <xs:element name="invoice_terms" minOccurs="0" maxOccurs="1">
+                     <xs:complexType>
+                      <xs:simpleContent>
+                       <xs:extension base="xs:string">
+                        <xs:attribute name="type" type="xs:string" use="required"/>
+                       </xs:extension>
+                      </xs:simpleContent>
+                     </xs:complexType>
                     </xs:element>
                     <xs:element name="invoice_notes" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="invoice_billing_id" type="xs:string" minOccurs="0" maxOccurs="1" />
