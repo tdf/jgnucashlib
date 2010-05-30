@@ -390,8 +390,8 @@ public class WirecardImporter {
           if (invoiceTo.size() > j) {
               split.setDescription(split.getDescription() + " - " + invoiceTo.get(j));
           }
-          auszahlung.setCurrencyID(currencies.get(j));
-          auszahlung.setCurrencyNameSpace("ISO4217");
+          //auszahlung.setCurrencyID(currencies.get(j));
+          //auszahlung.setCurrencyNameSpace("ISO4217");
           split.setValue(settlementAmount.get(j).negate());
           split.setQuantity(invoiceAmount.get(j).negate());
       }
