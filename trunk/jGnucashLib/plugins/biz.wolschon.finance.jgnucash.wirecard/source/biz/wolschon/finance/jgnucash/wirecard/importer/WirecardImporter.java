@@ -15,10 +15,9 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -254,81 +253,89 @@ public class WirecardImporter {
         String[] splits = line.split(" ");
         String settlementID = splits[0];
         Date date = UOS_DATEFORMAT.parse(splits[1]);
-
+        String settlementPeriod = splits[2];
         lineMustBeNull(aBuffer);
         line = aBuffer.readLine();
-        if (!line.startsWith("Business Case ")) {
-            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons.");
+        if (!line.startsWith("Business Case")) {
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
         }
         lineMustBeNull(aBuffer);
         lineMustEqual(aBuffer, "Invoice No.");
         lineMustBeNull(aBuffer);
-        lineMustEqual(aBuffer, "Billing Period");
+        line = aBuffer.readLine(); // Billing Periods
+        if (!line.startsWith("Billing Period")) {
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+        }
+        splits = line.split(" ");
+        List<String> invoiceFrom = new ArrayList<String>((splits.length - 2) / 2);
+        List<String> invoiceTo = new ArrayList<String>((splits.length - 2) / 2);
+        for (int j = 2; j < splits.length; j++) {
+            invoiceFrom.add(splits[j]);
+            j++;
+            invoiceTo.add(splits[j]);
+        }
         lineMustBeNull(aBuffer);
         lineMustEqual(aBuffer, "Comment");
         lineMustBeNull(aBuffer);
-        line = aBuffer.readLine();
-        if (!line.startsWith("Invoice Amount Exchange Rate Settlement Amount ")) {
-            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons.");
-        }
-        splits = line.split(" ");
-        //Invoice Amount Exchange Rate Settlement Amount
-        final int first = 6;
+        lineMustStartWith(aBuffer, "Invoice Amount Exchange Rate Settlement Amount");
+        lineMustBeNull(aBuffer);
+        line = aBuffer.readLine(); // customer-name
+        lineMustBeNull(aBuffer);
 
-        //EUR     EUR    USD         EUR    USD         EUR
-        int count = 0;
-        List<String> currencies = new LinkedList<String>();
-        for (count = 0; splits[count + first].equals("EUR")
-                    || splits[count + first].equals("USD"); count++) {
-            currencies.add(splits[count + first]);
-        }
-
-        //999.18 -984.14 0.00        59.17  0.00 3      81.66
-        List<FixedPointNumber> invoiceAmount = new ArrayList<FixedPointNumber>(count);
-        int i = first + count;
-        for (int j = 0; j < count; j++) {
-            invoiceAmount.add(new FixedPointNumber(splits[i++]));
-        }
-
-        //EUR      EUR   0.7336 EUR  EUR    0.7336 EUR  EUR     EUR
-        List<FixedPointNumber> exchangeRates = new ArrayList<FixedPointNumber>(count);
-        for (int j = 0; j < count; j++) {
-            if (currencies.get(j).equals("EUR")) {
-                exchangeRates.add(new FixedPointNumber(1));
-            } else {
-                exchangeRates.add(new FixedPointNumber(splits[i++]));
-            }
-            i++;
-        }
-        i++; // currency of total
-
-    //999.18 -984.14 0.00        59.17  0.00        381.66  455.87
-        List<FixedPointNumber> settlementAmount = new ArrayList<FixedPointNumber>(count);
-        for (int j = 0; j < count; j++) {
-            settlementAmount.add(new FixedPointNumber(splits[i++]));
-        }
-        FixedPointNumber total = new FixedPointNumber(splits[i++]);
+        line = aBuffer.readLine();// transaction-numbers
+        List<String> invoiceNumbers = Arrays.asList(line.split(" "));
 
         lineMustBeNull(aBuffer);
-        line = aBuffer.readLine();
+
+        line = aBuffer.readLine(); // currencies
+        List<String> currencies = Arrays.asList(line.split(" "));
+
+        lineMustBeNull(aBuffer);
+
+        line = aBuffer.readLine(); // invoiceAmount
         splits = line.split(" ");
-        List<String> invoiceNumbers = new ArrayList<String>(count);
-        List<String> invoiceFrom = new ArrayList<String>(count);
-        List<String> invoiceTo = new ArrayList<String>(count);
-        try {
-            i = 0;
-            for (int j = 0; j < count; j++) {
-                invoiceNumbers.add(splits[i++]);
-                invoiceFrom.add(splits[i++]);
-                i++;
-                invoiceTo.add(splits[i++]);
-                while (i < splits.length && !splits[i].startsWith(invoiceNumbers.get(0).substring(0, 2))) {
-                    i++;  // skip invoice-nodes. We know all invoice-numbers start with the same 3 characters
-                }
-            }
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Cannot parse invoice-number", e);
+        List<FixedPointNumber> invoiceAmount = new ArrayList<FixedPointNumber>(splits.length);
+        for (String split : splits) {
+            invoiceAmount.add(new FixedPointNumber(split));
         }
+
+        lineMustBeNull(aBuffer);
+
+        line = aBuffer.readLine(); // exchangeRates
+        splits = line.split(" ");
+        if (splits.length != 2 * invoiceAmount.size()) {
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+        }
+        List<FixedPointNumber> exchangeRates = new ArrayList<FixedPointNumber>(splits.length / 2);
+        for (int j = 0; j < splits.length; j+=2) {
+            if (currencies.get(j / 2).equals("EUR")) {
+                exchangeRates.add(new FixedPointNumber(1));
+            } else {
+                exchangeRates.add(new FixedPointNumber(splits[j]));
+            }
+        }
+
+        lineMustBeNull(aBuffer);
+
+        line = aBuffer.readLine(); // splits
+        splits = line.split(" ");
+        List<FixedPointNumber> settlementAmount = new ArrayList<FixedPointNumber>(splits.length);
+        for (String split : splits) {
+            String value = split;
+            if (value.endsWith("*")) { // 12.34* = value not final
+                value = value.substring(0, value.length() - 1);
+            }
+            settlementAmount.add(new FixedPointNumber(value));
+        }
+        lineMustBeNull(aBuffer);
+        lineMustEqual(aBuffer, "Total Payout");
+
+        lineMustBeNull(aBuffer);
+        lineMustEqual(aBuffer, "EUR");
+        lineMustBeNull(aBuffer);
+        line = aBuffer.readLine(); // total
+        FixedPointNumber total = new FixedPointNumber(line);
+
 
 
 //        String auszahlungAccount = "0682d0d40fefc9af74cae75372b0159d";
@@ -346,7 +353,7 @@ public class WirecardImporter {
       auszahlung.setCurrencyNameSpace("ISO4217");
       auszahlung.setDatePosted(date);
       auszahlung.setTransactionNumber("Settlement " + settlementID);
-      auszahlung.setDescription("Wirecard - Auszahlung Kreditkartenakzeptanz");
+      auszahlung.setDescription("Wirecard - Auszahlung Kreditkartenakzeptanz " + settlementPeriod);
       //targetAccount 192,20eur "Auszahlung"
       //auszahlungAccount -57,62 "UEBERTRAG/UEBERWEISUNG..."
       //auszahlungAccountUSD -179,20 -134,58 "179,20USD*0,7510=134,58EUR"
@@ -359,7 +366,7 @@ public class WirecardImporter {
       targetSplit.setValue(total);
       targetSplit.setQuantity(total);
 
-      for (int j = 0; j < count; j++) {
+      for (int j = 0; j < splits.length; j++) {
 //          String accountID = auszahlungAccount;
 //          if (!currencies.get(j).equals("EUR")) {
 //              accountID = auszahlungAccountUSD;
@@ -392,7 +399,7 @@ public class WirecardImporter {
     }
 
     /**
-     * Throws an IllegalArgumentException if the next line reat is
+     * Throws an IllegalArgumentException if the next line read is
      * not equal to the given one.
      * @param aBuffer the reader to read the line from
      * @param aString the string the line must be equal to
@@ -402,6 +409,22 @@ public class WirecardImporter {
     private static String lineMustEqual(final BufferedReader aBuffer, final String aString) throws IOException {
         String line = aBuffer.readLine();
         if (!line.equals(aString)) {
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons.");
+        }
+        return line;
+    }
+
+    /**
+     * Throws an IllegalArgumentException if the next line read does
+     * not start with the given one.
+     * @param aBuffer the reader to read the line from
+     * @param aString the string the line must be equal to
+     * @return the given line
+     * @throws IOException if we cannot read
+     */
+    private static String lineMustStartWith(final BufferedReader aBuffer, final String aString) throws IOException {
+        String line = aBuffer.readLine();
+        if (!line.startsWith(aString)) {
             throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons.");
         }
         return line;
@@ -576,15 +599,15 @@ public class WirecardImporter {
             lineMustBeNull(aBuffer);
 
             line = aBuffer.readLine();
-            if (!line.startsWith("Anzahl")) {
+            if (!line.startsWith("Rechnungszeitraum:")) {
                 throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
             }
 
             lineMustBeNull(aBuffer);
 
             line = aBuffer.readLine();
-
-            int i = 0;
+            splits = line.split(" ");
+            int i = -1;
             for (int j = 0; j < splits.length; j++) {
                 if (splits[j].equals("USD")) {
                     currency = "USD";
@@ -596,6 +619,9 @@ public class WirecardImporter {
                     i = j;
                     break;
                 }
+            }
+            if (i < 0) {
+                throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
             }
             from = splits[(i - 2) - 1];
             to = splits[i - 1];
@@ -616,31 +642,40 @@ public class WirecardImporter {
             lineMustBeNull(aBuffer);
 
             line = aBuffer.readLine();
-            if (!line.startsWith("19.00 % ")) {
+            if (!line.startsWith("19.00 %")) {
                 throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
             }
             lineMustBeNull(aBuffer);
             line = aBuffer.readLine();
             splits = line.split(" ");
 
-            fees = new FixedPointNumber(splits[0]);
-            if (!"EUR".equals(splits[1])) {
-                throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
-            }
-            feesTax = new FixedPointNumber(splits[2]);
-            if (!"EUR".equals(splits[3])) {
-                throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
-            }
-            feesWithTax = new FixedPointNumber(splits[4]);
-            if (!"EUR".equals(splits[5])) {
-                throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
-            }
-            security = new FixedPointNumber(splits[6]);
-            if (!"EUR".equals(splits[7])) {
-                throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
-            }
-            sum = new FixedPointNumber(splits[8]);
-            if (!"EUR".equals(splits[9])) {
+            try {
+                fees = new FixedPointNumber(splits[0]);
+                if (!"EUR".equals(splits[1]) && !"USD".equals(splits[1])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+                feesTax = new FixedPointNumber(splits[2]);
+                if (!"EUR".equals(splits[3]) && !"USD".equals(splits[3])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+                feesWithTax = new FixedPointNumber(splits[4]);
+                if (!"EUR".equals(splits[5]) && !"USD".equals(splits[5])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+                security = new FixedPointNumber(splits[6]);
+                if (!"EUR".equals(splits[7]) && !"USD".equals(splits[7])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+                if (splits.length == 8) {
+                    sum = security;
+                    security = new FixedPointNumber();
+                } else {
+                    sum = new FixedPointNumber(splits[8]);
+                    if (!"EUR".equals(splits[9]) && !"USD".equals(splits[9])) {
+                        throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                    }
+                }
+            } catch (IndexOutOfBoundsException e) {
                 throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
             }
         }

@@ -84,7 +84,7 @@ public class MailImport implements MailImportHandler {
             return false;
         }
 
-        if (!aSubject.startsWith("Settlement Note for time period")
+        if (!aSubject.startsWith("Settlement Note for ")
             &&
             !aSubject.contains("Reserve Balance Note for")
             &&
@@ -111,6 +111,7 @@ public class MailImport implements MailImportHandler {
                         in.close();
                         out.close();
                         WirecardImporter.importFile(aWritableModel, tempFile);
+                        return true;
                     } catch (Exception e) {
                         e.printStackTrace();
                         LOG.log(Level.SEVERE, "Error importing " + tempFile.getAbsolutePath(), e);
