@@ -122,32 +122,41 @@ public class WirecardImporter {
         if (aBuffer == null) {
             throw new IllegalArgumentException("null buffer given");
         }
-        String line = aBuffer.readLine();
+        String line = aBuffer.readLine(); // line 1
         if (line == null) {
             throw new IllegalArgumentException(
                     "cannot read a single line from buffer");
         }
+        aBuffer.readLine(); // line 2
         aBuffer.readLine();
         aBuffer.readLine();
         aBuffer.readLine();
         aBuffer.readLine();
-        aBuffer.readLine();
-        line = aBuffer.readLine();
+        line = aBuffer.readLine(); // line 7 = date
         String[] splits = line.split(" ");
         Date date = UOS_DATEFORMAT.parse(splits[0]);
         String currency = splits[splits.length - 1];
+        /*aBuffer.readLine(); // line 8
         aBuffer.readLine();
         aBuffer.readLine();
+        aBuffer.readLine(); // line 11
+        aBuffer.readLine();*/
+        line = aBuffer.readLine(); // 2010-05-30 made adaptive due to new PDF-layout
+        while (!line.startsWith("nvoice Reserve Amount")) {
+            line = aBuffer.readLine();
+        }
+        /*aBuffer.readLine();
         aBuffer.readLine();
         aBuffer.readLine();
-        aBuffer.readLine();
-        aBuffer.readLine();
-        aBuffer.readLine();
-        aBuffer.readLine();
-        aBuffer.readLine();
-        line = aBuffer.readLine();
+        line = aBuffer.readLine();  // line 17
+        */
         splits = line.split(" ");
-        FixedPointNumber total = new FixedPointNumber(splits[splits.length - 1]);
+        FixedPointNumber total;
+        try {
+            total = new FixedPointNumber(splits[splits.length - 1]);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot parse total from \"" + splits[splits.length - 1] + "\" in line \"" + line  + "\"", e);
+        }
 
         GnucashWritableAccount sicherheitseinbehalt = PluginConfigHelper.getOrConfigureAccountWithKey(aBook, "wirecard.sicherheitseinbehalt." + currency, "thisAccount",
                 "Please select the account for the accumulated 'Sicherheits-Einbehalt' for currency '" + currency + "'");
@@ -166,8 +175,7 @@ public class WirecardImporter {
         } else {
             trans.setDescription(trans.getDescription() + " OK");
         }
-        //GnucashWritableTransactionSplit split =
-        trans.createWritingSplit(account);
+       trans.createWritingSplit(account);
 
     }
 
