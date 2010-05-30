@@ -433,7 +433,12 @@ public class WirecardImporter {
             throw new IllegalArgumentException(
                     "cannot read a single line from buffer");
         }
+        if (line.trim().length() == 0) {
+            LOG.info("first line is empty, skipping.");
+            line = aBuffer.readLine();
+        }
         if (!line.equals("Wirecard Technologies AG | Bretonischer Ring 4 | 85630 Grasbrunn")) {
+            LOG.severe("first line=\"" + line + "\" != \"Wirecard Technologies...\"");
             throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons.");
         }
         lineMustBeNull(aBuffer);
