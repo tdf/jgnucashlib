@@ -81,8 +81,10 @@ public class PluginMain extends org.java.plugin.Plugin {
         LOG.info("loading MailImportHandlers... extensionPoint=("
                 + getInstance().getDescriptor().getId() + "/mailHandler" + ") ="
                 + extensionPoint);
+
         Collection<Extension> availableExtensions = extensionPoint.getConnectedExtensions();
         LOG.info("loading MailImportHandlers... #availableExtensions=" + availableExtensions.size());
+
         for (Extension extension : availableExtensions) {
             Parameter className = extension.getParameter("class");
             try {

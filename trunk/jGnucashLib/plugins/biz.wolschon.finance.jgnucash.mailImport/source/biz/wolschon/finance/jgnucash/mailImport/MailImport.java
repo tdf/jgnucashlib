@@ -158,7 +158,7 @@ public class MailImport implements ImporterPlugin {
             Store store = session.getStore("imap");
             String server = aWritableModel.getUserDefinedAttribute("imap.server");
             if (server == null) {
-                server = JOptionPane.showInputDialog("imap-server: (can be changed later in the root-account´s properties.)");
+                server = JOptionPane.showInputDialog("imap-server: (can be changed later in the root-account properties.)");
                 aWritableModel.setUserDefinedAttribute("imap.server", server);
             }
             String user = aWritableModel.getUserDefinedAttribute("imap.user");
