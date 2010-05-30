@@ -142,14 +142,13 @@ public class WirecardImporter {
         aBuffer.readLine(); // line 11
         aBuffer.readLine();*/
         line = aBuffer.readLine(); // 2010-05-30 made adaptive due to new PDF-layout
-        while (!line.startsWith("nvoice Reserve Amount")) {
+        while (!line.startsWith("EUR EUR")) {
             line = aBuffer.readLine();
         }
-        /*aBuffer.readLine();
+        //aBuffer.readLine();
+        //aBuffer.readLine();
         aBuffer.readLine();
-        aBuffer.readLine();
-        line = aBuffer.readLine();  // line 17
-        */
+        line = aBuffer.readLine(); // line 17 (old) line 29 (new)
         splits = line.split(" ");
         FixedPointNumber total;
         try {
@@ -168,7 +167,7 @@ public class WirecardImporter {
 
         GnucashWritableTransaction trans = aBook.createWritableTransaction();
         trans.setDatePosted(date);
-        trans.setDescription("TEST Saldo = " + total + " " + currency);
+        trans.setDescription("TEST Saldo = " + total + " eur"); // total is given in euro in the document even if for other currencies :/
         GnucashWritableAccount account = sicherheitseinbehalt; //aBook.getAccountByID(sicherheitseinbehalt);
         if (!account.getBalance(date).equals(total)) {
             trans.setDescription(trans.getDescription() + " NAK");
