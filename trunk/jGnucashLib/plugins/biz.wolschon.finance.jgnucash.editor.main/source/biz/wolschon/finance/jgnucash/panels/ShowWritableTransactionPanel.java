@@ -158,7 +158,7 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
     }
 
     /**
-     * @param aTransaction The transaction to set.
+     * @param aTransaction The transaction to set. MAY BE NULL
      * @see #myTransaction
      */
     @Override
@@ -176,12 +176,13 @@ public class ShowWritableTransactionPanel extends ShowTransactionPanel {
             model = new SingleWritableTransactionTableModel();
             setPreferredSize(new Dimension(0, 0));
             invalidate();
+            super.setModel(model);
         } else {
             model = new SingleWritableTransactionTableModel(aTransaction);
             setPreferredSize(new Dimension(200, 200));
             invalidate();
+            setModel(model);
         }
-        setModel(model);
     }
 
     /**
