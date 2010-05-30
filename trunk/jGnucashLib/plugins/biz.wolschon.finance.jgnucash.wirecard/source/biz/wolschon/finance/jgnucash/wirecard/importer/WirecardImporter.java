@@ -168,7 +168,7 @@ public class WirecardImporter {
 
         GnucashWritableTransaction trans = aBook.createWritableTransaction();
         trans.setDatePosted(date);
-        trans.setDescription("TEST Saldo = " + total + " eur"); // total is given in euro in the document even if for other currencies :/
+        trans.setDescription("TEST Saldo = " + total + " " + currency);
         GnucashWritableAccount account = sicherheitseinbehalt; //aBook.getAccountByID(sicherheitseinbehalt);
         if (!account.getBalance(date).equals(total)) {
             trans.setDescription(trans.getDescription() + " NAK");
