@@ -177,10 +177,14 @@ public class MailImport implements ImporterPlugin {
 
             Message[] messages = folder.getMessages();
             for (Message message : messages) {
-                if (importMessage(message, aCurrentAccount, aWritableModel)) {
-                    message.setFlag(Flag.SEEN, true);
-                    folder.copyMessages(new Message[]{message}, doneFolder);
-                    message.setFlag(Flags.Flag.DELETED, true);
+                try {
+                    if (importMessage(message, aCurrentAccount, aWritableModel)) {
+                        message.setFlag(Flag.SEEN, true);
+                        folder.copyMessages(new Message[]{message}, doneFolder);
+                        message.setFlag(Flags.Flag.DELETED, true);
+                    }
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, "Cannot import email" + message.getSubject(), e);
                 }
             }
         } catch (Exception e) {
