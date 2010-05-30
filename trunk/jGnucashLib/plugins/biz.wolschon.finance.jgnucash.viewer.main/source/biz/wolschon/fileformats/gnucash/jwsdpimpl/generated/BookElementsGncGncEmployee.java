@@ -10,16 +10,16 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl.generated;
 
 
 /**
- * Java content class for gnc_GncCustomer element declaration.
- * 	<p>The following schema fragment specifies the expected 	content contained within this java content object. 	(defined at file:/home/fox/workspace/jGnucashLib-GPL/plugins/biz.wolschon.finance.jgnucash.viewer.main/source/gnucash.xsd line 400)
+ * Java content class for gnc_GncEmployee element declaration.
+ * 	<p>The following schema fragment specifies the expected 	content contained within this java content object. 	(defined at file:/home/fox/workspace/jGnucashLib-GPL/plugins/biz.wolschon.finance.jgnucash.viewer.main/source/gnucash.xsd line 473)
  * <p>
  * <pre>
- * &lt;element name="gnc_GncCustomer">
+ * &lt;element name="gnc_GncEmployee">
  *   &lt;complexType>
  *     &lt;complexContent>
  *       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *         &lt;sequence>
- *           &lt;element name="cust_guid">
+ *           &lt;element name="employee_guid">
  *             &lt;complexType>
  *               &lt;simpleContent>
  *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
@@ -28,35 +28,18 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl.generated;
  *               &lt;/simpleContent>
  *             &lt;/complexType>
  *           &lt;/element>
- *           &lt;element name="cust_name">
+ *           &lt;element name="employee_username">
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *               &lt;minLength value="1"/>
  *             &lt;/restriction>
  *           &lt;/element>
- *           &lt;element name="cust_id" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *           &lt;element name="cust_addr" type="{}address"/>
- *           &lt;element name="cust_shipaddr" type="{}address"/>
- *           &lt;element name="cust_notes" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *           &lt;element name="cust_terms" minOccurs="0">
- *             &lt;complexType>
- *               &lt;simpleContent>
- *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *                   &lt;attribute name="type" use="required">
- *                     &lt;simpleType>
- *                       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}NMTOKEN">
- *                         &lt;enumeration value="guid"/>
- *                       &lt;/restriction>
- *                     &lt;/simpleType>
- *                   &lt;/attribute>
- *                 &lt;/extension>
- *               &lt;/simpleContent>
- *             &lt;/complexType>
- *           &lt;/element>
- *           &lt;element name="cust_taxincluded" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *           &lt;element name="cust_active" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *           &lt;element name="cust_discount" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *           &lt;element name="cust_credit" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *           &lt;element name="cust_currency">
+ *           &lt;element name="employee_id" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *           &lt;element name="employee_addr" type="{}address"/>
+ *           &lt;element name="employee_language" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *           &lt;element name="employee_active" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *           &lt;element name="employee_workday" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *           &lt;element name="employee_rate" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *           &lt;element name="employee_currency">
  *             &lt;complexType>
  *               &lt;complexContent>
  *                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
@@ -68,8 +51,7 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl.generated;
  *               &lt;/complexContent>
  *             &lt;/complexType>
  *           &lt;/element>
- *           &lt;element name="cust_use-tt" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *           &lt;element name="cust_taxtable" minOccurs="0">
+ *           &lt;element name="employee_ccard" minOccurs="0">
  *             &lt;complexType>
  *               &lt;simpleContent>
  *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
@@ -94,8 +76,8 @@ package biz.wolschon.fileformats.gnucash.jwsdpimpl.generated;
  * </pre>
  * 
  */
-public interface BookElementsGncGncCustomer
-    extends javax.xml.bind.Element, biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncCustomerType
+public interface BookElementsGncGncEmployee
+    extends javax.xml.bind.Element, biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncEmployeeType
 {
 
 
