@@ -136,10 +136,10 @@ public class MailImport implements ImporterPlugin {
     public List<String> getFolders(final Store aStore) throws MessagingException {
         if (myFolders == null) {
             LOG.info("listing folders...");
-            JOptionPane.showMessageDialog(null, "There is no mail-folder configured it it does not exist.\n"
+            JOptionPane.showMessageDialog(null, "There is no mail-folder configured or it does not exist.\n"
                     + "Listing folders after pressing OK...\n"
                     + "THIS MAY TAKE A WHILE!");
-            myFolders = listFolders(((Store) myFolders).getDefaultFolder());
+            myFolders = listFolders(aStore.getDefaultFolder());
         }
 
         return myFolders;
