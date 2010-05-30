@@ -363,8 +363,8 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
                     value = new BigDecimal(rightOfComma);
                 } catch (NumberFormatException e) {
                     throw new NumberFormatException("'" + rightOfComma
-                            + "' cannot be parsed by Biginteger! input was "
-                            + gnucashString);
+                            + "' cannot be parsed by Biginteger! input was \""
+                            + gnucashString + "\"");
                 }
 
             } else {
@@ -380,8 +380,8 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
                 } catch (NumberFormatException e) {
                     throw new NumberFormatException("'" + leftOfComma + '.'
                             + rightOfComma
-                            + "' cannot be parsed by Biginteger! input was "
-                            + gnucashString);
+                            + "' cannot be parsed by Biginteger! input was \""
+                            + gnucashString + "\"");
                 }
             }
 
