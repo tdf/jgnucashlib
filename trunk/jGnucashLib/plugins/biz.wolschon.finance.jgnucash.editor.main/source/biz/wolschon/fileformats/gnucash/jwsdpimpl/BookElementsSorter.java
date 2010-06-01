@@ -78,34 +78,34 @@ public class BookElementsSorter implements Comparator<Object> {
     private int getType(final Object element) {
         if (element instanceof BookElementsGncCommodity) {
             return 1;
+        } else if (element instanceof BookElementsGncPricedb) {
+            return 2;
         } else if (element instanceof GncAccount) {
+            return 3;
+        } else if (element instanceof BookElementsGncBudget) {
             return 4;
         } else if (element instanceof GncTransaction) {
+            return 5;
+        } else if (element instanceof BookElementsGncTemplateTransactions) {
             return 6;
-        } else if (element instanceof BookElementsGncGncCustomer) {
-            return 9;
+        } else if (element instanceof BookElementsGncSchedxaction) {
+            return 7;
         } else if (element instanceof BookElementsGncGncJob) {
-            return 10;
+            return 8;
         } else if (element instanceof BookElementsGncGncTaxTable) {
-            return 11;
+            return 9;
         } else if (element instanceof BookElementsGncGncInvoice) {
+            return 10;
+        } else if (element instanceof BookElementsGncGncCustomer) {
+            return 11;
+        } else if (element instanceof BookElementsGncGncEmployee) {
             return 12;
         } else if (element instanceof BookElementsGncGncEntry) {
             return 13;
-        } else if (element instanceof BookElementsGncTemplateTransactions) {
-            return 7;
-        } else if (element instanceof BookElementsGncSchedxaction) {
-            return 8;
-        } else if (element instanceof BookElementsGncBudget) {
-            return 5;
-        } else if (element instanceof BookElementsGncPricedb) {
-            return 2;
-        } else if (element instanceof BookElementsGncGncEmployee) {
-            return 14;
         } else if (element instanceof BookElementsGncGncBillTerm) {
-            return 15;
+            return 14;
         } else if (element instanceof BookElementsGncGncVendor) {
-            return 16;
+            return 15;
         } else {
             throw new IllegalStateException("Unecpected element in GNC:Book found! <" + element.toString() + ">");
         }

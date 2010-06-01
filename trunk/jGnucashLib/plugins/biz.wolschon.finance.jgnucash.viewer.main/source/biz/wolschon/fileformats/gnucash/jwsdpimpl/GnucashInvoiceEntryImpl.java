@@ -104,9 +104,10 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
      * {@inheritDoc}
      */
     public String getInvoiceID() {
-        if (jwsdpPeer.getEntryInvoice() == null) {
-            LOG.warn("file contains an invoice-entry with GUID="
-                    + getId() + " without an invoice-element");
+        if (jwsdpPeer.getEntryInvoice() == null && jwsdpPeer.getEntryBill() == null) {
+            LOG.error("file contains an invoice-entry with GUID="
+                    + getId() + " without an invoice-element(customer) AND "
+                    + "without a bill-element(supplier)");
             return null;
         }
         return jwsdpPeer.getEntryInvoice().getValue();
