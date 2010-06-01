@@ -64,11 +64,14 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncCommodity;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncBillTerm;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncCustomer;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEmployee;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEntry;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncInvoice;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncJob;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncVendor;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncSchedxaction;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncTemplateTransactions;
@@ -436,6 +439,9 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
             } else if (element instanceof BookElementsGncSchedxaction) {
             } else if (element instanceof BookElementsGncBudget) {
             } else if (element instanceof BookElementsGncPricedb) {
+            } else if (element instanceof BookElementsGncGncEmployee) {
+            } else if (element instanceof BookElementsGncGncBillTerm) {
+            } else if (element instanceof BookElementsGncGncVendor) {
             } else {
                 throw new IllegalStateException("Unecpected element in GNC:Book found! <" + element.toString() + ">");
             }

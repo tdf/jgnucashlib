@@ -35,11 +35,14 @@ import java.util.Comparator;
 
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncCommodity;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncBillTerm;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncCustomer;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEmployee;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEntry;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncInvoice;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncJob;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncVendor;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncPricedb;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncSchedxaction;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncTemplateTransactions;
@@ -97,6 +100,12 @@ public class BookElementsSorter implements Comparator<Object> {
             return 5;
         } else if (element instanceof BookElementsGncPricedb) {
             return 2;
+        } else if (element instanceof BookElementsGncGncEmployee) {
+            return 14;
+        } else if (element instanceof BookElementsGncGncBillTerm) {
+            return 15;
+        } else if (element instanceof BookElementsGncGncVendor) {
+            return 16;
         } else {
             throw new IllegalStateException("Unecpected element in GNC:Book found! <" + element.toString() + ">");
         }

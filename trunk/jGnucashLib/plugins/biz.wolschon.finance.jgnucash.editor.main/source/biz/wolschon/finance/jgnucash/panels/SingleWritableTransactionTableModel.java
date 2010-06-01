@@ -297,8 +297,8 @@ class SingleWritableTransactionTableModel extends SingleTransactionTableModel {
                                 // format: "<value> (<quantity>)"
                                 split.setValue(value.toString().substring(0, index));
                                 split.setQuantity(value.toString().substring(index + 1).replace(')', ' '));
-                                split.setQuantity(split.getQuantity());
-                                split.setValue(split.getValue());
+                                //split.setQuantity(split.getQuantity());
+                                //split.setValue(split.getValue());
                             } else {
                                 // format: "<quantity>"
                                 split.setValue(value.toString());

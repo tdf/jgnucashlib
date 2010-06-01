@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 
 import javax.xml.bind.JAXBException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -99,12 +100,13 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
     }
 
     /**
+     * MAY RETURN NULL.
      * {@inheritDoc}
      */
     public String getInvoiceID() {
         if (jwsdpPeer.getEntryInvoice() == null) {
-            LOG.error("file contains an invoice-entry with GUID="
-                    + getId() + "without an invoice-element");
+            LOG.warn("file contains an invoice-entry with GUID="
+                    + getId() + " without an invoice-element");
             return null;
         }
         return jwsdpPeer.getEntryInvoice().getValue();
@@ -358,20 +360,22 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
         try {
             GnucashInvoiceEntry otherSplit = o;
             GnucashInvoice otherTrans = otherSplit.getInvoice();
-            int c = otherTrans.compareTo(getInvoice());
-            if (c != 0) {
-                return c;
+            if (otherTrans != null && getInvoice() != null) {
+                int c = otherTrans.compareTo(getInvoice());
+                if (c != 0) {
+                    return c;
+                }
             }
 
 
-            c = otherSplit.getId().compareTo(getId());
+            int c = otherSplit.getId().compareTo(getId());
             if (c != 0) {
                 return c;
             }
 
 
             if (o != this) {
-                System.err.println("doublicate invoice-entry-id!! "
+                LOG.error("doublicate invoice-entry-id!! "
                                  + otherSplit.getId()
                                  + " and "
                                  + getId());
@@ -381,7 +385,7 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
             return 0;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("error comparing", e);
             return 0;
         }
     }
