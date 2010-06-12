@@ -45,7 +45,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -181,7 +180,8 @@ public class TaxReportPanel extends JPanel {
                 return;
             }
         } else {
-            try {
+            throw new IllegalStateException("To use the OPTIONAL tax-report panel, please create a file " + configFile.getAbsolutePath());
+            /*try {
                 props.loadFromXML(getClass().getResourceAsStream(
                         "TaxReportPanel.xml"));
                 props.storeToXML(new FileOutputStream(configFile),
@@ -201,7 +201,7 @@ public class TaxReportPanel extends JPanel {
                 JLabel errorLabel = new JLabel(e.getMessage());
                 this.add(errorLabel, BorderLayout.CENTER);
                 return;
-            }
+            }*/
         }
 
         LOGGER.info("calculating tax-panel...");

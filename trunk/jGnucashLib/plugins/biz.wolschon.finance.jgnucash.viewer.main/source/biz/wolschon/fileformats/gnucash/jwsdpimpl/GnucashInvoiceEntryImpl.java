@@ -108,6 +108,8 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
             LOG.error("file contains an invoice-entry with GUID="
                     + getId() + " without an invoice-element(customer) AND "
                     + "without a bill-element(supplier)");
+        }
+        if (jwsdpPeer.getEntryInvoice() == null) {
             return null;
         }
         return jwsdpPeer.getEntryInvoice().getValue();

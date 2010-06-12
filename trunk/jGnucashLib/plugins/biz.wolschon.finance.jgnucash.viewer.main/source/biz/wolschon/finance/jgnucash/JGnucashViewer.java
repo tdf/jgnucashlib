@@ -293,7 +293,10 @@ public class JGnucashViewer extends JFrame implements Application {
         if (myTabbedPane == null) {
             myTabbedPane = new JTabbedPane();
             myTabbedPane.addTab("transactions", getTransactionsPanel());
-            myTabbedPane.addTab("taxes", getTaxReportPanel());
+            TaxReportPanel taxReportPanel2 = getTaxReportPanel();
+            if (taxReportPanel2 != null) {
+                myTabbedPane.addTab("taxes", taxReportPanel2);
+            }
         }
         return myTabbedPane;
     }
@@ -318,7 +321,11 @@ public class JGnucashViewer extends JFrame implements Application {
      */
     protected TaxReportPanel getTaxReportPanel() {
         if (taxReportPanel == null) {
-            taxReportPanel = new TaxReportPanel(getModel());
+            try {
+                taxReportPanel = new TaxReportPanel(getModel());
+            } catch (Exception e) {
+                LOGGER.info("The tax-report panel is probably not configured. THIS IS OKAY.", e);
+            }
         }
         return taxReportPanel;
     }
