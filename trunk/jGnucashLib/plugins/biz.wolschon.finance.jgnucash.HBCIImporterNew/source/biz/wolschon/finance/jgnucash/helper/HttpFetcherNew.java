@@ -39,17 +39,17 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 
-public final class HttpFetcher {
+public final class HttpFetcherNew {
 
     /**
      * Automatically created logger for debug and error-output.
      */
-    private static final Log LOGGER = LogFactory.getLog(HttpFetcher.class);
+    private static final Log LOGGER = LogFactory.getLog(HttpFetcherNew.class);
 
     /**
      * Utility-class with no instances.
      */
-    private HttpFetcher() {
+    private HttpFetcherNew() {
 
     }
 
