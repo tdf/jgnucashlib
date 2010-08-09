@@ -126,7 +126,7 @@ public class AdvanziaImporter extends AbstractScriptableImporter {
             String value = matcher.group(3);
             LOG.fine("Advanzia date="+date +" description="+description+ " value=" + value);
             Date d = sdf.parse(date);
-            FixedPointNumber v = new FixedPointNumber(value);
+            FixedPointNumber v = new FixedPointNumber(value).negate();
             lines.add(new Line(d, description, v));
 
         }
