@@ -363,6 +363,7 @@ public class MailImport implements ImporterPlugin {
             Collection<MailImportHandler> mailHandlers = PluginMain.getMailHandlers();
             LOG.fine("handling as text/* via our #" + mailHandlers.size() + " plugins...");
             for (MailImportHandler mailImportHandler : mailHandlers) {
+                LOG.fine("handling as text/* via our #" + mailHandlers.size() + " plugins...trying " + mailImportHandler.getClass().getName());
                 if (mailImportHandler.handleTextMail(aWritableModel, message.getSubject(), message, readTextContent(message))) {
                     return true;
                 }
@@ -374,6 +375,7 @@ public class MailImport implements ImporterPlugin {
             Collection<MailImportHandler> mailHandlers = PluginMain.getMailHandlers();
             LOG.fine("handling as multipart via our #" + mailHandlers.size() + " plugins...");
             for (MailImportHandler mailImportHandler : mailHandlers) {
+                LOG.fine("handling as text/* via our #" + mailHandlers.size() + " plugins...trying " + mailImportHandler.getClass().getName());
                 if (mailImportHandler.handleMultiPartMail(aWritableModel, message.getSubject(), message, mp)) {
                     return true;
                 }

@@ -704,6 +704,9 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      * @see #SETTINGS_SERVER
      */
     public Properties getMyProperties() {
+        if (myProperties == null) {
+            myProperties = new Properties();
+        }
         return myProperties;
     }
 
