@@ -33,6 +33,11 @@ package biz.wolschon.finance.jgnucash.accountProperties;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -75,7 +80,7 @@ import com.l2fprod.common.propertysheet.PropertySheetTableModel;
  * <b>Action to open an the properties of an account in a new tab.</b>
  * @author  <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
-public class AccountProperties implements AccountAction {
+public class AccountProperties implements AccountAction, ClipboardOwner {
 
     /**
      * Our logger for debug- and error-output.
@@ -238,7 +243,27 @@ public class AccountProperties implements AccountAction {
 
 
         newPanel.add(new JLabel("GUID:"));
-        newPanel.add(new JLabel(myAccount.getId()));
+        final JTextField disabledIDInput = new JTextField(myAccount.getId());
+        final JPopupMenu accountIDPopupMenu = createAccountIDPopupMenu();
+        disabledIDInput.setEditable(false);
+        disabledIDInput.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseReleased(final MouseEvent arg0) {
+                if (arg0.isPopupTrigger()) {
+                    accountIDPopupMenu.show(disabledIDInput, arg0.getX(), arg0.getY());
+                }
+            }
+
+            @Override
+            public void mousePressed(final MouseEvent arg0) {
+                if (arg0.isPopupTrigger()) {
+                    accountIDPopupMenu.show(disabledIDInput, arg0.getX(), arg0.getY());
+                }
+            }
+
+        });
+        newPanel.add(disabledIDInput);
 
         newPanel.add(new JLabel("name:"));
         final JTextField nameInput = new JTextField(myAccount.getName());
@@ -262,6 +287,20 @@ public class AccountProperties implements AccountAction {
         myFrame.setVisible(true);
     }
 
+    private JPopupMenu createAccountIDPopupMenu() {
+        final JPopupMenu accountIDPopupMenu = new JPopupMenu();
+        JMenuItem copyAccountIDMenuItem = new JMenuItem("copy");
+        copyAccountIDMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent arg0) {
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(new StringSelection( myAccount.getId() ), AccountProperties.this);
+            }
+        });
+        accountIDPopupMenu.add(copyAccountIDMenuItem);
+        return accountIDPopupMenu;
+    }
     /**
      * @return The panel with the close-button.
      */
@@ -388,6 +427,7 @@ public class AccountProperties implements AccountAction {
         }
 
         Collection<String> keys = myAccount.getUserDefinedAttributeKeys();
+        LOGGER.debug("updateCustomAttributesPanel() #UserDefinedAttributeKeys=" + keys.size());
         for (String key : keys) {
             DefaultProperty property = new DefaultProperty();
             property.setName(key);
@@ -501,5 +541,13 @@ public class AccountProperties implements AccountAction {
             });
         }
         return myRemoveMenuItem;
+    }
+
+    /* (non-Javadoc)
+     * @see java.awt.datatransfer.ClipboardOwner#lostOwnership(java.awt.datatransfer.Clipboard, java.awt.datatransfer.Transferable)
+     */
+    @Override
+    public void lostOwnership(final Clipboard arg0, final Transferable arg1) {
+        // ignored
     }
 }
