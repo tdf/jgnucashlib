@@ -323,7 +323,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
                 .load(getClass()
                         .getClassLoader()
                         .getResourceAsStream(
-                                "biz/wolschon/finance/jgnucash/HBCIImporter/default_hbci.properties"));
+                                "biz/wolschon/finance/jgnucash/HBCIImporterNew/default_hbci.properties"));
 
         // get all accounts that contain contact-information
         // for an HBCI online-banking server of the respective
