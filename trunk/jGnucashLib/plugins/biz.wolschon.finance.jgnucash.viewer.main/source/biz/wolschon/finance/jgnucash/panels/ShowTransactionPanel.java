@@ -284,7 +284,26 @@ public class ShowTransactionPanel extends JPanel {
             setModel(new SingleTransactionTableModel());
             transactionTable.addMouseListener(new MouseAdapter() {
 
-                /* (non-Javadoc)
+                /** show ShowTransactionPanel#getCellPopupMenu() if mousePressed is a popupTrigger on this platform.
+                 * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+                 */
+                @Override
+                public void mousePressed(final MouseEvent aE) {
+                    try {
+                        if (aE.isPopupTrigger()) {
+                            int row = transactionTable.rowAtPoint(aE.getPoint());
+                            if (row > 0) {
+                                getCellPopupMenu(row).show((JComponent) aE.getSource(),
+                                        aE.getX(), aE.getY());
+                            }  else {
+                                LOGGER.info("no split-row below mouse found, not showing popup-menu");
+                            }
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("error showing popup-menu", e);
+                    }
+                }
+                /** show ShowTransactionPanel#getCellPopupMenu() if mouseReleased is a popupTrigger on this platform.
                  * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
                  */
                 @Override

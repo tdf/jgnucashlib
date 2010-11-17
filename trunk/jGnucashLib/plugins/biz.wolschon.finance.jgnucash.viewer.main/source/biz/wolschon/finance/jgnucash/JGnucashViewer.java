@@ -253,11 +253,21 @@ public class JGnucashViewer extends JFrame implements Application {
             }
             accountsTree.addMouseListener(new MouseAdapter() {
 
-                /* (non-Javadoc)
+                /** show popup if mouseReleased is a popupTrigger on this platform.
                  * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
                  */
                 @Override
                 public void mouseReleased(final MouseEvent aE) {
+                    if (aE.isPopupTrigger()) {
+                        getAccountTreePopupMenu().show((JComponent) aE.getSource(),
+                                aE.getX(), aE.getY());
+                    }
+                }
+                /** show popup if mousePressed is a popupTrigger on this platform.
+                 * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+                 */
+                @Override
+                public void mousePressed(final MouseEvent aE) {
                     if (aE.isPopupTrigger()) {
                         getAccountTreePopupMenu().show((JComponent) aE.getSource(),
                                 aE.getX(), aE.getY());
@@ -723,6 +733,7 @@ public class JGnucashViewer extends JFrame implements Application {
                 });
                 myAccountTreePopupMenu.add(newMenuItem);
             }
+            LOGGER.debug("getAccountTreePopupMenu() created menu with " + myAccountTreePopupMenu.getComponentCount() + " entries");
 
         }
         return myAccountTreePopupMenu;

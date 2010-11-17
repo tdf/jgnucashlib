@@ -324,14 +324,23 @@ public class AccountProperties implements AccountAction {
             });
             myPropertySheet.getTable().addMouseListener(new MouseAdapter() {
 
-                /* (non-Javadoc)
+                /** show popup if mouseReleased is a popupTrigger on this platform.
                  * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
                  */
                 @Override
-                public void mouseClicked(final MouseEvent aE) {
-                    LOGGER.debug("mouse clicked isPoupTrigger=" + aE.isPopupTrigger()
-                            + " button=" + aE.getButton());
-                    if (aE.isPopupTrigger() || aE.getButton() == MouseEvent.BUTTON3) {
+                public void mouseReleased(final MouseEvent aE) {
+                    if (aE.isPopupTrigger()) {
+                        JPopupMenu menu = getPropertyPopup();
+                        menu.show(myPropertySheet, aE.getX(), aE.getY());
+                    }
+                    super.mouseClicked(aE);
+                }
+                /** show popup if mousePressed is a popupTrigger on this platform.
+                 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+                 */
+                @Override
+                public void mousePressed(final MouseEvent aE) {
+                    if (aE.isPopupTrigger()) {
                         JPopupMenu menu = getPropertyPopup();
                         menu.show(myPropertySheet, aE.getX(), aE.getY());
                     }
