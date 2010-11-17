@@ -650,7 +650,7 @@ public class WirecardImporter {
             splits = line.split(" ");
 
             try {
-                fees = new FixedPointNumber(splits[0]);
+                fees = new FixedPointNumber(splits[0]).negate();
                 if (!"EUR".equals(splits[1]) && !"USD".equals(splits[1])) {
                     throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
                 }
@@ -662,12 +662,12 @@ public class WirecardImporter {
                 if (!"EUR".equals(splits[5]) && !"USD".equals(splits[5])) {
                     throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
                 }
-                security = new FixedPointNumber(splits[6]);
+                security = new FixedPointNumber(splits[6]).negate();
                 if (!"EUR".equals(splits[7]) && !"USD".equals(splits[7])) {
                     throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
                 }
                 if (splits.length == 8) {
-                    sum = security;
+                    sum = security.negate();
                     security = new FixedPointNumber();
                 } else {
                     sum = new FixedPointNumber(splits[8]);
