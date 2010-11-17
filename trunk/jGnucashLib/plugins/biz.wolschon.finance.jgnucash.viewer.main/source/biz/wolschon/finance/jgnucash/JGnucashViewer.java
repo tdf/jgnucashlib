@@ -15,6 +15,7 @@ package biz.wolschon.finance.jgnucash;
 
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -735,6 +736,11 @@ public class JGnucashViewer extends JFrame implements Application {
             }
             LOGGER.debug("getAccountTreePopupMenu() created menu with " + myAccountTreePopupMenu.getComponentCount() + " entries");
 
+        }
+        int count = myAccountTreePopupMenu.getComponentCount();
+        for (int i = 0; i < count; i++) {
+            Component component = myAccountTreePopupMenu.getComponent(i);
+            component.setEnabled(component.isEnabled());
         }
         return myAccountTreePopupMenu;
     }
