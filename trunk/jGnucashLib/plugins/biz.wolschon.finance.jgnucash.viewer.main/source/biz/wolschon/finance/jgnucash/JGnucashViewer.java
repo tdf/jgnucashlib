@@ -643,7 +643,13 @@ public class JGnucashViewer extends JFrame implements Application {
         myModel = model;
         getAccountsTree().setModel(
                 new GnucashAccountsTreeModel(myModel));
-        getTaxReportPanel().setBooks(myModel);
+        try {
+            getTaxReportPanel().setBooks(myModel);
+        } catch (Exception e) {
+            LOGGER.warn("cannot initialize (optional) TaxReportPanel", e);
+            getTaxReportPanel().setVisible(false);
+            getJTabbedPane().remove(getTaxReportPanel());
+        }
         setSelectedAccount(null);
         setTitle(TITLE);
         jSplitPane.setDividerLocation(0.5);
