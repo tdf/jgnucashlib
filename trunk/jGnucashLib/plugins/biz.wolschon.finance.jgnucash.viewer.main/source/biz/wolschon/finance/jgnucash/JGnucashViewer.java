@@ -81,8 +81,85 @@ import biz.wolschon.finance.jgnucash.swingModels.GnucashAccountsTreeModel;
 * Simple Viewer for Gnucash-Files.
 * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
 */
+@SuppressWarnings("serial")
 public class JGnucashViewer extends JFrame implements Application {
 
+
+    /**
+     * (c) 2010 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
+     * Project: jgnucashLib-GPL<br/>
+     * AccountActionWrapper<br/>
+     * created: 17.11.2010 <br/>
+     *<br/><br/>
+     * <b>Wrapper for an {@link AccountAction} that knows about {@link JGnucashViewer#getSelectedAccount()}.</b>
+     * @author  <a href="mailto:Marcus@Wolschon.biz">marcus</a>
+     */
+    private final class AccountActionWrapper implements Action {
+        /**
+         * The {@link AccountAction} we are wrapping.
+         */
+        private final AccountAction myAccountAction;
+
+        /**
+         * @param myAccountAction The {@link AccountAction} we are wrapping.
+         */
+        private AccountActionWrapper(final AccountAction anAccountAction) {
+            myAccountAction = anAccountAction;
+        }
+
+        @Override
+        public void addPropertyChangeListener(final PropertyChangeListener aListener) {
+            myAccountAction.addPropertyChangeListener(aListener);
+        }
+
+        @Override
+        public Object getValue(final String aKey) {
+            return myAccountAction.getValue(aKey);
+        }
+
+        @Override
+        public boolean isEnabled() {
+            try {
+                myAccountAction.setAccount(getSelectedAccount());
+                return myAccountAction.isEnabled();
+            } catch (Exception e) {
+                LOGGER.error("cannot query isEnabled for AccountAction", e);
+                return false;
+            }
+        }
+
+        @Override
+        public void putValue(final String aKey, final Object aValue) {
+            myAccountAction.putValue(aKey, aValue);
+        }
+
+        @Override
+        public void removePropertyChangeListener(final PropertyChangeListener aListener) {
+            myAccountAction.removePropertyChangeListener(aListener);
+        }
+
+        @Override
+        public void setEnabled(final boolean aB) {
+            myAccountAction.setEnabled(aB);
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent aE) {
+            try {
+                myAccountAction.setAccount(getSelectedAccount());
+                myAccountAction.actionPerformed(aE);
+            } catch (Exception e) {
+                LOGGER.error("cannot execute AccountAction", e);
+            }
+        }
+
+        /**
+         * @return the accountAction we are wrapping.
+         */
+        public AccountAction getAccountAction() {
+            return myAccountAction;
+        }
+    }
 
     /**
      * Our logger for debug- and error-output.
@@ -683,55 +760,7 @@ public class JGnucashViewer extends JFrame implements Application {
             Collection<AccountAction> accountActions = getAccountActions();
             for (AccountAction accountAction2 : accountActions) {
                 final AccountAction accountAction = accountAction2;
-                JMenuItem newMenuItem = new JMenuItem(new Action() {
-
-                    @Override
-                    public void addPropertyChangeListener(final PropertyChangeListener aListener) {
-                        accountAction.addPropertyChangeListener(aListener);
-                    }
-
-                    @Override
-                    public Object getValue(final String aKey) {
-                        return accountAction.getValue(aKey);
-                    }
-
-                    @Override
-                    public boolean isEnabled() {
-                        try {
-                            accountAction.setAccount(getSelectedAccount());
-                            return accountAction.isEnabled();
-                        } catch (Exception e) {
-                            LOGGER.error("cannot query isEnabled for AccountAction", e);
-                            return false;
-                        }
-                    }
-
-                    @Override
-                    public void putValue(final String aKey, final Object aValue) {
-                        accountAction.putValue(aKey, aValue);
-                    }
-
-                    @Override
-                    public void removePropertyChangeListener(final PropertyChangeListener aListener) {
-                        accountAction.removePropertyChangeListener(aListener);
-                    }
-
-                    @Override
-                    public void setEnabled(final boolean aB) {
-                        accountAction.setEnabled(aB);
-                    }
-
-                    @Override
-                    public void actionPerformed(final ActionEvent aE) {
-                        try {
-                            accountAction.setAccount(getSelectedAccount());
-                            accountAction.actionPerformed(aE);
-                        } catch (Exception e) {
-                            LOGGER.error("cannot execute AccountAction", e);
-                        }
-                    }
-
-                });
+                JMenuItem newMenuItem = new JMenuItem(new AccountActionWrapper(accountAction));
                 myAccountTreePopupMenu.add(newMenuItem);
             }
             LOGGER.debug("getAccountTreePopupMenu() created menu with " + myAccountTreePopupMenu.getComponentCount() + " entries");
@@ -740,7 +769,15 @@ public class JGnucashViewer extends JFrame implements Application {
         int count = myAccountTreePopupMenu.getComponentCount();
         for (int i = 0; i < count; i++) {
             Component component = myAccountTreePopupMenu.getComponent(i);
-            component.setEnabled(component.isEnabled());
+            if (component instanceof JMenuItem) {
+                JMenuItem item = (JMenuItem) component;
+                Action action = item.getAction();
+                if (action instanceof AccountActionWrapper) {
+                    AccountActionWrapper wrapper = (AccountActionWrapper) action;
+                    wrapper.getAccountAction().setAccount(getSelectedAccount());
+                    wrapper.setEnabled(wrapper.isEnabled());
+                }
+            }
         }
         return myAccountTreePopupMenu;
     }
