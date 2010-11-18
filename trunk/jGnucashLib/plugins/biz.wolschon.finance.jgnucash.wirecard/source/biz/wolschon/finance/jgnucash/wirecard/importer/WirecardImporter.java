@@ -24,6 +24,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.xml.bind.JAXBException;
 
+import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
@@ -33,7 +34,7 @@ import biz.wolschon.numbers.FixedPointNumber;
 
 /**
  * This class parses Wirecard-reports (clearing and account-statement)
- * and inserts transactions for them.<br/>
+ * and inserts transactions for them.<br/>Assumptions: payout currency is EUR
  */
 public class WirecardImporter {
 
@@ -277,22 +278,35 @@ public class WirecardImporter {
         lineMustBeNull(aBuffer);
         lineMustEqual(aBuffer, "Comment");
         lineMustBeNull(aBuffer);
-        lineMustStartWith(aBuffer, "Invoice Amount Exchange Rate Settlement Amount");
+        lineMustStartWith(aBuffer, "Invoice Amount Exchange Rate Settlement Amount"); // verify table header
         lineMustBeNull(aBuffer);
         line = aBuffer.readLine(); // customer-name
         lineMustBeNull(aBuffer);
 
+        // the following table is given as columns and has settlements-statements that may be in EUR or currencies with exchange rates as rows
         line = aBuffer.readLine();// transaction-numbers
         List<String> invoiceNumbers = Arrays.asList(line.split(" "));
 
         lineMustBeNull(aBuffer);
 
         line = aBuffer.readLine(); // currencies
-        List<String> currencies = Arrays.asList(line.split(" "));
+        List<String> currencies = Arrays.asList(line
+                .replaceAll("Negative payout EUR", "Negative_payout_EUR")
+                .replaceAll("Reserve payout EUR", "Reserve_payout_EUR")
+                .replaceAll("Reserve payout USD", "Reserve_payout_USD")
+                .split(" "));
+        // special handling of "Negative Paypout" with no invoice-number and no billing period
+        if (currencies.size() == (invoiceNumbers.size() - 1)
+              && currencies.size() > 0
+              && currencies.get(currencies.size() - 1).equals("Negative_payout_EUR")) {
+            invoiceNumbers.add("Negative Payout");
+            //does not work currencies.set(currencies.size() - 1, "EUR");
+            currencies = Arrays.asList(line.replaceAll("Negative payout", "").split(" "));
+        }
 
         lineMustBeNull(aBuffer);
 
-        line = aBuffer.readLine(); // invoiceAmount
+        line = aBuffer.readLine(); // invoiceAmount (values without currencies)
         splits = line.split(" ");
         List<FixedPointNumber> invoiceAmount = new ArrayList<FixedPointNumber>(splits.length);
         for (String split : splits) {
@@ -301,14 +315,27 @@ public class WirecardImporter {
 
         lineMustBeNull(aBuffer);
 
-        line = aBuffer.readLine(); // exchangeRates
-        splits = line.split(" ");
-        if (splits.length != 2 * invoiceAmount.size()) {
-            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+        line = aBuffer.readLine(); // exchangeRates "0.69 EUR EUR" = 0.69 for 1st split, ""=1 for second split
+        String line2 = line
+                  // handle the empty exchange rate (2 currencies without a number in between)
+                 .replaceAll("EUR EUR", "EUR 1 EUR")
+                 .replaceAll("USD EUR", "UDS 1 EUR")
+                 .replaceAll("^EUR", "1 EUR")
+                 .replaceAll("EUR EUR", "EUR 1 EUR")
+                 .replaceAll("USD EUR", "USD 1 EUR");
+        splits = line2.split(" ");
+        if (splits.length != 2 * invoiceAmount.size() && splits.length != 2 * invoiceAmount.size() + 2) {
+            // +2 because we may or may not have a currency for the "total" in this column
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line
+                    + "\" transformed to \"" + line2
+                    + "\" has no wrong number of elements (value - currency -pairs) expected 2 * " + invoiceAmount.size()
+                    + " found " + splits.length);
         }
         List<FixedPointNumber> exchangeRates = new ArrayList<FixedPointNumber>(splits.length / 2);
-        for (int j = 0; j < splits.length; j+=2) {
+        for (int j = 0; j < Math.min(currencies.size() * 2, splits.length); j+=2) {
+            // Math.min because with total being an additional row, we may have too few currencies for the exchange rates
             if (currencies.get(j / 2).equals("EUR")) {
+                // ignore exchange rate for EUR-rows
                 exchangeRates.add(new FixedPointNumber(1));
             } else {
                 exchangeRates.add(new FixedPointNumber(splits[j]));
@@ -327,15 +354,24 @@ public class WirecardImporter {
             }
             settlementAmount.add(new FixedPointNumber(value));
         }
-        lineMustBeNull(aBuffer);
-        lineMustEqual(aBuffer, "Total Payout");
 
-        lineMustBeNull(aBuffer);
-        lineMustEqual(aBuffer, "EUR");
-        lineMustBeNull(aBuffer);
-        line = aBuffer.readLine(); // total
-        FixedPointNumber total = new FixedPointNumber(line);
+        // total payout may be an additional row in the "amount" colum
+        // or a text below the table
+        FixedPointNumber total = null;
+        if (settlementAmount.size() == invoiceAmount.size() + 1) {
+            total = settlementAmount.get(settlementAmount.size() - 1);
+        } else if (settlementAmount.size() ==  invoiceAmount.size()) {
+            lineMustBeNull(aBuffer);
+            lineMustEqual(aBuffer, "Total Payout");
 
+            lineMustBeNull(aBuffer);
+            lineMustEqual(aBuffer, "EUR");
+            lineMustBeNull(aBuffer);
+            line = aBuffer.readLine(); // total
+            total = new FixedPointNumber(line);
+        } else {
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\" expected " + invoiceAmount.size() + " or +1 found " + splits.length);
+        }
 
 
 //        String auszahlungAccount = "0682d0d40fefc9af74cae75372b0159d";
@@ -366,15 +402,23 @@ public class WirecardImporter {
       targetSplit.setValue(total);
       targetSplit.setQuantity(total);
 
-      for (int j = 0; j < splits.length; j++) {
+
+      LOG.fine("DEBUG: invoiceAmount = " + Arrays.toString(invoiceAmount.toArray()));
+      LOG.fine("DEBUG: settlementAmount = " + Arrays.toString(settlementAmount.toArray()));
+      LOG.fine("DEBUG: currencies = " + Arrays.toString(currencies.toArray()));
+      LOG.fine("DEBUG: settlementAmount = " + Arrays.toString(settlementAmount.toArray()));
+
+      for (int j = 0; j < Math.min(settlementAmount.size(), currencies.size()); j++) {
 //          String accountID = auszahlungAccount;
 //          if (!currencies.get(j).equals("EUR")) {
 //              accountID = auszahlungAccountUSD;
 //          }
 //          GnucashWritableAccount account = aBook.getAccountByID(accountID);
-          //TODO: test this
+          //TODO: test this, TODO: Rï¿½ckzahlungen von Sicherheits-Einbehalt
           GnucashWritableAccount account = PluginConfigHelper.getOrConfigureAccountWithKey(aBook, "wirecard.auszahlung." + currencies.get(j), "thisAccount",
                   "Please select the account to accumulate 'Auszahlung' in before transfer to the bank-account for currency '" + currencies.get(j) + "'");
+
+          LOG.fine("DEBUG: accumulation-account for currency '" + currencies.get(j) + " is " + account.getQualifiedName());
 
           GnucashWritableTransactionSplit split = auszahlung.createWritingSplit(account);
           split.setDescription(invoiceAmount.get(j) + currencies.get(j)
@@ -395,6 +439,41 @@ public class WirecardImporter {
           split.setValue(settlementAmount.get(j).negate());
           split.setQuantity(invoiceAmount.get(j).negate());
       }
+
+      // check the next 12 days for a transaction with exactly 2 splits
+      // between the same accounts for the same
+      // value. If found, replace it by this transaction.
+      // (such a transaction may e.g. exist due to a HBCI-import of the bank-account we transfer to)
+      final long dateDeltaMillis = 2 * 24 * 60 * 60 * 1000;
+      long from = date.getTime() - dateDeltaMillis;
+      long to = date.getTime() + 6 * dateDeltaMillis;
+
+      // TODO: ein getTransactionSplits(fromDate, toDate) wï¿½re praktisch
+      List<? extends GnucashTransactionSplit> splits2 = targetAccount.getTransactionSplits();
+        for (GnucashTransactionSplit split : splits2) {
+            if (split.getTransaction().getId() == auszahlung.getId()) {
+                continue;
+            }
+            if (split.getTransaction().getDatePosted().getTime() < from) {
+                continue;
+            }
+            if (split.getTransaction().getDatePosted().getTime() > to) {
+                continue;
+            }
+            if (split.getTransaction().getSplits().size() != 2) {
+                continue;
+            }
+            if (!split.getTransaction().getDescription().toLowerCase().contains("wirecard")) {
+                continue;
+            }
+            if (split.getQuantity().equals(total)) {
+                targetAccount.getWritableGnucashFile().removeTransaction((GnucashWritableTransaction) split.getTransaction());
+//                auszahlung.setDatePosted(split.getTransaction().getDatePosted());
+//                        ((GnucashWritableTransaction) split.getTransaction())
+//                                .setDescription(split.getTransaction().getDescription() + " TODO: maybe remove this");
+                return;
+            }
+        }
 
     }
 
@@ -580,7 +659,7 @@ public class WirecardImporter {
             security = new FixedPointNumber(splits[p++]);
             sum = new FixedPointNumber(splits[p++]);
         } else {
-            //new: Rechnungsnummer: Händler: Händlerkennung: Brand:
+            //new: Rechnungsnummer: Hï¿½ndler: Hï¿½ndlerkennung: Brand:
             // 201022TA00789371 Wolschon Import WDB 0000003161ED9CA8 Master Card, Vis
             line = aBuffer.readLine();
             while (!line.startsWith("Rechnungsnummer: ")) {
