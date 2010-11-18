@@ -229,7 +229,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      * @param date
      *            effective date of the transaction
      * @param value
-     *            Wert in der Währung des Kontos
+     *            Wert in der Wï¿½hrung des Kontos
      * @return the transaction that involves this account.
      * @see #myAccount
      */
@@ -366,7 +366,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      *            the description-text ("usage"-field on a paper-form) of the
      *            transaction.
      * @param value
-     *            Wert in der Währung des Kontos
+     *            Wert in der Wï¿½hrung des Kontos
      * @param myAccountSplit
      *            a split for the transaction-part involving the bank's account.
      * @param scriptnum
@@ -441,7 +441,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      * @param date
      *            effective date of the transaction
      * @param value
-     *            Wert in der Währung des Kontos
+     *            Wert in der Wï¿½hrung des Kontos
      * @return The scriptnum of a newly created script or null.
      */
     private Integer createMissingScript(final Date date,
@@ -508,7 +508,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         FixedPointNumber zero = new FixedPointNumber();
         final String WARNING = "[did not happen in " + getPluginName().toUpperCase() + "-account";
 
-        // TODO: ein getTransactionSplits(fromDate, toDate) wäre praktisch
+        // TODO: ein getTransactionSplits(fromDate, toDate) wï¿½re praktisch
         List<? extends GnucashTransactionSplit> splits = getMyAccount()
                 .getTransactionSplits();
         for (GnucashTransactionSplit split : splits) {
@@ -547,6 +547,14 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      * @return The directory where we store config-files.
      */
     protected File getConfigFileDirectory() {
+        File testFirst = new File(System.getProperty("user.dir"), ".jgnucash");
+        if (testFirst.exists()) {
+            return testFirst;
+        }
+        testFirst = new File(new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath(), ".jgnucash");
+        if (testFirst.exists()) {
+            return testFirst;
+        }
         return new File(System.getProperty("user.home", "~"), ".jgnucash");
     }
 
@@ -627,7 +635,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      * @param date
      *            effective date of the transaction
      * @param value
-     *            Wert in der Währung des Kontos
+     *            Wert in der Wï¿½hrung des Kontos
      * @see #myAccount
      * @return true if such a transaction exists
      */
@@ -638,7 +646,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         long from = date.getTime() - dateDeltaMillis;
         long to = date.getTime() + 2 * dateDeltaMillis;
 
-        // TODO: ein getTransactionSplits(fromDate, toDate) wäre praktisch
+        // TODO: ein getTransactionSplits(fromDate, toDate) wï¿½re praktisch
         List<? extends GnucashTransactionSplit> splits = getMyAccount()
                 .getTransactionSplits();
         for (GnucashTransactionSplit split : splits) {
@@ -690,7 +698,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      */
     public void setMyAccount(final GnucashWritableAccount aAccount) {
         if (aAccount == null) {
-            throw new IllegalArgumentException("Null als Gnucash-Konto übergeben");
+            throw new IllegalArgumentException("Null als Gnucash-Konto ï¿½bergeben");
         }
         myAccount = aAccount;
     }
