@@ -263,15 +263,14 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                 // look if there is a script matching,
                 int scriptnum = 0;
                 LOG.log(Level.FINE, "Testing scripts for a match");
-                String scriptRegexKey   = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum;
-                String scriptFilenameKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum;
-                String scriptAccountKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT + scriptnum;
                 while (getMyProperties().containsKey(
-                        scriptRegexKey)) {
+                        getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum)) {
+                    String scriptFilenameKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum;
+                    String scriptAccountKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT + scriptnum;
                     LOG.log(Level.FINE, "Testing script number " + scriptnum + " for a match");
 
                     String regexp = getMyProperties().getProperty(
-                            scriptRegexKey);
+                            getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum);
                     if (text.matches(regexp)) {
                         scriptMatched = true;
 
