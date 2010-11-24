@@ -662,11 +662,14 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         List<? extends GnucashTransactionSplit> splits = getMyAccount()
                 .getTransactionSplits();
         int considered = 0;
+        int notconsidered = 0;
         for (GnucashTransactionSplit split : splits) {
             if (split.getTransaction().getDatePosted().getTime() < from) {
+                notconsidered++;
                 continue;
             }
             if (split.getTransaction().getDatePosted().getTime() > to) {
+                notconsidered++;
                 continue;
             }
             considered++;
@@ -697,7 +700,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             }
         }
 
-        LOG.log(Level.FINE, "isTransactionPresent(date=" + date + ") = false considered " + considered + " transactions");
+        LOG.log(Level.FINE, "isTransactionPresent(date=" + date + ") = false considered " + considered + " transactions, ignored " + notconsidered + " not between " + new Date(from) + " and " + new Date(to) + " in account " + getMyAccount().getQualifiedName());
         return false;
     }
 
