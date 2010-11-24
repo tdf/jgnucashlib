@@ -222,42 +222,42 @@ public class HBCIImporter extends AbstractScriptableImporter {
                         FixedPointNumber value = new FixedPointNumber(flatData[i].value
                                 .getLongValue())
                                 .divideBy(CENTPEREURO);
-                        if (!isTransactionPresent(valutaDate, value, message.toString())) {
+                        if (isTransactionPresent(valutaDate, value, message.toString())) {
+                            continue;
+                        }
 
-                            LOG.info("--------------importing------------------------------");
-                            LOG.info("value=" + value);
-                            LOG.info("saldo=" + flatData[i].saldo.value.getLongValue());
-                            System.err.println("saldo at " + flatData[i].saldo.timestamp);
-                            System.err.println("saldo=" + flatData[i].saldo.value.getLongValue() + " (" + flatData[i].saldo.value.getCurr()  + ")=" + flatData[i].saldo.value.getDoubleValue());
-                            LOG.info("date=" + flatData[i].valuta);
-                            LOG.info("UmsLine[" + i + "] Message="
-                                    + message.toString());
-                            // import this transaction
-                            importTransaction(flatData[i].valuta,
+                        LOG.info("--------------importing------------------------------(" + flatData[i].valuta + ")\n"
+                        +        "value=" + value + "\n"
+                        +        "saldo=" + flatData[i].saldo.value.getLongValue() + "\n"
+//                        System.err.println("saldo at " + flatData[i].saldo.timestamp);
+//                        System.err.println("saldo=" + flatData[i].saldo.value.getLongValue() + " (" + flatData[i].saldo.value.getCurr()  + ")=" + flatData[i].saldo.value.getDoubleValue());
+                        +        "date=" + flatData[i].valuta + "\n"
+                        +        "UmsLine[" + i + "] Message="
+                                + message.toString());
+                        // import this transaction
+                        importTransaction(flatData[i].valuta,
                                     (new FixedPointNumber(flatData[i].value
                                             .getLongValue()))
                                             .divideBy(CENTPEREURO),
                                     message.toString());
 
-                            finalMessage.append(flatData[i].valuta).append(" ")
+                        finalMessage.append(flatData[i].valuta).append(" ")
                                     .append(value.toString())
                                     .append(" - ").append(message.toString())
                                     .append("\n");
 
                             // create a saldo-transaction for the last imported
                             // transaction of each day
-                            if (lastImportedDate != null
-                                    && !lastImportedDate
-                                            .equals(flatData[i].valuta)) {
-                                Saldo saldo = flatData[i - 1].saldo;
-                                long saldoInCent = saldo.value
-                                                      .getLongValue();
-                                createSaldoEntry((new FixedPointNumber(saldoInCent)).divideBy(CENTPEREURO),
-                                                      saldo.timestamp);
-                                markNonExistingTransactions(lastImportedDate);
-                            }
-                            lastImportedDate = flatData[i].valuta;
+                        if (lastImportedDate != null
+                            && !lastImportedDate.equals(flatData[i].valuta)) {
+                            Saldo saldo = flatData[i - 1].saldo;
+                            long saldoInCent = saldo.value
+                                                  .getLongValue();
+                            createSaldoEntry((new FixedPointNumber(saldoInCent)).divideBy(CENTPEREURO),
+                                                  saldo.timestamp);
+                            markNonExistingTransactions(lastImportedDate);
                         }
+                        lastImportedDate = flatData[i].valuta;
                     }
 
                     // create a saldo-transaction after the last imported
@@ -415,7 +415,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
                     prop.setProperty(key, value);
                     aHbciAccount.setUserDefinedAttribute(key, value);
                 }
-                oldfile.renameTo(new File(oldfile.getAbsolutePath() + ".mirgated"));
+                oldfile.renameTo(new File(oldfile.getAbsolutePath() + ".migrated"));
             } else {
                 LOG.log(Level.INFO, "No old config file to import into new config");
             }
