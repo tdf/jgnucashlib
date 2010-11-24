@@ -57,8 +57,8 @@ import biz.wolschon.fileformats.gnucash.GnucashJob;
 import biz.wolschon.fileformats.gnucash.GnucashTaxTable;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncBillTerm;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncBudget;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncBillTerm;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncEmployee;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncTaxTable;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.BookElementsGncGncVendor;
@@ -924,8 +924,7 @@ public class GnucashFileImpl implements GnucashFile {
                         latestDate = date;
                         latestQuote = new FixedPointNumber(
                                 priceQuote.getPriceValue());
-                        LOGGER.debug(getClass().getName()
-                                + ".getLatestPrice(pCmdtySpace='"
+                        LOGGER.debug("getLatestPrice(pCmdtySpace='"
                                 + pCmdtySpace
                                 + "', String pCmdtyId='"
                                 + pCmdtyId
@@ -1710,7 +1709,7 @@ public class GnucashFileImpl implements GnucashFile {
                 case REPLACESTRINGLENGTH: {
                     if (cbuf[i] == ';') {
                         // found it!!!
-                        cbuf[i - REPLACESTRINGLENGTH] = '¤';
+                        cbuf[i - REPLACESTRINGLENGTH] = 'ï¿½';
                         if (i != reat - 1) {
                             System.arraycopy(cbuf, (i + 1), cbuf,
                                     (i - (REPLACESTRINGLENGTH - 1)),
