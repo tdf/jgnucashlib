@@ -262,26 +262,27 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             try {
                 // look if there is a script matching,
                 int scriptnum = 0;
+                LOG.log(Level.FINE, "Testing scripts for a match");
+                String scriptRegexKey   = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum;
+                String scriptFilenameKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum;
+                String scriptAccountKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT + scriptnum;
                 while (getMyProperties().containsKey(
-                        getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum)) {
+                        scriptRegexKey)) {
+                    LOG.log(Level.FINE, "Testing script number " + scriptnum + " for a match");
 
                     String regexp = getMyProperties().getProperty(
-                            getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_REGEXP + scriptnum);
+                            scriptRegexKey);
                     if (text.matches(regexp)) {
                         scriptMatched = true;
 
                         // does a full script exist or only an alternate
                         // accountid?
-                        if (getMyProperties().containsKey(
-                                getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum)) {
-                            importViaScript(value, text, myAccountSplit,
-                                    scriptnum);
+                        if (getMyProperties().containsKey(scriptFilenameKey)) {
+                            importViaScript(value, text, myAccountSplit, scriptnum);
                         } else {
 
                             String alternateAccountID = getMyProperties()
-                                    .getProperty(
-                                            getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_ACCOUNT
-                                                    + scriptnum);
+                                    .getProperty(scriptAccountKey);
                             otherAccount = getMyAccount().getWritableGnucashFile()
                                     .getAccountByID(alternateAccountID);
 
@@ -300,7 +301,6 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                                                 "User-supplied target-account not found.",
                                                 JOptionPane.ERROR_MESSAGE);
                             } else {
-
                                 LOG.log(Level.INFO, "importing transaction using alternate target-account: "
                                                 + alternateAccountID
                                                 + "="
@@ -362,11 +362,12 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
 
 
     /**
+     * Run the given import-script on the given transaction to import
      * @param text
      *            the description-text ("usage"-field on a paper-form) of the
      *            transaction.
      * @param value
-     *            Wert in der W�hrung des Kontos
+     *            value in the currency of the account
      * @param myAccountSplit
      *            a split for the transaction-part involving the bank's account.
      * @param scriptnum
@@ -376,11 +377,10 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                                  final String text,
                                  final GnucashWritableTransactionSplit myAccountSplit,
                                  final int scriptnum) {
-        String language = getMyProperties()
-                .getProperty(getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + scriptnum,
-                        "JavaScript");
-        String scriptPath = getMyProperties().getProperty(
-                getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum);
+        String scriptLanguageKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT_LANGUAGE + scriptnum;
+        String scriptPathKey = getPluginName() + SETTINGS_PREFIX_IMPORTSCRIPT + scriptnum;
+        String language = getMyProperties().getProperty(scriptLanguageKey, "JavaScript");
+        String scriptPath = getMyProperties().getProperty(scriptPathKey);
         InputStream is = null;
         try {
             if (new File(scriptPath).exists()) {
@@ -389,6 +389,10 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                     .exists()) {
                 is = new FileInputStream(new File(
                         getConfigFileDirectory(), scriptPath));
+            } else if (new File(System.getProperty("user.dir"), scriptPath)
+                    .exists()) {
+                is = new FileInputStream(new File(
+                        System.getProperty("user.dir"), scriptPath));
             } else {
                 is = this.getClass().getClassLoader().getResourceAsStream(
                         scriptPath);
@@ -409,12 +413,17 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                     scriptPath, reader);
         } else {
             LOG.log(Level.SEVERE, "Error  script number " + scriptnum + " at "
-                    + scriptPath + " not found");
+                    + scriptPath + " not found"
+                    + "\ncurrent directory is " + System.getProperty("user.dir")
+                    + "\nconfig directory is " + getConfigFileDirectory().getAbsolutePath());
             JOptionPane.showMessageDialog(null,
                     "Error, user- HBCI-Import-Script #" + scriptnum + " at '"
                             + scriptPath + "' not found"
                             + "\ntransaction (value is " + value + ") \n"
-                            + text, scriptPath, JOptionPane.ERROR_MESSAGE);
+                            + text
+                            + "\ncurrent directory is " + System.getProperty("user.dir")
+                            + "\nconfig directory is " + getConfigFileDirectory().getAbsolutePath(),
+                            scriptPath, JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -550,10 +559,14 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         File testFirst = new File(System.getProperty("user.dir"), ".jgnucash");
         if (testFirst.exists()) {
             return testFirst;
+        } else {
+            LOG.log(Level.FINE, "getConfigFileDirectory() does not exist: " + testFirst.getAbsolutePath());
         }
         testFirst = new File(new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath(), ".jgnucash");
         if (testFirst.exists()) {
             return testFirst;
+        } else {
+            LOG.log(Level.FINE, "getConfigFileDirectory() does not exist: " + testFirst.getAbsolutePath());
         }
         return new File(System.getProperty("user.home", "~"), ".jgnucash");
     }
