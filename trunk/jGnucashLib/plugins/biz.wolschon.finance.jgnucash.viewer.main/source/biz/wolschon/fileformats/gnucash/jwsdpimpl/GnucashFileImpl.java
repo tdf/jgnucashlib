@@ -1709,7 +1709,7 @@ public class GnucashFileImpl implements GnucashFile {
                 case REPLACESTRINGLENGTH: {
                     if (cbuf[i] == ';') {
                         // found it!!!
-                        cbuf[i - REPLACESTRINGLENGTH] = 'ï¿½';
+                        cbuf[i - REPLACESTRINGLENGTH] = '¤';
                         if (i != reat - 1) {
                             System.arraycopy(cbuf, (i + 1), cbuf,
                                     (i - (REPLACESTRINGLENGTH - 1)),
