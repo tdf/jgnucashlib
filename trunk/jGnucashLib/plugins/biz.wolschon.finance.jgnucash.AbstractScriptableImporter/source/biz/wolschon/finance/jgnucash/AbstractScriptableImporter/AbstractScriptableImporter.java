@@ -647,7 +647,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
      * @param date
      *            effective date of the transaction
      * @param value
-     *            Wert in der W�hrung des Kontos
+     *            Wert in der Waehrung des Kontos
      * @see #myAccount
      * @return true if such a transaction exists
      */
@@ -661,6 +661,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
         // TODO: ein getTransactionSplits(fromDate, toDate) w�re praktisch
         List<? extends GnucashTransactionSplit> splits = getMyAccount()
                 .getTransactionSplits();
+        int considered = 0;
         for (GnucashTransactionSplit split : splits) {
             if (split.getTransaction().getDatePosted().getTime() < from) {
                 continue;
@@ -668,12 +669,16 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             if (split.getTransaction().getDatePosted().getTime() > to) {
                 continue;
             }
+            considered++;
             if (split.getQuantity().equals(value)) {
                 String origDescr = split
                         .getUserDefinedAttribute(getPluginName() + ".orig_description");
                 if (origDescr != null
                         && !origDescr.equalsIgnoreCase(description)) {
                     // this transactions belongs to another HBCI-transaction
+                    LOG.log(Level.FINE, "isTransactionPresent(date=" + date + ") not matching\n"
+                            + "origDescr  =" + origDescr + "\n"
+                            + "description=" + description);
                     continue;
                 }
                 if (origDescr == null) {
@@ -690,9 +695,9 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                 }
                 return true;
             }
-            ;
         }
 
+        LOG.log(Level.FINE, "isTransactionPresent(date=" + date + ") = false considered " + considered + " transactions");
         return false;
     }
 
