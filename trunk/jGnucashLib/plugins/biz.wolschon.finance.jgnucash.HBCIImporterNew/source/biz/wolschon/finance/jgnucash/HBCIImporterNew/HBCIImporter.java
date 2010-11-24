@@ -388,11 +388,43 @@ public class HBCIImporter extends AbstractScriptableImporter {
      */
     private void setMyProperties(final GnucashWritableAccount aHbciAccount) {
         Properties prop = new Properties();
+
         Collection<String> keys = aHbciAccount.getUserDefinedAttributeKeys();
         for (String key : keys) {
             String value = aHbciAccount.getUserDefinedAttribute(key);
             prop.setProperty(key, value);
         }
+
+        // migration
+        try {
+            // set all properties from old config file
+            File oldfile = getConfigFile();
+            if (oldfile != null) {
+                LOG.log(Level.INFO, "Importing old config file "
+                        + oldfile.getAbsolutePath() + " to new config");
+                Properties oldprop = new Properties();
+                oldprop.load(new FileReader(oldfile));
+                for (Object keyo : oldprop.keySet()) {
+                    String key = keyo.toString();
+                    if (prop.contains(key)) {
+                        continue;
+                    }
+                    LOG.log(Level.INFO, "Importing old config key "
+                            + key + " to new config");
+                    String value = oldprop.getProperty(key);
+                    prop.setProperty(key, value);
+                    aHbciAccount.setUserDefinedAttribute(key, value);
+                }
+                oldfile.renameTo(new File(oldfile.getAbsolutePath() + ".mirgated"));
+            } else {
+                LOG.log(Level.INFO, "No old config file to import into new config");
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Problem in "
+                    + getClass().getName() + " while loading old config file",
+                    e);
+        }
+
         super.setMyProperties(prop);
     }
 
