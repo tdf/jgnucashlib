@@ -488,7 +488,7 @@ public class WirecardImporter {
     private static String lineMustEqual(final BufferedReader aBuffer, final String aString) throws IOException {
         String line = aBuffer.readLine();
         if (!line.equals(aString)) {
-            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons.");
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\" must equal \"" + aString + "\"");
         }
         return line;
     }
@@ -518,7 +518,7 @@ public class WirecardImporter {
         String line;
         line = aBuffer.readLine();
         if (line.length() != 0) {
-            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons.");
+            throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line should be empty but is \"" + line + "\"");
         }
     }
 
@@ -562,11 +562,24 @@ public class WirecardImporter {
             line = aBuffer.readLine();
             splits = line.split(" ");
         }
-        Date date;
-        try {
-            date = UOS_DATEFORMAT.parse(splits[splits.length - 1]);
-        } catch (Exception e) {
-            date = UOS_DATEFORMAT2.parse(splits[splits.length - 1]);
+        Date date = null; // we may start with the date, USt-ID+empty line+Date or address+USt-ID+empty line+Date
+        for (int i = 0; i < 10 ; i++) {
+            try {
+                date = UOS_DATEFORMAT.parse(splits[splits.length - 1]);
+            } catch (Exception e) {
+                if (i > 8) {
+                    date = UOS_DATEFORMAT2.parse(splits[splits.length - 1]);
+                } else {
+                    try {
+                        date = UOS_DATEFORMAT2.parse(splits[splits.length - 1]);
+                    } catch (Exception e2) {
+                        line = aBuffer.readLine();
+                        splits = line.split(" ");
+                        formatVersion = 2;
+                        continue;
+                    }
+                }
+            }
         }
         lineMustBeNull(aBuffer);
 
@@ -579,6 +592,7 @@ public class WirecardImporter {
         String invoiceNr = null;
         String from = null;
         String to = null;
+        String additionalText = "";
         FixedPointNumber umsatz = null;
         FixedPointNumber fees = null;
         FixedPointNumber feesTax = null;
@@ -658,7 +672,7 @@ public class WirecardImporter {
             feesWithTax = new FixedPointNumber(splits[p++]);
             security = new FixedPointNumber(splits[p++]);
             sum = new FixedPointNumber(splits[p++]);
-        } else {
+        } else if (formatVersion == 1) {
             //new: Rechnungsnummer: Hï¿½ndler: Hï¿½ndlerkennung: Brand:
             // 201022TA00789371 Wolschon Import WDB 0000003161ED9CA8 Master Card, Vis
             line = aBuffer.readLine();
@@ -757,6 +771,173 @@ public class WirecardImporter {
             } catch (IndexOutOfBoundsException e) {
                 throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
             }
+        } else  {
+            lineMustBeNull(aBuffer);
+            lineMustEqual(aBuffer, "Rechnungsnummer:");
+            lineMustEqual(aBuffer, "Händler:");
+            lineMustEqual(aBuffer, "Händlerkennung:");
+            lineMustEqual(aBuffer, "Brand:");
+            lineMustBeNull(aBuffer);
+            invoiceNr = aBuffer.readLine();
+            line = aBuffer.readLine(); // name
+            line = aBuffer.readLine(); // some number
+            line = aBuffer.readLine(); // "Master Card, Visa"
+            lineMustBeNull(aBuffer);
+
+            lineMustEqual(aBuffer, "Rechnungszeitraum:");
+            lineMustEqual(aBuffer, "Währung:");
+            lineMustEqual(aBuffer, "Produkt:");
+            lineMustEqual(aBuffer, "Acquirer:");
+            lineMustBeNull(aBuffer);
+            line = aBuffer.readLine();// 08.11.2010 - 14.11.2010
+            splits = line.split(" ");
+            from = splits[0];
+            to = splits[2];
+
+            line = aBuffer.readLine();
+            if (line.equals("USD")) {
+                currency = "USD";
+            } else if (line.equals("EUR")) {
+                currency = "EUR";
+            } else {
+                throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+            }
+            lineMustEqual(aBuffer, "Credit Card");
+            lineMustEqual(aBuffer, "Wirecard Bank");
+            lineMustBeNull(aBuffer);
+            lineMustEqual(aBuffer, "Sehr geehrte Damen und Herren,");
+            lineMustEqual(aBuffer, "für den Rechnungszeitraum " + from + " - " + to + " werden die folgenden Transaktionen berechnet.");
+            lineMustBeNull(aBuffer);
+            lineMustEqual(aBuffer, "Anzahl");
+            line = aBuffer.readLine();
+            boolean hasGutschriften = false;
+            boolean hasTransactions = false;
+            if (line.length() > 0) {
+                hasTransactions = true;
+                // this block may be missing if no transactions happened
+                try {
+                    additionalText +=" #Zahlungen=" + Integer.parseInt(line); // count
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\" is not an integer");
+                }
+                line = aBuffer.readLine();
+                if (line.length() > 0) {
+                    additionalText +=" #Gutschriften=" + line;
+                    hasGutschriften = true;
+                    lineMustBeNull(aBuffer);
+                }
+                lineMustEqual(aBuffer, "Kreditkarteneinzuege");
+                if (hasGutschriften) {
+                    lineMustEqual(aBuffer, "Gutschriften");
+                }
+                lineMustBeNull(aBuffer);
+            } else {
+                additionalText +=" keine Zahlungen";
+            }
+            lineMustEqual(aBuffer, "Volumen");
+            lineMustBeNull(aBuffer);
+            lineMustEqual(aBuffer, "Tarif");
+            lineMustBeNull(aBuffer);
+            if (hasTransactions) {
+                aBuffer.readLine();//48,90 EUR
+                if (hasGutschriften) {
+                    aBuffer.readLine();//Gutschrift EUR
+                }
+                lineMustBeNull(aBuffer);
+                aBuffer.readLine();//48,90 EUR
+                if (hasGutschriften) {
+                    aBuffer.readLine();//-Gutschrift EUR
+                }
+                lineMustBeNull(aBuffer);
+            }
+            lineMustEqual(aBuffer, "Summe Netto Transaktionsumsatz");
+            if (hasTransactions) {
+                lineMustBeNull(aBuffer);
+
+                line = aBuffer.readLine();//48,90 EUR
+                splits = line.split(" ");
+                try {
+                    umsatz = new FixedPointNumber(splits[0]);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+
+                lineMustBeNull(aBuffer);
+                lineMustEqual(aBuffer, "Disagio");
+                lineMustBeNull(aBuffer);
+
+                line = aBuffer.readLine();//    1,81 EUR
+                splits = line.split(" ");
+
+                fees = new FixedPointNumber(splits[0]).negate();
+                if (!"EUR".equals(splits[1]) && !"USD".equals(splits[1])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+                lineMustBeNull(aBuffer);
+            }
+            lineMustEqual(aBuffer, "Summe Gebühren ohne MwSt.");
+            lineMustEqual(aBuffer, "MwSt. auf Gebühren");
+            if (!hasTransactions) {
+                lineMustBeNull(aBuffer);
+                security = new FixedPointNumber();
+                feesWithTax = new FixedPointNumber();
+                sum = new FixedPointNumber();
+                umsatz = new FixedPointNumber();
+            } else {
+                lineMustEqual(aBuffer, "Summe Gebühren");
+                lineMustEqual(aBuffer, "Sicherheitseinbehalt");
+                lineMustBeNull(aBuffer);
+                lineMustEqual(aBuffer, "19.00 %");
+                line = aBuffer.readLine();//    48,90 EUR
+                lineMustBeNull(aBuffer);
+                line = aBuffer.readLine();//    1,81 EUR
+                line = aBuffer.readLine();//    0,34 EUR
+                splits = line.split(" ");
+                feesTax = new FixedPointNumber(splits[0]);
+                if (!currency.equals(splits[1])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+
+                lineMustBeNull(aBuffer);
+                line = aBuffer.readLine();//    5.00 %
+                lineMustBeNull(aBuffer);
+                line = aBuffer.readLine();//    2,15 EUR
+                splits = line.split(" ");
+                feesWithTax = new FixedPointNumber(splits[0]);
+                if (!currency.equals(splits[1])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+
+                line = aBuffer.readLine();//    2,44 EUR
+                splits = line.split(" ");
+                security = new FixedPointNumber(splits[0]);
+                if (!currency.equals(splits[1])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+                lineMustBeNull(aBuffer);
+                lineMustEqual(aBuffer, "Auszahlungsbetrag");
+                lineMustBeNull(aBuffer);
+                lineMustEqual(aBuffer, "Kontoinhaber:");
+                lineMustEqual(aBuffer, "Kontonummer:");
+                lineMustEqual(aBuffer, "BLZ:");
+                lineMustEqual(aBuffer, "Bankname:");
+                lineMustEqual(aBuffer, "Bankaddresse:");
+                lineMustEqual(aBuffer, "SWIFT Code:");
+                lineMustEqual(aBuffer, "IBAN:");
+                lineMustBeNull(aBuffer);
+                lineMustEqual(aBuffer, "Betrag");
+                lineMustBeNull(aBuffer);
+
+                line = aBuffer.readLine();//   44,31 EUR
+                splits = line.split(" ");
+                sum = new FixedPointNumber(splits[0]);
+                if (!"EUR".equals(splits[1]) && !"USD".equals(splits[1])) {
+                    throw new IllegalArgumentException("wrong input-format. Aborting for safety reasons. line=\"" + line + "\"");
+                }
+            }
+
         }
 
        String auszahlungAccount = "0682d0d40fefc9af74cae75372b0159d";//TODO: these should not be hardcoded
@@ -795,7 +976,7 @@ public class WirecardImporter {
      GnucashWritableTransactionSplit auszahlungSplit = auszahlung.createWritingSplit(aBook.getAccountByID(auszahlungAccount));
      auszahlungSplit.setValue(sum);
      auszahlungSplit.setQuantity(sum);
-     auszahlungSplit.setDescription("Auszahlungen");
+     auszahlungSplit.setDescription("Auszahlungen" + (additionalText.length() > 0?"(" + additionalText + ")":""));
 
      // "Sicherheitseinebhalt" 9,89 SicherheitseinbehaltUSD
      GnucashWritableTransactionSplit securitySplit = auszahlung.createWritingSplit(aBook.getAccountByID(sicherheitseinbehalt));
