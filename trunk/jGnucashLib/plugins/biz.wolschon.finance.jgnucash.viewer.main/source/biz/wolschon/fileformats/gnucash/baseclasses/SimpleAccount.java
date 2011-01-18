@@ -667,8 +667,8 @@ public abstract class SimpleAccount  implements GnucashAccount {
 
         // compare
 
-        Integer i0 = startsWithNumber(other);
-        Integer i1 = startsWithNumber(me);
+        Long i0 = startsWithNumber(other);
+        Long i1 = startsWithNumber(me);
         if (i0 == null && i1 != null) {
             return 1;
         }
@@ -696,7 +696,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
      * @param s the name
      * @return the Integer build from the digits the name starts with or null
      */
-    private Integer startsWithNumber(final String s) {
+    private Long startsWithNumber(final String s) {
         int digitCount = 0;
         for (int i = 0; i < s.length()
                           &&
@@ -706,7 +706,7 @@ public abstract class SimpleAccount  implements GnucashAccount {
         if (digitCount == 0) {
             return null;
         }
-        return new Integer(s.substring(0, digitCount));
+        return new Long(s.substring(0, digitCount));
     }
 
 //  ------------------------ support for propertyChangeListeners ------------------

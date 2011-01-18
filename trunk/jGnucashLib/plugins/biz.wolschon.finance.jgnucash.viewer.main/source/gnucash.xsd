@@ -270,7 +270,7 @@
                     <xs:element name="sx_schedule" minOccurs="0" maxOccurs="1">
                       <xs:complexType>
                         <xs:sequence>
-                          <xs:element name="gnc_recurrence" minOccurs="1" maxOccurs="unbounded">
+                          <xs:element name="gnc_recurrence" minOccurs="0" maxOccurs="unbounded">
                             <xs:complexType>
                               <xs:sequence>
                                 <xs:element name="recurrence_mult"        type="xs:int"/>
@@ -1105,6 +1105,7 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="slot"/>
         <xs:element ref="ts_date"/>
+        <xs:element ref="gdate"/>
         <xs:element ref="slot_value"/>
       </xs:choice>
       <xs:attribute name="type" use="required">
@@ -1113,6 +1114,7 @@
             <xs:enumeration value="list"/>
             <xs:enumeration value="frame"/>
             <xs:enumeration value="guid"/>
+            <xs:enumeration value="gdate"/>
             <xs:enumeration value="integer"/>
             <xs:enumeration value="string"/>
             <xs:enumeration value="timespec"/>
@@ -1132,6 +1134,7 @@
   </xs:element>
 
   <xs:element name="ts_date" type="xs:string"/>
+  <xs:element name="gdate" type="xs:string"/>
 
   <xs:complexType name="gnc_budget">
   	<xs:sequence>
