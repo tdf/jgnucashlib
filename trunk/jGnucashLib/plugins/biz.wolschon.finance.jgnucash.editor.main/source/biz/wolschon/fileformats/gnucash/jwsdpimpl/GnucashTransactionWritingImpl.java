@@ -24,6 +24,9 @@ import java.util.LinkedList;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
@@ -38,6 +41,11 @@ import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
  * @author <a href="mailto:Marcus@Wolschon.biz">Marcus Wolschon</a>
  */
 public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implements GnucashWritableTransaction {
+
+    /**
+     * Our logger for debug- and error-ourput.
+     */
+    private static final Log LOGGER = LogFactory.getLog(GnucashTransactionWritingImpl.class);
 
     /**
      * Our helper to implement the GnucashWritableObject-interface.
@@ -61,6 +69,18 @@ public class GnucashTransactionWritingImpl extends GnucashTransactionImpl implem
             final GncTransactionType jwsdpPeer,
             final GnucashFileImpl file) throws JAXBException {
         super(jwsdpPeer, file);
+
+        // repair a broken file
+        if (jwsdpPeer.getTrnDatePosted() == null) {
+            LOGGER.warn("repairing broken transaction " + jwsdpPeer.getTrnId() + " with no date-posted!");
+            //we use our own ObjectFactory because:   Exception in thread "AWT-EventQueue-0" java.lang.IllegalAccessError: tried to access method biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl.getObjectFactory()Lbiz/wolschon/fileformats/gnucash/jwsdpimpl/generated/ObjectFactory; from class biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashTransactionWritingImpl
+            //ObjectFactory factory =  file.getObjectFactory();
+            ObjectFactory factory = new ObjectFactory();
+            GncTransactionType.TrnDatePostedType datePosted = factory.createGncTransactionTypeTrnDatePostedType();
+            datePosted.setTsDate(jwsdpPeer.getTrnDateEntered().getTsDate());
+            jwsdpPeer.setTrnDatePosted(datePosted);
+        }
+
     }
 
     /**

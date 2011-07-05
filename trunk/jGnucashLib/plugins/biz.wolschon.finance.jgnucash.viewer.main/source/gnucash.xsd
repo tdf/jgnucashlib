@@ -1000,7 +1000,7 @@
           </xs:complexType>
         </xs:element>
         <xs:element name="trn_num" type="xs:string" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="trn_date-posted">
+        <xs:element name="trn_date-posted"  minOccurs="0" maxOccurs="1"> <!-- this is illegal but we have code to fix this broken file -->
           <xs:complexType>
             <xs:sequence>
               <xs:element ref="ts_date"/>
@@ -1134,7 +1134,6 @@
   </xs:element>
 
   <xs:element name="ts_date" type="xs:string"/>
-  <xs:element name="gdate" type="xs:string"/>
 
   <xs:complexType name="gnc_budget">
   	<xs:sequence>
