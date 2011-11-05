@@ -23,6 +23,9 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import biz.wolschon.fileformats.gnucash.GnucashAccount;
 import biz.wolschon.fileformats.gnucash.GnucashFile;
 
@@ -34,6 +37,10 @@ import biz.wolschon.fileformats.gnucash.GnucashFile;
  *
  */
 public class GnucashAccountsTreeModel implements TreeModel {
+    /**
+     * Our logger for debug- and error-ourput.
+     */
+    private static final Log LOGGER = LogFactory.getLog(GnucashAccountsTreeModel.class);
 
     /**
      * @param file where we get our data from
@@ -83,7 +90,13 @@ public class GnucashAccountsTreeModel implements TreeModel {
                 throw new IllegalArgumentException("file nas no root-account");
             }
             if (rootAccounts.size() > 1) {
-                throw new IllegalArgumentException("file nas more then one root-account");
+                StringBuilder roots = new StringBuilder();
+                for (GnucashAccount gnucashAccount : rootAccounts) {
+                    roots.append(gnucashAccount.getId()).append("=\"").append(gnucashAccount.getName()).append("\" ");
+                }
+                LOGGER.warn("file has more then one root-account! Attaching excess accounts to root-account: "
+                         + roots.toString());
+
             }
             GnucashAccount root = rootAccounts.iterator().next();
             if (root == null) {

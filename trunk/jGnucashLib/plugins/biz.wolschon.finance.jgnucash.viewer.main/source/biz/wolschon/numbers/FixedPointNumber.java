@@ -464,6 +464,9 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
     public String toGnucashString() {
         StringBuffer sb = new StringBuffer();
 
+        if (value.scale() > 5) {
+            value.setScale(5);
+        }
         // try to have a divider of "100"
         int scaleAdjust = 2 - value.scale();
 

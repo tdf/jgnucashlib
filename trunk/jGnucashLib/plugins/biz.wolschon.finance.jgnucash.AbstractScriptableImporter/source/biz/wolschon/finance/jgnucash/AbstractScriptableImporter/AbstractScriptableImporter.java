@@ -398,6 +398,10 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             }
         } catch (FileNotFoundException e) {
             LOG.log(Level.SEVERE, "Error loading script number " + scriptnum, e);
+            LOG.log(Level.SEVERE, "was not found in current path: " + new File(scriptPath).getAbsolutePath());
+            LOG.log(Level.SEVERE, "was not found in config dir: " + (new File(getConfigFileDirectory(), scriptPath)).getAbsolutePath());
+            LOG.log(Level.SEVERE, "was not found in home dir: " + (new File(System.getProperty("user.dir"), scriptPath)).getAbsolutePath());
+            LOG.log(Level.SEVERE, "was not found in class loader");
             JOptionPane.showMessageDialog(null,
                     "Error, user- HBCI-Import-Script #" + scriptnum + " at '"
                             + scriptPath + "' cannot be loaded:\n"

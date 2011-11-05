@@ -74,11 +74,11 @@ import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncInvoiceType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncJobType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncTaxTableType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCommodityType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCommodityType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.impl.runtime.DefaultJAXBContextImpl;
 import biz.wolschon.finance.ComplexCurrencyTable;
 import biz.wolschon.numbers.FixedPointNumber;
@@ -97,7 +97,7 @@ public class GnucashFileImpl implements GnucashFile {
     /**
      * Our logger for debug- and error-ourput.
      */
-    private static final Log LOGGER = LogFactory.getLog(GnucashFileImpl.class);
+    protected static final Log LOGGER = LogFactory.getLog(GnucashFileImpl.class);
 
 
     /**

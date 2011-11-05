@@ -85,13 +85,13 @@ import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncInvoiceType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncJobType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncGncTaxTableType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCommodityType;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCurrencyType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransaction;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncTransactionType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncV2;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.ObjectFactory;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.Slot;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCommodityType;
-import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.GncPricedbType.PriceType.PriceCurrencyType;
 import biz.wolschon.fileformats.gnucash.jwsdpimpl.generated.impl.GncPricedbTypeImpl.PriceTypeImpl.PriceCommodityTypeImpl;
 import biz.wolschon.numbers.FixedPointNumber;
 
@@ -1459,6 +1459,7 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
     }
 
 
+
     /**
      *
      * @return a read-only collection of all accounts that have no parent
@@ -1552,5 +1553,48 @@ public class GnucashFileWritingImpl extends GnucashFileImpl implements GnucashWr
         newSlot.getSlotValue().getContent().add(aValue);
         newSlot.getSlotValue().setType("string");
         getRootElement().getGncBook().getBookSlots().getSlot().add(newSlot);
+    }
+
+    /* (non-Javadoc)
+     * @see biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl#getRootAccounts()
+     */
+    @Override
+    public Collection<? extends GnucashAccount> getRootAccounts() {
+        // TODO Auto-generated method stub
+        Collection<? extends GnucashAccount> rootAccounts = super.getRootAccounts();
+        if (rootAccounts.size() > 1) {
+            GnucashAccount root = null;
+            StringBuilder roots = new StringBuilder();
+            for (GnucashAccount gnucashAccount : rootAccounts) {
+                if (gnucashAccount == null) {
+                    continue;
+                }
+                if (gnucashAccount.getType() != null && gnucashAccount.getType().equals("ROOT")) {
+                    root = gnucashAccount;
+                    continue;
+                }
+                roots.append(gnucashAccount.getId()).append("=\"").append(gnucashAccount.getName()).append("\" ");
+            }
+            LOGGER.warn("file has more then one root-account! Attaching excess accounts to root-account: "
+                     + roots.toString());
+            LinkedList<GnucashAccount> rootAccounts2 = new LinkedList<GnucashAccount>();
+            rootAccounts2.add(root);
+            for (GnucashAccount gnucashAccount : rootAccounts) {
+                if (gnucashAccount == null) {
+                    continue;
+                }
+                if (gnucashAccount == root) {
+                    continue;
+                }
+                try {
+                    ((GnucashWritableAccount) gnucashAccount).setParentAccount(root);
+                } catch (JAXBException e) {
+                    LOGGER.warn("Canno re-parent account " + gnucashAccount.getId() + " \"" + gnucashAccount.getName() + "\"", e);
+                    rootAccounts2.add(gnucashAccount);
+                }
+            }
+            rootAccounts = rootAccounts2;
+        }
+        return rootAccounts;
     }
 }

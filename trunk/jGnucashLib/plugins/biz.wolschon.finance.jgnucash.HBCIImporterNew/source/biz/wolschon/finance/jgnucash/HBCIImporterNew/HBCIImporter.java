@@ -389,8 +389,11 @@ public class HBCIImporter extends AbstractScriptableImporter {
     private void setMyProperties(final GnucashWritableAccount aHbciAccount) {
         Properties prop = new Properties();
 
+        LOG.log(Level.INFO, "Loading properties from gnucash-account " + aHbciAccount.getQualifiedName());
         Collection<String> keys = aHbciAccount.getUserDefinedAttributeKeys();
         for (String key : keys) {
+            LOG.log(Level.INFO, "Loading from gnucash-account key: "
+                    + key);
             String value = aHbciAccount.getUserDefinedAttribute(key);
             prop.setProperty(key, value);
         }
@@ -400,7 +403,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
             // set all properties from old config file
             File oldfile = getConfigFile();
             if (oldfile != null) {
-                LOG.log(Level.INFO, "Importing old config file "
+                LOG.log(Level.INFO, "Importing old config file:"
                         + oldfile.getAbsolutePath() + " to new config");
                 Properties oldprop = new Properties();
                 oldprop.load(new FileReader(oldfile));
@@ -410,7 +413,7 @@ public class HBCIImporter extends AbstractScriptableImporter {
                         continue;
                     }
                     LOG.log(Level.INFO, "Importing old config key "
-                            + key + " to new config");
+                            + key + " to new config in gnucash-account");
                     String value = oldprop.getProperty(key);
                     prop.setProperty(key, value);
                     aHbciAccount.setUserDefinedAttribute(key, value);
