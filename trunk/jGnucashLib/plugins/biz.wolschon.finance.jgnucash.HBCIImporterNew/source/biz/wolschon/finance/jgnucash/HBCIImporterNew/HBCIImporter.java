@@ -387,7 +387,18 @@ public class HBCIImporter extends AbstractScriptableImporter {
      * @param aHbciAccount the account
      */
     private void setMyProperties(final GnucashWritableAccount aHbciAccount) {
-        Properties prop = new Properties();
+        Properties prop = new Properties() {
+              @Override
+             public Object setProperty(String key,
+                          String value) {
+                try {
+                   aHbciAccount.setUserDefinedAttribute(key, value);
+                } catch (javax.xml.bind.JAXBException e) {
+                   throw new RuntimeException("cannot set property in account", e);
+                }
+                return super.setProperty(key, value);
+             }
+        };
 
         LOG.log(Level.INFO, "Loading properties from gnucash-account " + aHbciAccount.getQualifiedName());
         Collection<String> keys = aHbciAccount.getUserDefinedAttributeKeys();

@@ -465,7 +465,7 @@ public class FixedPointNumber extends BigDecimalWrapper implements Cloneable {
         StringBuffer sb = new StringBuffer();
 
         if (value.scale() > 5) {
-            value.setScale(5);
+            value = value.setScale(5, java.math.RoundingMode.HALF_UP);
         }
         // try to have a divider of "100"
         int scaleAdjust = 2 - value.scale();

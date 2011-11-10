@@ -57,6 +57,7 @@ import javax.xml.bind.JAXBException;
 import biz.wolschon.fileformats.gnucash.GnucashTransactionSplit;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
+import biz.wolschon.fileformats.gnucash.jwsdpimpl.GnucashFileImpl;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransaction;
 import biz.wolschon.fileformats.gnucash.GnucashWritableTransactionSplit;
 import biz.wolschon.finance.jgnucash.AbstractScriptablePlugin.ScriptEditorPanel;
@@ -392,6 +393,10 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                     .exists()) {
                 is = new FileInputStream(new File(
                         System.getProperty("user.dir"), scriptPath));
+            } else if (myAccountSplit.getTransaction().getGnucashFile() instanceof GnucashFileImpl && new File(((GnucashFileImpl)myAccountSplit.getTransaction().getGnucashFile()).getFile().getParentFile(), scriptPath)
+                    .exists()) {
+                is = new FileInputStream(new File(
+                        ((GnucashFileImpl)myAccountSplit.getTransaction().getGnucashFile()).getFile().getParentFile(), scriptPath));
             } else {
                 is = this.getClass().getClassLoader().getResourceAsStream(
                         scriptPath);
