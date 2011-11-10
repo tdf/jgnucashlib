@@ -61,6 +61,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -256,8 +257,8 @@ public abstract class ScriptEditorPanel extends JPanel {
 
 		this.setLayout(new BorderLayout());
 
-        this.add(new JScrollPane(getEditorArea(myScriptSourcecode)), BorderLayout.CENTER);
-        this.add(new JScrollPane(getRegExpArea()), BorderLayout.NORTH);
+        this.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(getRegExpArea()), new JScrollPane(getEditorArea(myScriptSourcecode))), BorderLayout.CENTER);
+        //this.add(new JScrollPane(getRegExpArea()), BorderLayout.NORTH);
         this.add(getButtonsPanel(), BorderLayout.SOUTH);
     }
 
