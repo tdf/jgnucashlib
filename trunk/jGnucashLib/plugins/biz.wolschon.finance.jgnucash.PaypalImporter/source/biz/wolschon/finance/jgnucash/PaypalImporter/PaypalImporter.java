@@ -16,9 +16,9 @@ package biz.wolschon.finance.jgnucash.PaypalImporter;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -30,6 +30,7 @@ import javax.xml.bind.JAXBException;
 import biz.wolschon.fileformats.gnucash.GnucashWritableAccount;
 import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
 import biz.wolschon.finance.jgnucash.AbstractScriptableImporter.AbstractScriptableImporter;
+import biz.wolschon.finance.jgnucash.plugin.PluginConfigHelper;
 import biz.wolschon.numbers.FixedPointNumber;
 
 import com.paypal.sdk.profiles.APIProfile;
@@ -290,7 +291,6 @@ to our base-class for import.
                                                                    throws Exception {
 
         // load the properties
-        Properties settings = new Properties();
         Properties defaultSettings = new Properties();
         defaultSettings
                 .load(getClass()
@@ -298,25 +298,184 @@ to our base-class for import.
                         .getResourceAsStream(
                                 "biz/wolschon/finance/jgnucash/PaypalImporter/default_paypal.properties"));
 
+        // get all accounts that contain contact-information
+        // for an HBCI online-banking server of the respective
+        // bank
+        Collection<GnucashWritableAccount> paypalAccounts = PluginConfigHelper.getAllAccountsWithKey(aWritableModel, "paypal");
+        if (paypalAccounts != null && paypalAccounts.size() > 0) {
+            for (GnucashWritableAccount paypalAccount : paypalAccounts) {
+                LOG.info("synchronizing Paypaö-account " + paypalAccount.getId() + "=\"" + paypalAccount.getName() + "\"");
+                setMyProperties(paypalAccount);
+                setMyAccount(paypalAccount);
+                boolean ok = askRequiresSettings(defaultSettings,
+                        paypalAccount, aWritableModel);
+                if (ok) {
+                    synchronizeAllTransactions();
+                }
+            }
+            return null;
+        }
+
+
+        GnucashWritableAccount hbciAccount = PluginConfigHelper.getOrConfigureAccountWithKey(aWritableModel, "paypal", "yes",
+                "Please select the account representing\n"
+                + " your paypal-account in Gnucash.\n"
+                + "You can add additional accounts later by setting the user-defined poperty hbci=yes on them.");
+        if (hbciAccount == null) {
+            return null;
+        }
+
+
+        ////////////////////////////////
+        // try to import an old config-file
+        // into the new format of account-properties
+        Properties settings = new Properties();
         File configfile = getConfigFile();
         if (configfile.exists()) {
             settings.load(new FileReader(configfile));
+            for (String key : REQUIREDSETTINGS) {
+                String value = settings.getProperty(key, "");
+                hbciAccount.setUserDefinedAttribute(key, value);
+            }
         }
 
-        // check the config-file
-        boolean ok = askRequiresSettings(settings, defaultSettings, configfile,
-                aCurrentAccount);
+        // ask all missing settings
+        boolean ok = askRequiresSettings(defaultSettings, hbciAccount, aWritableModel);
         // user-attributes
 
         if (ok) {
             // run the actual import.
             setMyProperties(settings);
-            setMyAccount(aWritableModel.getAccountByID(settings
-                            .getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT)));
+            setMyAccount(hbciAccount);
             synchronizeAllTransactions();
         }
 
         return null;
+    }
+
+//    /**
+//     * @param settings
+//     *            settings currently in effect
+//     * @param defaultSettings
+//     *            default-values for settings
+//     * @param configfile
+//     *            the file to save a changed config to
+//     * @param aCurrentAccount
+//     *            the currently selected account (may be null)
+//     * @return true if all is ready for action
+//     * @throws IOException
+//     *             if we cannot write the config-file
+//     */
+//    private boolean askRequiresSettings(final Properties settings,
+//                                        final Properties defaultSettings,
+//                                        final File configfile,
+//                                        final GnucashWritableAccount aCurrentAccount)
+//                                                                                     throws IOException {
+//        if (settings.getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT) == null
+//                || settings.getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT)
+//                        .trim().length() == 0
+//                || settings
+//                        .getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT)
+//                        .equalsIgnoreCase(
+//                                defaultSettings
+//                                        .getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT))) {
+//            if (aCurrentAccount != null) {
+//                // the user cannot be expected to write down account-ids,
+//                // so for this one setting we are going to help him
+//                settings.setProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT,
+//                        aCurrentAccount.getId());
+//                settings.store(new FileWriter(configfile),
+//                        "automatically created default-values");
+//            } else {
+//                JOptionPane
+//                        .showMessageDialog(
+//                                null,
+//                                "Please select the account representing\n"
+//                                        + " your paypal-account in Gnucash and try again.\n"
+//                                        + "A config-file will then automatically be generated for you.");
+//                return false;
+//            }
+//        }
+//
+//        boolean ok = true;
+//        for (int i = 0; i < REQUIREDSETTINGS.length; i++) {
+//            String key = REQUIREDSETTINGS[i];
+//            if (settings.getProperty(key) == null
+//                    || settings.getProperty(key).trim().length() == 0
+//                    || settings.getProperty(key).equalsIgnoreCase(
+//                            defaultSettings.getProperty(key))) {
+//                String input = JOptionPane.showInputDialog("Please enter\n"
+//                        + REQUIREDSETTINGNAMES[i]
+//                        + "\nYou can later edit these values in\n"
+//                        + configfile.getAbsolutePath(), settings.getProperty(
+//                        key, ""));
+//                if (input != null && input.trim().length() > 0) {
+//                    settings.setProperty(key, input);
+//                    settings.store(new FileWriter(configfile),
+//                            "automatically created default-values");
+//                } else {
+//                    ok = false;
+//                }
+//                // JOptionPane.showMessageDialog(null,
+//                // "Please edit\n" + configfile.getAbsolutePath()
+//                // + "\nand add a meaningfull value for '" + key + "'.",
+//                // "Config-File missing.",
+//                // JOptionPane.INFORMATION_MESSAGE);
+//                // return null;
+//            }
+//        } // TODO: we may better save bankcode, ... in the gnucash-account as
+//        return ok;
+//    }
+
+
+    /**
+     * Clear our settings and add only the attributes
+     * of the given account to the settings.
+     * @param aPaypalAccount the account
+     */
+    private void setMyProperties(final GnucashWritableAccount aPaypalAccount) {
+        Properties prop = new Properties();
+
+        LOG.log(Level.INFO, "Loading properties from gnucash-account " + aPaypalAccount.getQualifiedName());
+        Collection<String> keys = aPaypalAccount.getUserDefinedAttributeKeys();
+        for (String key : keys) {
+            LOG.log(Level.INFO, "Loading from gnucash-account key: "
+                    + key);
+            String value = aPaypalAccount.getUserDefinedAttribute(key);
+            prop.setProperty(key, value);
+        }
+
+        // migration
+        try {
+            // set all properties from old config file
+            File oldfile = getConfigFile();
+            if (oldfile != null) {
+                LOG.log(Level.INFO, "Importing old config file:"
+                        + oldfile.getAbsolutePath() + " to new config");
+                Properties oldprop = new Properties();
+                oldprop.load(new FileReader(oldfile));
+                for (Object keyo : oldprop.keySet()) {
+                    String key = keyo.toString();
+                    if (prop.contains(key)) {
+                        continue;
+                    }
+                    LOG.log(Level.INFO, "Importing old config key "
+                            + key + " to new config in gnucash-account");
+                    String value = oldprop.getProperty(key);
+                    prop.setProperty(key, value);
+                    aPaypalAccount.setUserDefinedAttribute(key, value);
+                }
+                oldfile.renameTo(new File(oldfile.getAbsolutePath() + ".migrated"));
+            } else {
+                LOG.log(Level.INFO, "No old config file to import into new config");
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Problem in "
+                    + getClass().getName() + " while loading old config file",
+                    e);
+        }
+
+        super.setMyProperties(prop);
     }
 
     /**
@@ -324,74 +483,47 @@ to our base-class for import.
      *            settings currently in effect
      * @param defaultSettings
      *            default-values for settings
-     * @param configfile
-     *            the file to save a changed config to
      * @param aCurrentAccount
      *            the currently selected account (may be null)
+     * @param aWritableModel the current file we are working on
      * @return true if all is ready for action
      * @throws IOException
      *             if we cannot write the config-file
+     * @throws JAXBException on issues with the backend
      */
-    private boolean askRequiresSettings(final Properties settings,
-                                        final Properties defaultSettings,
-                                        final File configfile,
-                                        final GnucashWritableAccount aCurrentAccount)
-                                                                                     throws IOException {
-        if (settings.getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT) == null
-                || settings.getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT)
-                        .trim().length() == 0
-                || settings
-                        .getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT)
-                        .equalsIgnoreCase(
-                                defaultSettings
-                                        .getProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT))) {
-            if (aCurrentAccount != null) {
-                // the user cannot be expected to write down account-ids,
-                // so for this one setting we are going to help him
-                settings.setProperty(PaypalImporter.SETTINGS_GNUCASHACCOUNT,
-                        aCurrentAccount.getId());
-                settings.store(new FileWriter(configfile),
-                        "automatically created default-values");
-            } else {
-                JOptionPane
-                        .showMessageDialog(
-                                null,
-                                "Please select the account representing\n"
-                                        + " your paypal-account in Gnucash and try again.\n"
-                                        + "A config-file will then automatically be generated for you.");
-                return false;
-            }
-        }
-
+    private boolean askRequiresSettings(final Properties defaultSettings,
+                                        final GnucashWritableAccount aCurrentAccount,
+                                        final GnucashWritableFile aWritableModel)
+                                                                                     throws IOException, JAXBException {
         boolean ok = true;
         for (int i = 0; i < REQUIREDSETTINGS.length; i++) {
             String key = REQUIREDSETTINGS[i];
-            if (settings.getProperty(key) == null
-                    || settings.getProperty(key).trim().length() == 0
-                    || settings.getProperty(key).equalsIgnoreCase(
+            String value = aCurrentAccount.getUserDefinedAttribute(key);
+            if (value == null
+                    || value.trim().length() == 0
+                    || value
+                    .equalsIgnoreCase(
                             defaultSettings.getProperty(key))) {
+
+                if (value == null) {
+                    value = defaultSettings.getProperty(key);
+                }
                 String input = JOptionPane.showInputDialog("Please enter\n"
                         + REQUIREDSETTINGNAMES[i]
-                        + "\nYou can later edit these values in\n"
-                        + configfile.getAbsolutePath(), settings.getProperty(
-                        key, ""));
+                        + "\nYou can later edit these values the properties of the account\n"
+                        + aCurrentAccount.getName()
+                        + value);
                 if (input != null && input.trim().length() > 0) {
-                    settings.setProperty(key, input);
-                    settings.store(new FileWriter(configfile),
-                            "automatically created default-values");
+                    aCurrentAccount.setUserDefinedAttribute(key, input);
                 } else {
                     ok = false;
                 }
-                // JOptionPane.showMessageDialog(null,
-                // "Please edit\n" + configfile.getAbsolutePath()
-                // + "\nand add a meaningfull value for '" + key + "'.",
-                // "Config-File missing.",
-                // JOptionPane.INFORMATION_MESSAGE);
-                // return null;
             }
-        } // TODO: we may better save bankcode, ... in the gnucash-account as
+        } // for
+
         return ok;
     }
+
 
 
 
