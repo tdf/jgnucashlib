@@ -500,6 +500,9 @@ to our base-class for import.
         for (int i = 0; i < REQUIREDSETTINGS.length; i++) {
             String key = REQUIREDSETTINGS[i];
             String value = aCurrentAccount.getUserDefinedAttribute(key);
+            if (key.equals(SETTINGS_GNUCASHACCOUNT)) {
+                continue;
+            }
             if (value == null
                     || value.trim().length() == 0
                     || value
@@ -512,8 +515,8 @@ to our base-class for import.
                 String input = JOptionPane.showInputDialog("Please enter\n"
                         + REQUIREDSETTINGNAMES[i]
                         + "\nYou can later edit these values the properties of the account\n"
-                        + aCurrentAccount.getName()
-                        + value);
+                        + aCurrentAccount.getName(),
+                        value);
                 if (input != null && input.trim().length() > 0) {
                     aCurrentAccount.setUserDefinedAttribute(key, input);
                 } else {
