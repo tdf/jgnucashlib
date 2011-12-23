@@ -317,11 +317,11 @@ to our base-class for import.
         }
 
 
-        GnucashWritableAccount hbciAccount = PluginConfigHelper.getOrConfigureAccountWithKey(aWritableModel, "paypal", "yes",
+        GnucashWritableAccount paypalAccount = PluginConfigHelper.getOrConfigureAccountWithKey(aWritableModel, "paypal", "yes",
                 "Please select the account representing\n"
                 + " your paypal-account in Gnucash.\n"
-                + "You can add additional accounts later by setting the user-defined poperty hbci=yes on them.");
-        if (hbciAccount == null) {
+                + "You can add additional accounts later by setting the user-defined poperty paypal=yes on them.");
+        if (paypalAccount == null) {
             return null;
         }
 
@@ -335,18 +335,18 @@ to our base-class for import.
             settings.load(new FileReader(configfile));
             for (String key : REQUIREDSETTINGS) {
                 String value = settings.getProperty(key, "");
-                hbciAccount.setUserDefinedAttribute(key, value);
+                paypalAccount.setUserDefinedAttribute(key, value);
             }
         }
 
         // ask all missing settings
-        boolean ok = askRequiresSettings(defaultSettings, hbciAccount, aWritableModel);
+        boolean ok = askRequiresSettings(defaultSettings, paypalAccount, aWritableModel);
         // user-attributes
 
         if (ok) {
             // run the actual import.
             setMyProperties(settings);
-            setMyAccount(hbciAccount);
+            setMyAccount(paypalAccount);
             synchronizeAllTransactions();
         }
 
