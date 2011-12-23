@@ -307,6 +307,7 @@ to our base-class for import.
                 LOG.info("synchronizing Paypaö-account " + paypalAccount.getId() + "=\"" + paypalAccount.getName() + "\"");
                 setMyProperties(paypalAccount);
                 setMyAccount(paypalAccount);
+                defaultSettings.put(SETTINGS_GNUCASHACCOUNT, paypalAccount.getId());
                 boolean ok = askRequiresSettings(defaultSettings,
                         paypalAccount, aWritableModel);
                 if (ok) {
@@ -449,7 +450,7 @@ to our base-class for import.
         try {
             // set all properties from old config file
             File oldfile = getConfigFile();
-            if (oldfile != null) {
+            if (oldfile != null && oldfile.exists()) {
                 LOG.log(Level.INFO, "Importing old config file:"
                         + oldfile.getAbsolutePath() + " to new config");
                 Properties oldprop = new Properties();
