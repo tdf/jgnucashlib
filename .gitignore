@@ -1,0 +1,6 @@
+# ignore generated files
+/trunk/jGnucashLib/plugins/biz.wolschon.finance.jgnucash.viewer.main/source/biz/wolschon/fileformats/gnucash/jwsdpimpl/generated/
+
+# ignore output trees
+/trunk/jGnucashLib/build/
+/trunk/jGnucashLib/dist/
