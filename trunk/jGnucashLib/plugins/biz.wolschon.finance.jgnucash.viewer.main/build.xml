@@ -170,6 +170,7 @@ Use top-level project build file to build application.
 	</target>
 	<target name="build" depends="build.libs" unless="uptoodate.source">
 		<echo>Building plug-in ${plugin.id} to folder ${plugin.home}</echo>
+		<mkdir dir="${basedir}/lib"/>
 		<mkdir dir="${plugin.home}/classes" />
 		<javac destdir="${plugin.home}/classes"
 		       srcdir="${basedir}/source"
