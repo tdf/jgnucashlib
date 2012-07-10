@@ -1,5 +1,5 @@
 /**
- *
+ * License: GPLv3 or later
  */
 package biz.wolschon.finance.jgnucash.pago.importer;
 

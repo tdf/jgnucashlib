@@ -17,6 +17,7 @@ import biz.wolschon.fileformats.gnucash.GnucashWritableFile;
  * TODO: not done yet!!!
  * (c) 2010 by <a href="http://Wolschon.biz>Wolschon Softwaredesign und Beratung</a>.<br/>
  * Project: jgnucashLib-GPL<br/>
+ * License: GPLv3 or later<br/>
  * Main<br/>
  * created: 09.08.2010 <br/>
  *<br/><br/>

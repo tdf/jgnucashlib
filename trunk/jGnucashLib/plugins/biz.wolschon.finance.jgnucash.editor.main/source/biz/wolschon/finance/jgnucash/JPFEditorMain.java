@@ -1,5 +1,6 @@
 /**
  * JGnucashViewer.java
+ * License: GPLv3 or later
  * Created on 27.09.2008
  * (c) 2005 by "Wolschon Softwaredesign und Beratung".
  *

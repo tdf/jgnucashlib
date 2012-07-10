@@ -1,5 +1,6 @@
 /**
  * GnucashObjectImpl.java
+ * License: GPLv3 or later
  * created: 01.10.2005 13:32:15
  * (c) 2005 by <a href="http://Wolschon.biz">Wolschon Softwaredesign und Beratung</a>
  */

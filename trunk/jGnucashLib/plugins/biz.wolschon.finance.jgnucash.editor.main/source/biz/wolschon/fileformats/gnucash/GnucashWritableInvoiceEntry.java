@@ -1,5 +1,6 @@
 /**
  * GnucashWritableInvoiceEntry.java
+ * License: GPLv3 or later
  * created: 14.06.2005 09:50:15
  */
 package biz.wolschon.fileformats.gnucash;

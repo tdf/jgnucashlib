@@ -1,5 +1,6 @@
 /**
  * GnucashCustomerImpl.java
+ * License: GPLv3 or later
  * Created on 14.05.2005
  * (c) 2005 by "Wolschon Softwaredesign und Beratung".
  *

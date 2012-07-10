@@ -8,6 +8,9 @@
  * else is specified these rights are given non-exclusively with no restrictions
  * solely to the contractor(s). If no specified otherwise I reserve the right to
  * use, modify, publish and sub-license this code to other parties myself.
+ *
+ * Otherwise, this code is made available under GPLv3 or later.
+ *
  * -----------------------------------------------------------
  * major Changes:
  * 28.04.2009 - initial version ...

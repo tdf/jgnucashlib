@@ -9,6 +9,8 @@
  *  If no specified otherwise I reserve the right to use, modify, publish and
  *  sub-license this code to other parties myself.
  *
+ * Otherwise, this code is made available under GPLv3 or later.
+ *
  * -----------------------------------------------------------
  * major Changes:
  *  16.05.2005 - initial version

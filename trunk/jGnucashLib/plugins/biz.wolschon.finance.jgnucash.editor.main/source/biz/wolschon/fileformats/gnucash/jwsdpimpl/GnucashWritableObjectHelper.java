@@ -1,6 +1,7 @@
 /**
  * GnucashWritableObjectHelper.java
  * created: 01.10.2005 13:31:21
+ * License: GPLv3 or later
  * (c) 2005 by <a href="http://Wolschon.biz">Wolschon Softwaredesign und Beratung</a>
  */
 package biz.wolschon.fileformats.gnucash.jwsdpimpl;

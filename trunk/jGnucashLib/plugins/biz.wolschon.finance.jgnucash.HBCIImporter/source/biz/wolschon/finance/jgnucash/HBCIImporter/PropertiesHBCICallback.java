@@ -1,6 +1,7 @@
 /**
  * LdapUserHBCICallback.java
  * created: 26.12.2005 15:15:43
+ * License: GPLv3 or later
  * (c) 2005 by <a href="http://Wolschon.biz">Wolschon Softwaredesign und Beratung</a>
  */
 package biz.wolschon.finance.jgnucash.HBCIImporter;

@@ -1,5 +1,6 @@
 /**
  * SimpleAccount.java
+ * License: GPLv3 or later
  * created: 22.05.2006 17:56:15
  */
 package biz.wolschon.fileformats.gnucash.baseclasses;

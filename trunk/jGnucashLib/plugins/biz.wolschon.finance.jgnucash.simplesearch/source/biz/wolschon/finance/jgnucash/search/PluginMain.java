@@ -6,6 +6,8 @@
  * You can purchase support for a sensible hourly rate or
  * a commercial license of this file (unless modified by others) by contacting him directly.
  *
+ * Otherwise, this code is made available under GPLv3 or later.
+ *
  ***********************************
  * Editing this file:
  *  -For consistent code-quality this file should be checked with the
