@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -144,11 +145,12 @@ public class PaypalImporter extends AbstractScriptableImporter {
             // thus we:
             // * start with the current day,
             // *then go back one day at a time
-            // * until we reached 10 days
+            // * until we reached 10 consecutive days
             //   with no transaction that needed importing.
             StringBuilder finalMessage = new StringBuilder();
             int daysWithNoImportCountdown = MAXDAYSWITHNOIMPORT;
             while (daysWithNoImportCountdown > 0) {
+                request.setEndDate((Calendar)calendar.clone());
                 calendar.add(Calendar.DAY_OF_MONTH, -1);
                 request.setStartDate(calendar);
 
@@ -162,6 +164,7 @@ public class PaypalImporter extends AbstractScriptableImporter {
                 PaymentTransactionSearchResultType[] ts = response.getPaymentTransactions();
                 if (ts == null) {
                     LOG.log(Level.INFO, "Paypal-search  with start-date " + calendar.getTime().toString() + " had no result");
+                    daysWithNoImportCountdown--;
                     continue;
                 }
                 LOG.log(Level.INFO, "Found " + ts.length + " records at all for day " + calendar.getTime().toString());
@@ -169,6 +172,9 @@ public class PaypalImporter extends AbstractScriptableImporter {
                 int importedCount = importDay(ts, finalMessage, calendar.getTime());
                 if (importedCount == 0) {
                     daysWithNoImportCountdown--;
+                }
+                else {
+                    daysWithNoImportCountdown = MAXDAYSWITHNOIMPORT;
                 }
             }
             if (finalMessage.length() > 0) {
@@ -195,14 +201,34 @@ public class PaypalImporter extends AbstractScriptableImporter {
                            final StringBuilder finalMessage,
                            final Date date) throws JAXBException {
         int retval = 0;
+
+        // shorthands
+        String ourCurrency = getDefaultAccount().getCurrencyID();
+
         for (int currentTransaction = 0; currentTransaction < ts.length; currentTransaction++) {
             PaymentTransactionSearchResultType element = ts[currentTransaction];
+
+            // skip in-progress transactions
+            if (element.getStatus().equals("Pending") ) {
+                continue;
+            }
 
             java.util.Calendar timestamp = element.getTimestamp();
             Date valutaDate = timestamp.getTime();
             StringBuilder message = new StringBuilder();
-            message.append(element.getPayerDisplayName());
+            Formatter formatter = new Formatter(message, null);
+            formatter.format("%s [transaction %s] [type %s]",
+                             element.getPayerDisplayName(),
+                             element.getTransactionID(),
+                             element.getType());
             FixedPointNumber value = new FixedPointNumber(element.getNetAmount().get_value());
+
+            LOG.finer("--------------current transaction------------------------------");
+            LOG.finer("value=" + value + "\n"
+                    + "date=" + valutaDate + "\n"
+                    + "currency=" + element.getNetAmount().getCurrencyID().toString() + "\n"
+                    + "default currency=" + getDefaultAccount().getCurrencyID().toString() + "\n"
+                    + "Message=" + message.toString());
 
             //////////////////////////////////////////////////////////////////////
             // we need to support different currencies
@@ -227,32 +253,82 @@ Gross Amount: EUR -15.80
 Fee Amount: EUR 0.00
 Net Amount: EUR -15.80
 
+/* Payments in different currencies are split into 3 transactions
+ * by paypal:
+Payer Name: From U.S. Dollar
+Gross Amount: EUR 20.00
+Fee Amount: EUR 0.00
+Net Amount: EUR 20.00
+----------------
+Transaction ID: AAAAAAAAAAAAAAAAAAAA
+Payer Name: To Euro
+Gross Amount: USD -20.00
+Fee Amount: USD 0.00
+Net Amount: USD -20.00
+-----------------
+Transaction ID: BBBBBBBBBBBBBBBBBBBBB
+Payer Name: actual payer
+Gross Amount: USD 30.00
+Fee Amount: USD -0.50
+Net Amount: USD 29.50
+
 since it is usually not needed tu support multiple currencies in AbstractScriptableImporter,
 we don't extend it to support this but combine such 3 transactions here before handing them
 to our base-class for import.
  * */
-          if (!element.getNetAmount().getCurrencyID().toString().equals(getDefaultAccount().getCurrencyID())) {
-              String foreignCurrency = element.getNetAmount().getCurrencyID().toString();
-              String foreignValue = element.getNetAmount().get_value();
-              String ourCurrency = getDefaultAccount().getCurrencyID();
-              // (paypal and gnucash use uppercase ISO-names for the currencies)
-              if (ts.length > currentTransaction + 2
-                     && foreignValue.startsWith("-")
-                     && ts[currentTransaction + 1].getPayerDisplayName().startsWith("From ")
-                     && ts[currentTransaction + 2].getPayerDisplayName().startsWith("To ")
-                     && ts[currentTransaction + 1].getNetAmount().getCurrencyID().toString().equals(foreignCurrency)
-                     && ts[currentTransaction + 2].getNetAmount().getCurrencyID().toString().equals(ourCurrency)
-                     && ts[currentTransaction + 1].getNetAmount().get_value().equals(foreignValue.substring(1))) {
+          // look ahead for merging foreign-currency transactions
+          if (ts.length > currentTransaction + 2) {
+              // more shorthands
+              String trans1stCurrency = element.getNetAmount().getCurrencyID().toString();
+              String trans1stValue = element.getNetAmount().get_value();
+              String trans2ndCurrency = ts[currentTransaction + 1].getNetAmount().getCurrencyID().toString();
+              String trans2ndValue = ts[currentTransaction + 1].getNetAmount().get_value();
+              String trans3rdCurrency = ts[currentTransaction + 2].getNetAmount().getCurrencyID().toString();
+              String trans3rdValue = ts[currentTransaction + 2].getNetAmount().get_value();
 
-                  LOG.fine("combining a foreign-currency transaction with currency-conversion into a single transaction");
+              // incoming or outgoing?
+              if (!trans1stCurrency.equals(ourCurrency)) {
+                  if (trans1stValue.startsWith("-")
+                      && trans3rdValue.startsWith("-")
+                      && ts[currentTransaction + 1].getPayerDisplayName().startsWith("From ")
+                      && ts[currentTransaction + 2].getPayerDisplayName().startsWith("To ")
+                      && trans2ndCurrency.equals(trans1stCurrency)
+                      && trans3rdCurrency.equals(ourCurrency)) {
 
-                  value = new FixedPointNumber(ts[currentTransaction + 2].getNetAmount().get_value());
+                      LOG.fine("combining an outgoing foreign-currency transaction with currency-conversion into a single transaction");
+
+                      value = new FixedPointNumber(trans3rdValue);
+                      formatter.format(" (%s - net amount: %s %s)",
+                                       ts[currentTransaction + 2].getPayerDisplayName(),
+                                       trans1stCurrency, trans1stValue);
+                      currentTransaction += 2;
+                  } else {
+
+                      LOG.warning("we got a foreign-currency transaction that we cannot handle. Handling it as a EUR-transaction. The account-balance will be wrong!");
+                      formatter.format(" [WARN: %s %s]",
+                                       trans1stCurrency, trans1stValue);
+
+                  }
+              } else if (!trans3rdCurrency.equals(ourCurrency)
+                         && !trans1stValue.startsWith("-")
+                         && trans2ndValue.startsWith("-")
+                         && !trans3rdValue.startsWith("-")
+                         && ts[currentTransaction + 0].getPayerDisplayName().startsWith("From ")
+                         && ts[currentTransaction + 1].getPayerDisplayName().startsWith("To ")
+                         && trans1stCurrency.equals(ourCurrency)
+                         && trans2ndCurrency.equals(trans3rdCurrency)) {
+
+                  LOG.fine("combining an incoming foreign-currency transaction with currency-conversion into a single transaction");
+
+                  message = new StringBuilder();
+                  formatter = new Formatter(message, null);
+                  formatter.format("%s [transaction %s] [type %s] (%s - gross amount: %s %s)",
+                                   ts[currentTransaction + 2].getPayerDisplayName(),
+                                   ts[currentTransaction + 2].getTransactionID(),
+                                   ts[currentTransaction + 2].getType(),
+                                   element.getPayerDisplayName(),
+                                   trans3rdCurrency, trans3rdValue);
                   currentTransaction += 2;
-
-              } else {
-
-                  LOG.warning("we got a foreign-currency transaction that we cannot handle. Handling it as a EUR-transaction. The account-balance will be wrong!");
-
               }
           }
           //////////////////////////////////////////////////////////////////////

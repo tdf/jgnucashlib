@@ -215,7 +215,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             LOG.log(Level.SEVERE, "Error executing script number " + scriptnum
                     + " from " + scriptPath, ex);
             JOptionPane.showMessageDialog(null,
-                    "Error executing user HBCI-Import-Script #" + scriptnum
+                    "Error executing user Import-Script #" + scriptnum
                             + " '" + scriptPath + "':\n " + ex.getMessage()
                             + "\ntransaction (value is " + value + ") \n"
                             + text, scriptPath, JOptionPane.ERROR_MESSAGE);
@@ -408,7 +408,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             LOG.log(Level.SEVERE, "was not found in home dir: " + (new File(System.getProperty("user.dir"), scriptPath)).getAbsolutePath());
             LOG.log(Level.SEVERE, "was not found in class loader");
             JOptionPane.showMessageDialog(null,
-                    "Error, user- HBCI-Import-Script #" + scriptnum + " at '"
+                    "Error, user-import-script #" + scriptnum + " at '"
                             + scriptPath + "' cannot be loaded:\n"
                             + e.getMessage() + "\ntransaction (value is "
                             + value + ") \n" + text, scriptPath,
@@ -425,7 +425,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
                     + "\ncurrent directory is " + System.getProperty("user.dir")
                     + "\nconfig directory is " + getConfigFileDirectory().getAbsolutePath());
             JOptionPane.showMessageDialog(null,
-                    "Error, user- HBCI-Import-Script #" + scriptnum + " at '"
+                    "Error, user-import-script #" + scriptnum + " at '"
                             + scriptPath + "' not found"
                             + "\ntransaction (value is " + value + ") \n"
                             + text
@@ -602,7 +602,7 @@ public abstract class AbstractScriptableImporter extends org.java.plugin.Plugin 
             GnucashWritableTransaction transaction = getMyAccount()
                     .getWritableGnucashFile().createWritableTransaction();
             transaction.setDescription("Saldo: " + aValue + " "
-                    + saldoOKStr + " (imported via HBCI on " + DateFormat.getDateInstance().format(new Date()) + ")");
+                    + saldoOKStr + " (imported via script on " + DateFormat.getDateInstance().format(new Date()) + ")");
             transaction.setDatePosted(timestamp);
             transaction.setCurrencyNameSpace(getMyAccount()
                     .getCurrencyNameSpace());

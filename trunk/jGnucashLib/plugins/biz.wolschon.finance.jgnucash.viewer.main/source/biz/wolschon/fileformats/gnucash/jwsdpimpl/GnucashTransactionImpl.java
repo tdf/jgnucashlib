@@ -64,7 +64,10 @@ public class GnucashTransactionImpl extends GnucashObjectImpl implements Gnucash
      */
     public GnucashTransactionImpl(final GncTransactionType peer,
                                   final GnucashFile gncFile) throws JAXBException {
-    	super((peer.getTrnSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getTrnSlots(), gncFile);
+        super((peer.getTrnSlots() == null) ? new ObjectFactory().createSlotsType() : peer.getTrnSlots(), gncFile);
+        if (peer.getTrnSlots() == null) {
+            peer.setTrnSlots(getSlots());
+        }
 
         if (peer == null) {
             throw new IllegalArgumentException("null jwsdpPeer given");

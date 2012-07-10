@@ -66,6 +66,10 @@ public class GnucashInvoiceEntryImpl extends GnucashObjectImpl implements Gnucas
             final GnucashInvoice invoice,
             final GncGncEntryType peer) throws JAXBException {
         super((peer.getEntrySlots() == null) ? new ObjectFactory().createSlotsType() : peer.getEntrySlots(), invoice.getFile());
+        if (peer.getEntrySlots() == null) {
+            peer.setEntrySlots(getSlots());
+        }
+
         myInvoice = invoice;
         jwsdpPeer = peer;
 
