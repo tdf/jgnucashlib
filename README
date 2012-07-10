@@ -1,0 +1,8 @@
+jGnucashLib
+
+A Java-library for manipulating the file-format of the gnucash open
+source accounting-software. Usable to automate accounting-tasks using
+e.g. HBCI or invoice-parsing or to simplify the preparation of your
+taxes. Contains a portable gnucash-viewer/editor.
+
+From http://sourceforge.net/projects/jgnucashlib/
